@@ -7,20 +7,65 @@ import AssetBreakdownChart from '@/components/AssetBreakdownChart';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Currency } from '@/types';
+import { Currency, StockPrice, Asset } from '@/types';
 import {
   snapshotsToChartData,
-  calculateMovingAverage,
   getAssetSummary,
   formatCurrency,
   calculateGrowthRate,
   getLatestSnapshotDate,
+  toTWD,
+  toUSD,
 } from '@/utils/calculations';
+
+// Calculate portfolio value with given price type
+function calculatePortfolioValue(
+  assets: Asset[],
+  stockPrices: Record<string, StockPrice>,
+  exchangeRate: number,
+  priceType: 'current' | 'ma3m' | 'ma1y',
+  currency: Currency
+): number {
+  let total = 0;
+
+  for (const asset of assets) {
+    let assetValue = asset.value;
+
+    // For stocks with price data, recalculate using the specified price type
+    if (asset.symbol && asset.shares && stockPrices[asset.symbol]) {
+      const priceData = stockPrices[asset.symbol];
+      let price: number;
+
+      switch (priceType) {
+        case 'ma3m':
+          price = priceData.movingAvg3M;
+          break;
+        case 'ma1y':
+          price = priceData.movingAvg1Y;
+          break;
+        default:
+          price = priceData.currentPrice;
+      }
+
+      assetValue = asset.shares * price;
+    }
+
+    // Convert to display currency
+    if (currency === 'TWD') {
+      total += toTWD(assetValue, asset.currency, exchangeRate);
+    } else {
+      total += toUSD(assetValue, asset.currency, exchangeRate);
+    }
+  }
+
+  return total;
+}
 
 export default function DashboardPage() {
   const {
     currentAssets,
     snapshots,
+    stockPrices,
     totalTWD,
     totalUSD,
     isLoaded,
@@ -29,16 +74,68 @@ export default function DashboardPage() {
   const { t } = useI18n();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
 
-  // Calculate chart data
-  const chartData = useMemo(() => {
-    const currentValues = snapshotsToChartData(snapshots, displayCurrency);
-    // 3-month MA (assuming monthly snapshots, window = 3)
-    const ma3M = calculateMovingAverage(currentValues, 3);
-    // 1-year MA (assuming monthly snapshots, window = 12)
-    const ma1Y = calculateMovingAverage(currentValues, 12);
+  // Calculate current portfolio values with different price bases
+  const portfolioValues = useMemo(() => {
+    const current = calculatePortfolioValue(
+      currentAssets.assets,
+      stockPrices,
+      currentAssets.exchangeRate,
+      'current',
+      displayCurrency
+    );
+    const ma3m = calculatePortfolioValue(
+      currentAssets.assets,
+      stockPrices,
+      currentAssets.exchangeRate,
+      'ma3m',
+      displayCurrency
+    );
+    const ma1y = calculatePortfolioValue(
+      currentAssets.assets,
+      stockPrices,
+      currentAssets.exchangeRate,
+      'ma1y',
+      displayCurrency
+    );
 
-    return { currentValues, ma3M, ma1Y };
-  }, [snapshots, displayCurrency]);
+    return { current, ma3m, ma1y };
+  }, [currentAssets.assets, stockPrices, currentAssets.exchangeRate, displayCurrency]);
+
+  // Calculate chart data - show snapshots with current MA-based values as last point
+  const chartData = useMemo(() => {
+    const snapshotValues = snapshotsToChartData(snapshots, displayCurrency);
+
+    // For the chart, we show historical snapshot values
+    // Plus current portfolio calculated with different price bases
+    const hasStockPrices = Object.keys(stockPrices).length > 0;
+
+    if (hasStockPrices && currentAssets.assets.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const todayLabel = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+      // Add current values as the latest data point
+      const currentValues = [
+        ...snapshotValues,
+        { date: today, value: portfolioValues.current, label: todayLabel },
+      ];
+
+      // MA values show the same historical snapshots but with current MA-based value at end
+      const ma3M = [
+        ...snapshotValues,
+        { date: today, value: portfolioValues.ma3m, label: todayLabel },
+      ];
+
+      const ma1Y = [
+        ...snapshotValues,
+        { date: today, value: portfolioValues.ma1y, label: todayLabel },
+      ];
+
+      return { currentValues, ma3M, ma1Y };
+    }
+
+    // If no stock prices, just show snapshot values for all three lines
+    return { currentValues: snapshotValues, ma3M: snapshotValues, ma1Y: snapshotValues };
+  }, [snapshots, displayCurrency, stockPrices, currentAssets.assets, portfolioValues]);
 
   // Calculate asset breakdown
   const assetBreakdown = useMemo(() => {

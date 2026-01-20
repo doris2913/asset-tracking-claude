@@ -20,6 +20,7 @@ export const en = {
   nav: {
     dashboard: 'Dashboard',
     assets: 'Assets',
+    details: 'Details',
     snapshots: 'Snapshots',
     settings: 'Settings',
     appName: 'Asset Tracker',
@@ -87,7 +88,7 @@ export const en = {
     cash_usd: 'Cash (USD)',
     stock_tw: 'TW Stocks',
     stock_us: 'US Stocks',
-    rent: 'Rent/Property',
+    liability: 'Liability',
     us_tbills: 'US T-Bills',
   },
 

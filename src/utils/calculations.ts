@@ -63,7 +63,7 @@ export function getAssetSummary(assets: Asset[], exchangeRate: number): AssetSum
   return Array.from(summaryMap.values()).filter((s) => s.count > 0);
 }
 
-// Calculate simple moving average
+// Calculate simple moving average (count-based, deprecated)
 export function calculateMovingAverage(
   data: ChartDataPoint[],
   windowSize: number
@@ -81,6 +81,33 @@ export function calculateMovingAverage(
     }
     const slice = data.slice(index - windowSize + 1, index + 1);
     const avg = slice.reduce((sum, p) => sum + p.value, 0) / windowSize;
+    return { ...point, value: avg };
+  });
+}
+
+// Calculate time-based moving average (uses actual dates)
+export function calculateTimeBasedMovingAverage(
+  data: ChartDataPoint[],
+  monthsWindow: number
+): ChartDataPoint[] {
+  if (data.length === 0) return [];
+
+  return data.map((point) => {
+    const currentDate = new Date(point.date);
+    const windowStart = new Date(currentDate);
+    windowStart.setMonth(windowStart.getMonth() - monthsWindow);
+
+    // Find all points within the time window (including current point)
+    const pointsInWindow = data.filter((p) => {
+      const pDate = new Date(p.date);
+      return pDate >= windowStart && pDate <= currentDate;
+    });
+
+    if (pointsInWindow.length === 0) {
+      return { ...point };
+    }
+
+    const avg = pointsInWindow.reduce((sum, p) => sum + p.value, 0) / pointsInWindow.length;
     return { ...point, value: avg };
   });
 }

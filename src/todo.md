@@ -6,7 +6,9 @@
 
 ## Must
 
-- When adding stock asset, the name defaults to the stock symbol if left blank.
+- migrate asset/local_resource/database.json to the web import file format
+- When adding stock asset, the name defaults to the stock symbol if left blank and gets the current price from Yahoo Finance as the default price
+- 增加一個按鈕可以手動更新所有股票的股價
 - 更新股價後將股價顯示在畫面上
 - 資產成長趨勢圖中移動平均不該跟現在股價一樣，並增加快照當時總資產
 - 增加一頁來顯示所有資產的明細，包括名稱、類型、數量、最新價格、總價值等資訊

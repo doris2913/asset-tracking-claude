@@ -9,7 +9,7 @@ const ASSET_TYPE_ICONS: Record<AssetType, string> = {
   cash_usd: '💲',
   stock_tw: '📈',
   stock_us: '📊',
-  rent: '🏠',
+  liability: '💳',
   us_tbills: '🏛️',
 };
 

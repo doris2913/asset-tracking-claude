@@ -9,6 +9,7 @@ import {
   DEFAULT_APP_DATA,
   CurrentAssets,
   AppSettings,
+  StockPrice,
 } from '@/types';
 import {
   generateId,
@@ -144,6 +145,41 @@ export function useAssetData() {
     [setData]
   );
 
+  // Update stock prices with moving averages
+  const updateStockPricesWithMA = useCallback(
+    (prices: Record<string, StockPrice>) => {
+      setData((prev) => {
+        // Update asset values based on current prices
+        const updatedAssets = prev.currentAssets.assets.map((asset) => {
+          if (asset.symbol && prices[asset.symbol]) {
+            const { currentPrice } = prices[asset.symbol];
+            const newValue = asset.shares ? currentPrice * asset.shares : currentPrice;
+            return {
+              ...asset,
+              value: newValue,
+              lastUpdated: new Date().toISOString(),
+            };
+          }
+          return asset;
+        });
+
+        return {
+          ...prev,
+          currentAssets: {
+            ...prev.currentAssets,
+            assets: updatedAssets,
+            lastModified: new Date().toISOString(),
+          },
+          stockPrices: {
+            ...prev.stockPrices,
+            ...prices,
+          },
+        };
+      });
+    },
+    [setData]
+  );
+
   // Create a manual snapshot
   const createManualSnapshot = useCallback(
     (notes?: string) => {
@@ -246,6 +282,7 @@ export function useAssetData() {
     currentAssets: data.currentAssets,
     snapshots: data.snapshots,
     settings: data.settings,
+    stockPrices: data.stockPrices || {},
     isLoaded,
 
     // Calculated values
@@ -257,6 +294,7 @@ export function useAssetData() {
     updateAsset,
     deleteAsset,
     updateStockPrices,
+    updateStockPricesWithMA,
 
     // Snapshot operations
     createManualSnapshot,

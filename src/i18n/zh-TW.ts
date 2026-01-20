@@ -22,6 +22,7 @@ export const zhTW: Translations = {
   nav: {
     dashboard: '儀表板',
     assets: '資產',
+    details: '明細',
     snapshots: '快照',
     settings: '設定',
     appName: '資產追蹤器',
@@ -89,7 +90,7 @@ export const zhTW: Translations = {
     cash_usd: '現金（美元）',
     stock_tw: '台股',
     stock_us: '美股',
-    rent: '租金/房產',
+    liability: '負債',
     us_tbills: '美國國庫券',
   },
 

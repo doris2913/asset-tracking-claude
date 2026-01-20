@@ -14,7 +14,7 @@ const ASSET_TYPE_ICONS: Record<AssetType, string> = {
   cash_usd: '💲',
   stock_tw: '📈',
   stock_us: '📊',
-  rent: '🏠',
+  liability: '💳',
   us_tbills: '🏛️',
 };
 
@@ -246,6 +246,14 @@ export default function SnapshotsPage() {
                     <div>
                       <span className="mr-2">{ASSET_TYPE_ICONS[asset.type]}</span>
                       <span className="text-sm">{asset.name}</span>
+                      {asset.symbol && (
+                        <span className="text-xs text-gray-400 ml-1">({asset.symbol})</span>
+                      )}
+                      {asset.shares && (
+                        <span className="text-xs text-gray-500 ml-2">
+                          {asset.shares.toLocaleString()} {t.assets.shares}
+                        </span>
+                      )}
                     </div>
                     <span className="text-sm font-medium">
                       {formatCurrency(asset.value, asset.currency)}

@@ -11,6 +11,7 @@ export default function Navigation() {
   const navItems = [
     { href: '/', label: t.nav.dashboard, icon: '📊' },
     { href: '/assets', label: t.nav.assets, icon: '💰' },
+    { href: '/details', label: t.nav.details, icon: '📋' },
     { href: '/snapshots', label: t.nav.snapshots, icon: '📸' },
     { href: '/settings', label: t.nav.settings, icon: '⚙️' },
   ];

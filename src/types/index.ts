@@ -4,7 +4,7 @@ export type AssetType =
   | 'cash_usd'      // Cash in USD
   | 'stock_tw'      // Taiwan stocks
   | 'stock_us'      // US stocks
-  | 'rent'          // Rental property/deposits
+  | 'liability'     // Liabilities (rent, loans, etc.)
   | 'us_tbills';    // US Treasury Bills
 
 // Currency types
@@ -41,11 +41,22 @@ export interface CurrentAssets {
   exchangeRate: number;      // Current USD/TWD exchange rate
 }
 
+// Stock price with moving averages
+export interface StockPrice {
+  symbol: string;
+  currentPrice: number;
+  movingAvg3M: number;
+  movingAvg1Y: number;
+  currency: Currency;
+  lastUpdated: string;
+}
+
 // Application data structure
 export interface AppData {
   currentAssets: CurrentAssets;
   snapshots: Snapshot[];
   settings: AppSettings;
+  stockPrices: Record<string, StockPrice>;  // Stock prices with MAs
   version: string;           // Data schema version for migrations
 }
 
@@ -103,7 +114,7 @@ export const ASSET_TYPE_CONFIG: Record<AssetType, { label: string; color: string
   cash_usd: { label: 'Cash (USD)', color: '#16a34a', icon: '💲' },
   stock_tw: { label: 'TW Stocks', color: '#3b82f6', icon: '📈' },
   stock_us: { label: 'US Stocks', color: '#6366f1', icon: '📊' },
-  rent: { label: 'Rent/Property', color: '#f59e0b', icon: '🏠' },
+  liability: { label: 'Liability', color: '#ef4444', icon: '💳' },
   us_tbills: { label: 'US T-Bills', color: '#8b5cf6', icon: '🏛️' },
 };
 
@@ -123,5 +134,6 @@ export const DEFAULT_APP_DATA: AppData = {
     defaultCurrency: 'TWD',
     exchangeRate: DEFAULT_EXCHANGE_RATE,
   },
+  stockPrices: {},
   version: '1.0.0',
 };
