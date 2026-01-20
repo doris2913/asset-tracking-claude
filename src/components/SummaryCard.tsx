@@ -9,6 +9,7 @@ interface SummaryCardProps {
     value: number;
     isPositive: boolean;
   };
+  trendLabel?: string;
   color?: 'blue' | 'green' | 'yellow' | 'purple';
 }
 
@@ -25,6 +26,7 @@ export default function SummaryCard({
   subtitle,
   icon,
   trend,
+  trendLabel = 'vs last month',
   color = 'blue',
 }: SummaryCardProps) {
   return (
@@ -45,7 +47,7 @@ export default function SummaryCard({
               >
                 {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value).toFixed(1)}%
               </span>
-              <span className="text-xs text-gray-500 ml-2">vs last month</span>
+              <span className="text-xs text-gray-500 ml-2">{trendLabel}</span>
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { useI18n } from '@/i18n';
 
 interface ImportExportProps {
   onExport: () => string;
@@ -9,6 +10,7 @@ interface ImportExportProps {
 }
 
 export default function ImportExport({ onExport, onImport, onClear }: ImportExportProps) {
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
@@ -26,7 +28,7 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
     URL.revokeObjectURL(url);
 
     setImportStatus('success');
-    setStatusMessage('Data exported successfully!');
+    setStatusMessage(t.settings.dataExported);
     setTimeout(() => setImportStatus('idle'), 3000);
   };
 
@@ -44,14 +46,14 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
 
       if (success) {
         setImportStatus('success');
-        setStatusMessage('Data imported successfully!');
+        setStatusMessage(t.settings.dataImported);
       } else {
         setImportStatus('error');
-        setStatusMessage('Failed to import data. Invalid format.');
+        setStatusMessage(t.settings.importFailed);
       }
     } catch (error) {
       setImportStatus('error');
-      setStatusMessage('Failed to read file.');
+      setStatusMessage(t.settings.readFileFailed);
     }
 
     // Reset file input
@@ -63,14 +65,10 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
   };
 
   const handleClear = () => {
-    if (
-      confirm(
-        'Are you sure you want to clear all data? This action cannot be undone. Please export your data first if you want to keep a backup.'
-      )
-    ) {
+    if (confirm(t.settings.clearDataConfirm)) {
       onClear();
       setImportStatus('success');
-      setStatusMessage('All data cleared.');
+      setStatusMessage(t.settings.dataCleared);
       setTimeout(() => setImportStatus('idle'), 3000);
     }
   };
@@ -79,13 +77,13 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
         <button onClick={handleExport} className="btn btn-primary">
-          Export Data
+          {t.settings.exportData}
         </button>
         <button onClick={handleImportClick} className="btn btn-secondary">
-          Import Data
+          {t.settings.importData}
         </button>
         <button onClick={handleClear} className="btn btn-danger">
-          Clear All Data
+          {t.settings.clearAllData}
         </button>
         <input
           ref={fileInputRef}
@@ -109,8 +107,7 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
       )}
 
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Export your data to keep a backup. Import previously exported data to restore.
-        Data is stored locally in your browser.
+        {t.settings.dataNote}
       </p>
     </div>
   );

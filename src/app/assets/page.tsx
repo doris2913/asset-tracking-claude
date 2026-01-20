@@ -7,6 +7,7 @@ import AssetForm from '@/components/AssetForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useStockPrices, fetchExchangeRate } from '@/lib/yahooFinance';
+import { useI18n } from '@/i18n';
 import { Asset } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
 
@@ -23,6 +24,7 @@ export default function AssetsPage() {
     isLoaded,
   } = useAssetData();
 
+  const { t, language } = useI18n();
   const { fetchPrices } = useStockPrices();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,16 +53,15 @@ export default function AssetsPage() {
 
   const handleUpdateStockPrices = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus('Fetching stock prices...');
+    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價...' : 'Fetching stock prices...');
 
     try {
-      // Get all stock symbols
       const stockAssets = currentAssets.assets.filter(
         (a) => a.symbol && (a.type === 'stock_tw' || a.type === 'stock_us')
       );
 
       if (stockAssets.length === 0) {
-        setPriceUpdateStatus('No stocks with symbols to update.');
+        setPriceUpdateStatus(language === 'zh-TW' ? '沒有需要更新的股票。' : 'No stocks with symbols to update.');
         return;
       }
 
@@ -70,13 +71,15 @@ export default function AssetsPage() {
       if (Object.keys(prices).length > 0) {
         updateStockPrices(prices);
         setPriceUpdateStatus(
-          `Updated ${Object.keys(prices).length} stock price(s) successfully!`
+          language === 'zh-TW'
+            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格！`
+            : `Updated ${Object.keys(prices).length} stock price(s) successfully!`
         );
       } else {
-        setPriceUpdateStatus('Could not fetch any stock prices. API might be unavailable.');
+        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
       }
     } catch (error) {
-      setPriceUpdateStatus('Failed to update stock prices.');
+      setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
       console.error(error);
     } finally {
       setIsUpdatingPrices(false);
@@ -86,18 +89,22 @@ export default function AssetsPage() {
 
   const handleUpdateExchangeRate = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus('Fetching exchange rate...');
+    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得匯率...' : 'Fetching exchange rate...');
 
     try {
       const rate = await fetchExchangeRate();
       if (rate) {
         updateExchangeRate(rate);
-        setPriceUpdateStatus(`Exchange rate updated to ${rate.toFixed(2)} TWD/USD`);
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? `匯率已更新為 ${rate.toFixed(2)} TWD/USD`
+            : `Exchange rate updated to ${rate.toFixed(2)} TWD/USD`
+        );
       } else {
-        setPriceUpdateStatus('Could not fetch exchange rate.');
+        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得匯率。' : 'Could not fetch exchange rate.');
       }
     } catch (error) {
-      setPriceUpdateStatus('Failed to update exchange rate.');
+      setPriceUpdateStatus(language === 'zh-TW' ? '更新匯率失敗。' : 'Failed to update exchange rate.');
       console.error(error);
     } finally {
       setIsUpdatingPrices(false);
@@ -105,12 +112,14 @@ export default function AssetsPage() {
     }
   };
 
+  const dateLocale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navigation />
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-gray-500">{t.common.loading}</div>
         </div>
       </div>
     );
@@ -124,26 +133,26 @@ export default function AssetsPage() {
         {/* Header */}
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Assets</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.assets.title}</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage your current assets
+              {t.assets.subtitle}
             </p>
           </div>
           <button onClick={handleAddAsset} className="btn btn-primary">
-            + Add Asset
+            {t.assets.addAsset}
           </button>
         </div>
 
         {/* Summary */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="card">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total (TWD)</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalTWD}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {formatCurrency(totalTWD, 'TWD')}
             </p>
           </div>
           <div className="card">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total (USD)</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalUSD}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {formatCurrency(totalUSD, 'USD')}
             </p>
@@ -153,7 +162,7 @@ export default function AssetsPage() {
         {/* Price Update Actions */}
         <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Update Prices
+            {t.assets.updatePrices}
           </h2>
           <div className="flex flex-wrap gap-3">
             <button
@@ -161,14 +170,14 @@ export default function AssetsPage() {
               disabled={isUpdatingPrices}
               className="btn btn-secondary"
             >
-              {isUpdatingPrices ? 'Updating...' : 'Update Stock Prices'}
+              {isUpdatingPrices ? t.assets.updating : t.assets.updateStockPrices}
             </button>
             <button
               onClick={handleUpdateExchangeRate}
               disabled={isUpdatingPrices}
               className="btn btn-secondary"
             >
-              {isUpdatingPrices ? 'Updating...' : 'Update Exchange Rate'}
+              {isUpdatingPrices ? t.assets.updating : t.assets.updateExchangeRate}
             </button>
           </div>
           {priceUpdateStatus && (
@@ -177,7 +186,7 @@ export default function AssetsPage() {
             </p>
           )}
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
-            Stock prices are fetched from Yahoo Finance. Exchange rate: {currentAssets.exchangeRate.toFixed(2)} TWD/USD
+            {t.assets.priceUpdateNote}: {currentAssets.exchangeRate.toFixed(2)} TWD/USD
           </p>
         </div>
 
@@ -185,10 +194,10 @@ export default function AssetsPage() {
         <div className="card">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Current Assets
+              {t.assets.currentAssets}
             </h2>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Last updated: {new Date(currentAssets.lastModified).toLocaleString()}
+              {t.assets.lastUpdated}: {new Date(currentAssets.lastModified).toLocaleString(dateLocale)}
             </span>
           </div>
           <AssetList
@@ -203,7 +212,7 @@ export default function AssetsPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingAsset ? 'Edit Asset' : 'Add Asset'}
+        title={editingAsset ? t.assets.editAsset : t.assets.addAsset}
       >
         <AssetForm
           asset={editingAsset}

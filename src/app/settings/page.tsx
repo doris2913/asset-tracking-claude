@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import ImportExport from '@/components/ImportExport';
 import { useAssetData } from '@/hooks/useAssetData';
+import { useI18n } from '@/i18n';
 import { Currency } from '@/types';
 
 export default function SettingsPage() {
@@ -18,6 +19,8 @@ export default function SettingsPage() {
     isLoaded,
   } = useAssetData();
 
+  const { t } = useI18n();
+
   const [snapshotInterval, setSnapshotInterval] = useState(settings.snapshotIntervalDays);
   const [exchangeRate, setExchangeRate] = useState(currentAssets.exchangeRate);
   const [defaultCurrency, setDefaultCurrency] = useState(settings.defaultCurrency);
@@ -29,7 +32,7 @@ export default function SettingsPage() {
       defaultCurrency,
     });
     updateExchangeRate(exchangeRate);
-    setSaveStatus('Settings saved!');
+    setSaveStatus(t.settings.settingsSaved);
     setTimeout(() => setSaveStatus(''), 3000);
   };
 
@@ -38,7 +41,7 @@ export default function SettingsPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navigation />
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-gray-500">{t.common.loading}</div>
         </div>
       </div>
     );
@@ -50,21 +53,21 @@ export default function SettingsPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.settings.title}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Configure your asset tracker preferences
+            {t.settings.subtitle}
           </p>
         </div>
 
         {/* General Settings */}
         <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            General Settings
+            {t.settings.generalSettings}
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="label">Snapshot Interval (days)</label>
+              <label className="label">{t.settings.snapshotInterval}</label>
               <input
                 type="number"
                 value={snapshotInterval}
@@ -74,13 +77,12 @@ export default function SettingsPage() {
                 className="input w-32"
               />
               <p className="text-xs text-gray-500 mt-1">
-                How often you want to be reminded to create a snapshot.
-                When updating assets after this interval, a snapshot will be auto-created.
+                {t.settings.snapshotIntervalHint}
               </p>
             </div>
 
             <div>
-              <label className="label">Default Currency</label>
+              <label className="label">{t.settings.defaultCurrency}</label>
               <select
                 value={defaultCurrency}
                 onChange={(e) => setDefaultCurrency(e.target.value as Currency)}
@@ -92,7 +94,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="label">Exchange Rate (USD to TWD)</label>
+              <label className="label">{t.settings.exchangeRate}</label>
               <input
                 type="number"
                 value={exchangeRate}
@@ -102,13 +104,13 @@ export default function SettingsPage() {
                 className="input w-32"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Used for converting between USD and TWD. Update this regularly for accurate totals.
+                {t.settings.exchangeRateHint}
               </p>
             </div>
 
             <div className="pt-4">
               <button onClick={handleSaveSettings} className="btn btn-primary">
-                Save Settings
+                {t.settings.saveSettings}
               </button>
               {saveStatus && (
                 <span className="ml-3 text-green-600 dark:text-green-400">{saveStatus}</span>
@@ -120,7 +122,7 @@ export default function SettingsPage() {
         {/* Data Management */}
         <div className="card mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Data Management
+            {t.settings.dataManagement}
           </h2>
           <ImportExport
             onExport={exportData}
@@ -131,28 +133,27 @@ export default function SettingsPage() {
 
         {/* About */}
         <div className="card">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">About</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.settings.about}</h2>
           <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
             <p>
-              <strong>Asset Tracker</strong> - Track your asset growth over time
+              <strong>{t.nav.appName}</strong> - {t.dashboard.subtitle}
             </p>
             <p>
-              Version: 1.0.0
+              {t.settings.version}: 1.0.0
             </p>
             <p>
-              This application stores all data locally in your browser using localStorage.
-              No data is sent to any server. Use the export feature to backup your data.
+              {t.settings.aboutDesc}
             </p>
             <p className="pt-2">
-              <strong>Features:</strong>
+              <strong>{t.settings.features}:</strong>
             </p>
             <ul className="list-disc list-inside pl-2">
-              <li>Track multiple asset types (Cash, Stocks, T-Bills, Rent)</li>
-              <li>Support for TWD and USD currencies</li>
-              <li>Automatic stock price updates via Yahoo Finance</li>
-              <li>Monthly snapshots for historical tracking</li>
-              <li>Growth visualization with moving averages</li>
-              <li>Import/Export for data portability</li>
+              <li>{t.settings.featureList.multiAsset}</li>
+              <li>{t.settings.featureList.dualCurrency}</li>
+              <li>{t.settings.featureList.stockPrices}</li>
+              <li>{t.settings.featureList.snapshots}</li>
+              <li>{t.settings.featureList.visualization}</li>
+              <li>{t.settings.featureList.importExport}</li>
             </ul>
           </div>
         </div>

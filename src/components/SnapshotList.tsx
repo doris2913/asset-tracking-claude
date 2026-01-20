@@ -2,6 +2,7 @@
 
 import { Snapshot, Currency } from '@/types';
 import { formatCurrency, calculateGrowthRate } from '@/utils/calculations';
+import { useI18n } from '@/i18n';
 
 interface SnapshotListProps {
   snapshots: Snapshot[];
@@ -16,11 +17,13 @@ export default function SnapshotList({
   onDelete,
   onView,
 }: SnapshotListProps) {
+  const { t, language } = useI18n();
+
   if (snapshots.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
         <p className="text-4xl mb-4">📸</p>
-        <p>No snapshots yet. Create your first snapshot to start tracking asset growth!</p>
+        <p>{t.snapshots.noSnapshots}</p>
       </div>
     );
   }
@@ -29,6 +32,8 @@ export default function SnapshotList({
   const sortedSnapshots = [...snapshots].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const dateLocale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
 
   return (
     <div className="space-y-4">
@@ -53,7 +58,7 @@ export default function SnapshotList({
               <div>
                 <div className="flex items-center space-x-3">
                   <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {new Date(snapshot.date).toLocaleDateString('en-US', {
+                    {new Date(snapshot.date).toLocaleDateString(dateLocale, {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -73,7 +78,7 @@ export default function SnapshotList({
                   )}
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {snapshot.assets.length} assets | Rate: {snapshot.exchangeRate.toFixed(2)} TWD/USD
+                  {snapshot.assets.length} {t.snapshots.assets} | {t.snapshots.rate}: {snapshot.exchangeRate.toFixed(2)} TWD/USD
                 </p>
                 {snapshot.notes && (
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
@@ -90,17 +95,17 @@ export default function SnapshotList({
                     onClick={() => onView(snapshot)}
                     className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
                   >
-                    View Details
+                    {t.snapshots.viewDetails}
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Are you sure you want to delete this snapshot?')) {
+                      if (confirm(t.snapshots.confirmDelete)) {
                         onDelete(snapshot.id);
                       }
                     }}
                     className="text-sm text-red-600 hover:text-red-800 dark:text-red-400"
                   >
-                    Delete
+                    {t.common.delete}
                   </button>
                 </div>
               </div>

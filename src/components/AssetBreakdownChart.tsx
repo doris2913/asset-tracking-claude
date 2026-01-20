@@ -7,8 +7,9 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import { AssetSummary, ASSET_TYPE_CONFIG, Currency } from '@/types';
+import { AssetSummary, Currency } from '@/types';
 import { formatCurrency, formatNumber } from '@/utils/calculations';
+import { useI18n } from '@/i18n';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -17,29 +18,40 @@ interface AssetBreakdownChartProps {
   currency: Currency;
 }
 
+const ASSET_TYPE_COLORS: Record<string, string> = {
+  cash_twd: '#22c55e',
+  cash_usd: '#16a34a',
+  stock_tw: '#3b82f6',
+  stock_us: '#6366f1',
+  rent: '#f59e0b',
+  us_tbills: '#8b5cf6',
+};
+
 export default function AssetBreakdownChart({
   breakdown,
   currency,
 }: AssetBreakdownChartProps) {
+  const { t } = useI18n();
+
   if (breakdown.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
         <div className="text-center">
           <p className="text-4xl mb-4">🥧</p>
-          <p>No assets to display breakdown.</p>
+          <p>{t.dashboard.noBreakdownData}</p>
         </div>
       </div>
     );
   }
 
   const data = {
-    labels: breakdown.map((item) => ASSET_TYPE_CONFIG[item.type].label),
+    labels: breakdown.map((item) => t.assetTypes[item.type]),
     datasets: [
       {
         data: breakdown.map((item) =>
           currency === 'TWD' ? item.totalTWD : item.totalUSD
         ),
-        backgroundColor: breakdown.map((item) => ASSET_TYPE_CONFIG[item.type].color),
+        backgroundColor: breakdown.map((item) => ASSET_TYPE_COLORS[item.type]),
         borderWidth: 2,
         borderColor: 'white',
       },

@@ -1,7 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Asset, AssetType, Currency, ASSET_TYPE_CONFIG } from '@/types';
+import { Asset, AssetType, Currency } from '@/types';
+import { useI18n } from '@/i18n';
+
+const ASSET_TYPE_ICONS: Record<AssetType, string> = {
+  cash_twd: '💵',
+  cash_usd: '💲',
+  stock_tw: '📈',
+  stock_us: '📊',
+  rent: '🏠',
+  us_tbills: '🏛️',
+};
 
 interface AssetFormProps {
   asset?: Asset;
@@ -10,6 +20,7 @@ interface AssetFormProps {
 }
 
 export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps) {
+  const { t } = useI18n();
   const [name, setName] = useState(asset?.name || '');
   const [type, setType] = useState<AssetType>(asset?.type || 'cash_twd');
   const [value, setValue] = useState(asset?.value?.toString() || '');
@@ -45,30 +56,32 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
     onSubmit(assetData);
   };
 
+  const assetTypes: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'rent', 'us_tbills'];
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="label">Asset Name</label>
+        <label className="label">{t.assetForm.assetName}</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="input"
-          placeholder="e.g., Bank A Savings, AAPL Shares"
+          placeholder={t.assetForm.assetNamePlaceholder}
           required
         />
       </div>
 
       <div>
-        <label className="label">Asset Type</label>
+        <label className="label">{t.assetForm.assetType}</label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as AssetType)}
           className="select"
         >
-          {Object.entries(ASSET_TYPE_CONFIG).map(([key, config]) => (
-            <option key={key} value={key}>
-              {config.icon} {config.label}
+          {assetTypes.map((assetType) => (
+            <option key={assetType} value={assetType}>
+              {ASSET_TYPE_ICONS[assetType]} {t.assetTypes[assetType]}
             </option>
           ))}
         </select>
@@ -76,7 +89,7 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="label">Value</label>
+          <label className="label">{t.assetForm.value}</label>
           <input
             type="number"
             value={value}
@@ -90,7 +103,7 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
         </div>
 
         <div>
-          <label className="label">Currency</label>
+          <label className="label">{t.common.currency}</label>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value as Currency)}
@@ -105,21 +118,21 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
       {isStockType && (
         <>
           <div>
-            <label className="label">Stock Symbol (for auto-price update)</label>
+            <label className="label">{t.assetForm.stockSymbol}</label>
             <input
               type="text"
               value={symbol}
               onChange={(e) => setSymbol(e.target.value.toUpperCase())}
               className="input"
-              placeholder="e.g., AAPL, 0050.TW, 2330.TW"
+              placeholder={t.assetForm.stockSymbolPlaceholder}
             />
             <p className="text-xs text-gray-500 mt-1">
-              TW stocks: use .TW suffix (e.g., 2330.TW). US stocks: use symbol directly (e.g., AAPL)
+              {t.assetForm.stockSymbolHint}
             </p>
           </div>
 
           <div>
-            <label className="label">Number of Shares</label>
+            <label className="label">{t.assetForm.numberOfShares}</label>
             <input
               type="number"
               value={shares}
@@ -134,22 +147,22 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
       )}
 
       <div>
-        <label className="label">Notes (optional)</label>
+        <label className="label">{t.common.notes} ({t.common.optional})</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="input"
           rows={2}
-          placeholder="Additional notes..."
+          placeholder={t.assetForm.notesPlaceholder}
         />
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         <button type="button" onClick={onCancel} className="btn btn-secondary">
-          Cancel
+          {t.common.cancel}
         </button>
         <button type="submit" className="btn btn-primary">
-          {asset ? 'Update' : 'Add'} Asset
+          {asset ? t.common.update : t.common.add} {t.nav.assets.slice(0, -1)}
         </button>
       </div>
     </form>

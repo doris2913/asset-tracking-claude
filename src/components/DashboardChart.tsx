@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,6 +15,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import { ChartDataPoint, Currency } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
+import { useI18n } from '@/i18n';
 
 ChartJS.register(
   CategoryScale,
@@ -41,13 +42,14 @@ export default function DashboardChart({
   currency,
 }: DashboardChartProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
+  const { t } = useI18n();
 
   if (currentValues.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
         <div className="text-center">
           <p className="text-4xl mb-4">📊</p>
-          <p>No snapshot data yet. Create snapshots to see your asset growth chart.</p>
+          <p>{t.dashboard.noChartData}</p>
         </div>
       </div>
     );
@@ -59,7 +61,7 @@ export default function DashboardChart({
     labels,
     datasets: [
       {
-        label: 'Current Value',
+        label: t.chart.currentValue,
         data: currentValues.map((point) => point.value),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -69,7 +71,7 @@ export default function DashboardChart({
         pointHoverRadius: 6,
       },
       {
-        label: '3-Month Moving Average',
+        label: t.chart.movingAverage3M,
         data: movingAverage3M.map((point) => point.value),
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'transparent',
@@ -79,7 +81,7 @@ export default function DashboardChart({
         pointHoverRadius: 4,
       },
       {
-        label: '1-Year Moving Average',
+        label: t.chart.movingAverage1Y,
         data: movingAverage1Y.map((point) => point.value),
         borderColor: 'rgb(249, 115, 22)',
         backgroundColor: 'transparent',

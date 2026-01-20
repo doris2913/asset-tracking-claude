@@ -1,7 +1,17 @@
 'use client';
 
-import { Asset, ASSET_TYPE_CONFIG } from '@/types';
-import { formatCurrency, formatDate } from '@/utils/calculations';
+import { Asset, AssetType } from '@/types';
+import { formatCurrency } from '@/utils/calculations';
+import { useI18n } from '@/i18n';
+
+const ASSET_TYPE_ICONS: Record<AssetType, string> = {
+  cash_twd: '💵',
+  cash_usd: '💲',
+  stock_tw: '📈',
+  stock_us: '📊',
+  rent: '🏠',
+  us_tbills: '🏛️',
+};
 
 interface AssetListProps {
   assets: Asset[];
@@ -10,11 +20,13 @@ interface AssetListProps {
 }
 
 export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) {
+  const { t } = useI18n();
+
   if (assets.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
         <p className="text-4xl mb-4">📦</p>
-        <p>No assets yet. Add your first asset to get started!</p>
+        <p>{t.assets.noAssets}</p>
       </div>
     );
   }
@@ -34,12 +46,12 @@ export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) 
   return (
     <div className="space-y-6">
       {Object.entries(groupedAssets).map(([type, typeAssets]) => {
-        const config = ASSET_TYPE_CONFIG[type as keyof typeof ASSET_TYPE_CONFIG];
+        const assetType = type as AssetType;
         return (
           <div key={type}>
             <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-800 dark:text-gray-200">
-              <span className="mr-2">{config.icon}</span>
-              {config.label}
+              <span className="mr-2">{ASSET_TYPE_ICONS[assetType]}</span>
+              {t.assetTypes[assetType]}
               <span className="ml-2 text-sm font-normal text-gray-500">
                 ({typeAssets.length})
               </span>
@@ -61,9 +73,9 @@ export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) 
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       {asset.shares && (
-                        <span className="mr-3">{asset.shares.toLocaleString()} shares</span>
+                        <span className="mr-3">{asset.shares.toLocaleString()} {t.assets.shares}</span>
                       )}
-                      <span>Updated: {new Date(asset.lastUpdated).toLocaleDateString()}</span>
+                      <span>{t.assets.updated}: {new Date(asset.lastUpdated).toLocaleDateString()}</span>
                     </div>
                     {asset.notes && (
                       <div className="text-xs text-gray-400 mt-1">{asset.notes}</div>
@@ -78,17 +90,17 @@ export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) 
                         onClick={() => onEdit(asset)}
                         className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
                       >
-                        Edit
+                        {t.common.edit}
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm('Are you sure you want to delete this asset?')) {
+                          if (confirm(t.assets.confirmDelete)) {
                             onDelete(asset.id);
                           }
                         }}
                         className="text-sm text-red-600 hover:text-red-800 dark:text-red-400"
                       >
-                        Delete
+                        {t.common.delete}
                       </button>
                     </div>
                   </div>
