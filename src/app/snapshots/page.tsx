@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Navigation from '@/components/Navigation';
 import SnapshotList from '@/components/SnapshotList';
 import Modal from '@/components/Modal';
@@ -38,6 +38,50 @@ export default function SnapshotsPage() {
   const latestSnapshotDate = getLatestSnapshotDate(snapshots);
   const needsSnapshot = isSnapshotNeeded(latestSnapshotDate, settings.snapshotIntervalDays);
   const dateLocale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
+
+  // Asset types to show in the history table
+  const ASSET_TYPES: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'us_tbills', 'liability'];
+
+  // Calculate category history data
+  const categoryHistory = useMemo(() => {
+    if (snapshots.length === 0) return [];
+
+    const sortedSnapshots = [...snapshots].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    return sortedSnapshots.map((snapshot) => {
+      const categoryValues: Record<AssetType, number> = {
+        cash_twd: 0,
+        cash_usd: 0,
+        stock_tw: 0,
+        stock_us: 0,
+        liability: 0,
+        us_tbills: 0,
+      };
+
+      for (const asset of snapshot.assets) {
+        let value = asset.value;
+        // Convert to display currency
+        if (displayCurrency === 'TWD') {
+          if (asset.currency === 'USD') {
+            value = value * snapshot.exchangeRate;
+          }
+        } else {
+          if (asset.currency === 'TWD') {
+            value = value / snapshot.exchangeRate;
+          }
+        }
+        categoryValues[asset.type] = (categoryValues[asset.type] || 0) + value;
+      }
+
+      return {
+        date: snapshot.date,
+        total: displayCurrency === 'TWD' ? snapshot.totalValueTWD : snapshot.totalValueUSD,
+        ...categoryValues,
+      };
+    });
+  }, [snapshots, displayCurrency]);
 
   const handleCreateSnapshot = () => {
     createManualSnapshot(snapshotNotes || undefined);
@@ -151,6 +195,71 @@ export default function SnapshotsPage() {
             </div>
           </div>
         </div>
+
+        {/* Category History Table */}
+        {categoryHistory.length > 0 && (
+          <div className="card mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {t.snapshots.categoryHistory}
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="py-2 px-3 text-left font-medium text-gray-600 dark:text-gray-400">
+                      {t.snapshots.snapshotDate.replace(':', '')}
+                    </th>
+                    {ASSET_TYPES.map((type) => (
+                      <th
+                        key={type}
+                        className="py-2 px-3 text-right font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap"
+                      >
+                        <span className="mr-1">{ASSET_TYPE_ICONS[type]}</span>
+                        {t.assetTypes[type]}
+                      </th>
+                    ))}
+                    <th className="py-2 px-3 text-right font-medium text-gray-900 dark:text-white">
+                      {t.dashboard.totalAssets}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoryHistory.map((row, index) => (
+                    <tr
+                      key={row.date}
+                      className={`border-b border-gray-100 dark:border-gray-800 ${
+                        index === 0 ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                      }`}
+                    >
+                      <td className="py-2 px-3 text-gray-900 dark:text-white whitespace-nowrap">
+                        {new Date(row.date).toLocaleDateString(dateLocale, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </td>
+                      {ASSET_TYPES.map((type) => (
+                        <td
+                          key={type}
+                          className={`py-2 px-3 text-right ${
+                            row[type] > 0
+                              ? 'text-gray-900 dark:text-white'
+                              : 'text-gray-400 dark:text-gray-600'
+                          }`}
+                        >
+                          {row[type] > 0 ? formatCurrency(row[type], displayCurrency) : '-'}
+                        </td>
+                      ))}
+                      <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(row.total, displayCurrency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Snapshot List */}
         <div className="card">

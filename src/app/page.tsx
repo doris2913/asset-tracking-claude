@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Navigation from '@/components/Navigation';
 import DashboardChart from '@/components/DashboardChart';
 import AssetBreakdownChart from '@/components/AssetBreakdownChart';
+import AllocationHistoryChart from '@/components/AllocationHistoryChart';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
@@ -360,6 +361,16 @@ export default function DashboardPage() {
             <AssetBreakdownChart breakdown={assetBreakdown} currency={displayCurrency} />
           </div>
         </div>
+
+        {/* Allocation History Chart */}
+        {snapshots.length > 0 && (
+          <div className="card mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {t.dashboard.allocationHistory}
+            </h2>
+            <AllocationHistoryChart snapshots={snapshots} currency={displayCurrency} />
+          </div>
+        )}
 
         {/* Asset Type Summary Table */}
         {assetBreakdown.length > 0 && (

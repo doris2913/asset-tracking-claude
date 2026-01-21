@@ -13,6 +13,7 @@ export default function Navigation() {
     { href: '/assets', label: t.nav.assets, icon: '💰' },
     { href: '/details', label: t.nav.details, icon: '📋' },
     { href: '/snapshots', label: t.nav.snapshots, icon: '📸' },
+    { href: '/migrate', label: t.nav.migrate, icon: '📥' },
     { href: '/settings', label: t.nav.settings, icon: '⚙️' },
   ];
 

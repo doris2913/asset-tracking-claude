@@ -22,6 +22,7 @@ export const en = {
     assets: 'Assets',
     details: 'Details',
     snapshots: 'Snapshots',
+    migrate: 'Migrate',
     settings: 'Settings',
     appName: 'Asset Tracker',
   },
@@ -41,6 +42,7 @@ export const en = {
     assetGrowthChart: 'Asset Growth Over Time',
     assetAllocation: 'Asset Allocation',
     assetSummary: 'Asset Summary by Type',
+    allocationHistory: 'Asset Allocation History',
     type: 'Type',
     count: 'Count',
     value: 'Value',
@@ -114,6 +116,7 @@ export const en = {
     snapshotDate: 'Snapshot',
     assets: 'Assets',
     rate: 'Rate',
+    categoryHistory: 'Category History',
   },
 
   // Settings
