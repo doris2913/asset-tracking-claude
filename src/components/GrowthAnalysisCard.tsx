@@ -10,6 +10,7 @@ interface GrowthAnalysisCardProps {
   currency: Currency;
   showIndex?: boolean;
   periodNumber?: number;
+  isTotal?: boolean;
 }
 
 export default function GrowthAnalysisCard({
@@ -17,6 +18,7 @@ export default function GrowthAnalysisCard({
   currency,
   showIndex = false,
   periodNumber,
+  isTotal = false,
 }: GrowthAnalysisCardProps) {
   const { language } = useI18n();
 
@@ -43,7 +45,10 @@ export default function GrowthAnalysisCard({
     <div className="card">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          {language === 'zh-TW' ? '資產成長來源分析' : 'Asset Growth Source Analysis'}
+          {isTotal 
+            ? (language === 'zh-TW' ? '總成長分析' : 'Total Growth Analysis')
+            : (language === 'zh-TW' ? '資產成長來源分析' : 'Asset Growth Source Analysis')
+          }
           {showIndex && periodNumber && (
             <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
               {language === 'zh-TW' ? `期間 ${periodNumber}` : `Period ${periodNumber}`}
@@ -52,6 +57,11 @@ export default function GrowthAnalysisCard({
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {formatDate(analysis.period.start)} → {formatDate(analysis.period.end)}
+          {isTotal && (
+            <span className="ml-2 text-xs text-gray-500">
+              ({language === 'zh-TW' ? '整體期間' : 'Overall Period'})
+            </span>
+          )}
         </p>
       </div>
 

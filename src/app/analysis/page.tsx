@@ -5,13 +5,14 @@ import Navigation from '@/components/Navigation';
 import GrowthAnalysisCard from '@/components/GrowthAnalysisCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Currency } from '@/types';
+import { Currency, GrowthAnalysis } from '@/types';
 import { analyzeGrowthSources } from '@/utils/calculations';
 
 export default function AnalysisPage() {
   const { snapshots, isLoaded } = useAssetData();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('total');
 
   // Calculate growth analysis for ALL consecutive snapshot pairs
   const historicalAnalyses = useMemo(() => {
@@ -33,6 +34,30 @@ export default function AnalysisPage() {
     // Return in reverse chronological order (most recent first)
     return analyses.reverse();
   }, [snapshots]);
+
+  // Calculate total/overall growth analysis
+  const totalAnalysis = useMemo((): GrowthAnalysis | null => {
+    if (snapshots.length < 2) return null;
+
+    const sortedSnapshots = [...snapshots].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    // Compare first and last snapshot for total growth
+    const firstSnapshot = sortedSnapshots[0];
+    const lastSnapshot = sortedSnapshots[sortedSnapshots.length - 1];
+
+    return analyzeGrowthSources(firstSnapshot, lastSnapshot);
+  }, [snapshots]);
+
+  // Get the selected analysis to display
+  const displayedAnalysis = useMemo(() => {
+    if (selectedPeriod === 'total') {
+      return totalAnalysis;
+    }
+    const index = parseInt(selectedPeriod);
+    return historicalAnalyses[index] || null;
+  }, [selectedPeriod, historicalAnalyses, totalAnalysis]);
 
   if (!isLoaded) {
     return (
@@ -58,16 +83,41 @@ export default function AnalysisPage() {
               {t.analysis.subtitle}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <label className="text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
-            <select
-              value={displayCurrency}
-              onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
-              className="select w-24"
-            >
-              <option value="TWD">TWD</option>
-              <option value="USD">USD</option>
-            </select>
+          <div className="flex items-center space-x-4">
+            {/* Period Selector */}
+            {historicalAnalyses.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  {language === 'zh-TW' ? '期間:' : 'Period:'}
+                </label>
+                <select
+                  value={selectedPeriod}
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                  className="select w-40"
+                >
+                  <option value="total">
+                    {language === 'zh-TW' ? '總成長' : 'Total Growth'}
+                  </option>
+                  {historicalAnalyses.map((analysis, index) => (
+                    <option key={index} value={index.toString()}>
+                      {language === 'zh-TW' ? `期間 ${historicalAnalyses.length - index}` : `Period ${historicalAnalyses.length - index}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {/* Currency Selector */}
+            <div className="flex items-center space-x-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
+              <select
+                value={displayCurrency}
+                onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
+                className="select w-24"
+              >
+                <option value="TWD">TWD</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -80,22 +130,17 @@ export default function AnalysisPage() {
             <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
               <div className="text-center">
                 <p className="text-4xl mb-4">📈</p>
-                <p>{t.common.loading === 'Loading...' ? 'Need at least 2 snapshots to analyze growth' : '需要至少兩個快照才能分析成長來源'}</p>
+                <p>{language === 'zh-TW' ? '需要至少兩個快照才能分析成長來源' : 'Need at least 2 snapshots to analyze growth'}</p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
-            {historicalAnalyses.map((analysis, index) => (
-              <GrowthAnalysisCard 
-                key={`${analysis.period.start}-${analysis.period.end}`}
-                analysis={analysis} 
-                currency={displayCurrency}
-                showIndex={historicalAnalyses.length > 1}
-                periodNumber={historicalAnalyses.length - index}
-              />
-            ))}
-          </div>
+          <GrowthAnalysisCard 
+            analysis={displayedAnalysis} 
+            currency={displayCurrency}
+            showIndex={false}
+            isTotal={selectedPeriod === 'total'}
+          />
         )}
       </main>
     </div>
