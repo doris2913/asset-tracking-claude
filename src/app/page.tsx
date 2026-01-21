@@ -5,8 +5,10 @@ import Navigation from '@/components/Navigation';
 import DashboardChart from '@/components/DashboardChart';
 import AssetBreakdownChart from '@/components/AssetBreakdownChart';
 import AllocationHistoryChart from '@/components/AllocationHistoryChart';
+import AllocationComparisonChart from '@/components/AllocationComparisonChart';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
+import { useStockPrices } from '@/lib/yahooFinance';
 import { useI18n } from '@/i18n';
 import { Currency, StockPrice, Asset } from '@/types';
 import {
@@ -67,13 +69,55 @@ export default function DashboardPage() {
     currentAssets,
     snapshots,
     stockPrices,
+    settings,
     totalTWD,
     totalUSD,
+    updateStockPricesWithMA,
     isLoaded,
   } = useAssetData();
 
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const { fetchPricesWithMA } = useStockPrices();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
+  const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
+  const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
+
+  // Handle stock price update
+  const handleUpdateStockPrices = async () => {
+    setIsUpdatingPrices(true);
+    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價與移動平均...' : 'Fetching stock prices with moving averages...');
+
+    try {
+      const stockAssets = currentAssets.assets.filter(
+        (a) => a.symbol && (a.type === 'stock_tw' || a.type === 'stock_us')
+      );
+
+      if (stockAssets.length === 0) {
+        setPriceUpdateStatus(language === 'zh-TW' ? '沒有需要更新的股票。' : 'No stocks with symbols to update.');
+        return;
+      }
+
+      const symbols = stockAssets.map((a) => a.symbol!);
+      const prices = await fetchPricesWithMA(symbols);
+
+      if (Object.keys(prices).length > 0) {
+        updateStockPricesWithMA(prices);
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
+            : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
+        );
+      } else {
+        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
+      }
+    } catch (error) {
+      setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
+      console.error(error);
+    } finally {
+      setIsUpdatingPrices(false);
+      setTimeout(() => setPriceUpdateStatus(''), 5000);
+    }
+  };
 
   // Calculate current portfolio values with different price bases
   const portfolioValues = useMemo(() => {
@@ -289,18 +333,35 @@ export default function DashboardPage() {
               {t.dashboard.subtitle}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <label className="text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
-            <select
-              value={displayCurrency}
-              onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
-              className="select w-24"
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleUpdateStockPrices}
+              disabled={isUpdatingPrices}
+              className="btn btn-secondary text-sm"
+              title={t.assets.updateStockPrices}
             >
-              <option value="TWD">TWD</option>
-              <option value="USD">USD</option>
-            </select>
+              {isUpdatingPrices ? t.assets.updating : t.assets.updateStockPrices}
+            </button>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
+              <select
+                value={displayCurrency}
+                onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
+                className="select w-24"
+              >
+                <option value="TWD">TWD</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
           </div>
         </div>
+
+        {/* Price Update Status */}
+        {priceUpdateStatus && (
+          <div className="mb-6 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">{priceUpdateStatus}</p>
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -376,6 +437,21 @@ export default function DashboardPage() {
               {t.dashboard.allocationHistory}
             </h2>
             <AllocationHistoryChart snapshots={snapshots} currency={displayCurrency} />
+          </div>
+        )}
+
+        {/* Allocation Comparison Chart */}
+        {currentAssets.assets.length > 0 && (
+          <div className="card mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {t.dashboard.allocationComparison}
+            </h2>
+            <AllocationComparisonChart
+              assets={currentAssets.assets}
+              exchangeRate={currentAssets.exchangeRate}
+              currency={displayCurrency}
+              targetAllocation={settings.targetAllocation}
+            />
           </div>
         )}
 

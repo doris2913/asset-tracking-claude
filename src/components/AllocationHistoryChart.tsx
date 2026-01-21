@@ -149,7 +149,14 @@ export default function AllocationHistoryChart({
         callbacks: {
           label: function (context: any) {
             const value = context.raw as number;
-            return `${context.dataset.label}: ${formatCurrency(value, currency)}`;
+            // Calculate total for this snapshot (column)
+            const dataIndex = context.dataIndex;
+            const total = context.chart.data.datasets.reduce(
+              (sum: number, dataset: any) => sum + (dataset.data[dataIndex] || 0),
+              0
+            );
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${context.dataset.label}: ${formatCurrency(value, currency)} (${percentage}%)`;
           },
           footer: function (tooltipItems: any[]) {
             const total = tooltipItems.reduce((sum, item) => sum + (item.raw as number), 0);

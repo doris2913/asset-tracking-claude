@@ -66,6 +66,7 @@ export interface AppSettings {
   snapshotIntervalDays: number;  // Default 30 (monthly)
   defaultCurrency: Currency;
   exchangeRate: number;          // Default USD/TWD rate
+  targetAllocation?: Record<AssetType, number>;  // Target percentage for each asset type (0-100)
 }
 
 // Stock quote from Yahoo Finance

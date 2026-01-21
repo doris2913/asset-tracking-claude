@@ -45,6 +45,7 @@ export const zhTW: Translations = {
     assetAllocation: '資產配置',
     assetSummary: '各類資產總覽',
     allocationHistory: '資產配置歷史',
+    allocationComparison: '目前配置 vs 目標配置',
     type: '類型',
     count: '數量',
     value: '價值',
@@ -165,5 +166,23 @@ export const zhTW: Translations = {
     currentValue: '目前價值',
     movingAverage3M: '3個月移動平均',
     movingAverage1Y: '1年移動平均',
+  },
+
+  // Allocation Settings
+  allocationSettings: {
+    title: '目標資產配置',
+    subtitle: '設定各資產類型的目標配置比例',
+    targetAllocation: '目標配置',
+    description: '為每個資產類型設定目標百分比。總計應等於 100%。',
+    total: '總計',
+    totalWarning: '總配置應等於 100%',
+    reset: '重設',
+    info: '這些目標配置將用於與您當前的投資組合配置進行比較，並幫助您重新平衡資產。',
+  },
+
+  // Allocation Comparison
+  allocationComparison: {
+    current: '目前',
+    target: '目標',
   },
 };
