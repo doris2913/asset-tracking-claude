@@ -183,6 +183,21 @@ export const en = {
     current: 'Current',
     target: 'Target',
   },
+
+  // Allocation Adjustment
+  allocationAdjustment: {
+    title: 'Rebalancing Recommendations',
+    description: 'Based on your target allocation, here are the recommended adjustments to rebalance your portfolio:',
+    current: 'Current',
+    target: 'Target',
+    difference: 'Difference',
+    action: 'Recommended Action',
+    sell: 'Sell',
+    buy: 'Buy',
+    balanced: 'Portfolio is well balanced!',
+    balancedDesc: 'Your current allocation is close to your target allocation.',
+    note: 'Note: These are suggestions based on percentage targets. Consider transaction costs, tax implications, and market conditions before making changes.',
+  },
 };
 
 export type Translations = typeof en;

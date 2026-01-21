@@ -6,6 +6,7 @@ import DashboardChart from '@/components/DashboardChart';
 import AssetBreakdownChart from '@/components/AssetBreakdownChart';
 import AllocationHistoryChart from '@/components/AllocationHistoryChart';
 import AllocationComparisonChart from '@/components/AllocationComparisonChart';
+import AllocationAdjustmentRecommendation from '@/components/AllocationAdjustmentRecommendation';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useStockPrices } from '@/lib/yahooFinance';
@@ -452,6 +453,21 @@ export default function DashboardPage() {
               currency={displayCurrency}
               targetAllocation={settings.targetAllocation}
             />
+
+            {settings.targetAllocation && (
+              <>
+                <div className="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  {t.allocationAdjustment.title}
+                </h2>
+                <AllocationAdjustmentRecommendation
+                  assets={currentAssets.assets}
+                  exchangeRate={currentAssets.exchangeRate}
+                  currency={displayCurrency}
+                  targetAllocation={settings.targetAllocation}
+                />
+              </>
+            )}
           </div>
         )}
 

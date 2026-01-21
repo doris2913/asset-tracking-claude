@@ -185,4 +185,19 @@ export const zhTW: Translations = {
     current: '目前',
     target: '目標',
   },
+
+  // Allocation Adjustment
+  allocationAdjustment: {
+    title: '再平衡建議',
+    description: '根據您的目標配置，以下是建議的調整方案以重新平衡您的投資組合：',
+    current: '目前',
+    target: '目標',
+    difference: '差異',
+    action: '建議操作',
+    sell: '賣出',
+    buy: '買入',
+    balanced: '投資組合已良好平衡！',
+    balancedDesc: '您目前的配置已接近目標配置。',
+    note: '注意：這些建議基於百分比目標。在進行調整前，請考慮交易成本、稅務影響和市場狀況。',
+  },
 };
