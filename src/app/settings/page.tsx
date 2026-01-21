@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import ImportExport from '@/components/ImportExport';
 import { useAssetData } from '@/hooks/useAssetData';
@@ -118,6 +119,23 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Target Allocation Link */}
+        <Link href="/settings/allocation" className="block mb-6">
+          <div className="card hover:shadow-lg transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                  {t.allocationSettings.title}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t.allocationSettings.subtitle}
+                </p>
+              </div>
+              <div className="text-3xl">📊</div>
+            </div>
+          </div>
+        </Link>
 
         {/* Data Management */}
         <div className="card mb-6">

@@ -41,7 +41,7 @@ export interface CurrentAssets {
   exchangeRate: number;      // Current USD/TWD exchange rate
 }
 
-// Stock price with moving averages
+// Stock price with moving averages and historical data
 export interface StockPrice {
   symbol: string;
   currentPrice: number;
@@ -49,6 +49,7 @@ export interface StockPrice {
   movingAvg1Y: number;
   currency: Currency;
   lastUpdated: string;
+  historicalPrices?: Record<string, number>;  // date string (YYYY-MM-DD) -> price
 }
 
 // Application data structure
@@ -65,6 +66,7 @@ export interface AppSettings {
   snapshotIntervalDays: number;  // Default 30 (monthly)
   defaultCurrency: Currency;
   exchangeRate: number;          // Default USD/TWD rate
+  targetAllocation?: Record<AssetType, number>;  // Target percentage for each asset type (0-100)
 }
 
 // Stock quote from Yahoo Finance
