@@ -13,19 +13,25 @@ export default function AnalysisPage() {
   const { t } = useI18n();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
 
-  // Calculate growth analysis for the most recent period
-  const growthAnalysis = useMemo(() => {
-    if (snapshots.length < 2) return null;
+  // Calculate growth analysis for ALL consecutive snapshot pairs
+  const historicalAnalyses = useMemo(() => {
+    if (snapshots.length < 2) return [];
 
     const sortedSnapshots = [...snapshots].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    // Compare latest snapshot with previous one
-    const latestSnapshot = sortedSnapshots[0];
-    const previousSnapshot = sortedSnapshots[1];
+    // Create analyses for each consecutive pair
+    const analyses = [];
+    for (let i = 0; i < sortedSnapshots.length - 1; i++) {
+      const startSnapshot = sortedSnapshots[i];
+      const endSnapshot = sortedSnapshots[i + 1];
+      const analysis = analyzeGrowthSources(startSnapshot, endSnapshot);
+      analyses.push(analysis);
+    }
 
-    return analyzeGrowthSources(previousSnapshot, latestSnapshot);
+    // Return in reverse chronological order (most recent first)
+    return analyses.reverse();
   }, [snapshots]);
 
   if (!isLoaded) {
@@ -66,7 +72,31 @@ export default function AnalysisPage() {
         </div>
 
         {/* Growth Analysis */}
-        <GrowthAnalysisCard analysis={growthAnalysis} currency={displayCurrency} />
+        {historicalAnalyses.length === 0 ? (
+          <div className="card">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {t.analysis.title}
+            </h2>
+            <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+              <div className="text-center">
+                <p className="text-4xl mb-4">📈</p>
+                <p>{t.common.loading === 'Loading...' ? 'Need at least 2 snapshots to analyze growth' : '需要至少兩個快照才能分析成長來源'}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {historicalAnalyses.map((analysis, index) => (
+              <GrowthAnalysisCard 
+                key={`${analysis.period.start}-${analysis.period.end}`}
+                analysis={analysis} 
+                currency={displayCurrency}
+                showIndex={historicalAnalyses.length > 1}
+                periodNumber={historicalAnalyses.length - index}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

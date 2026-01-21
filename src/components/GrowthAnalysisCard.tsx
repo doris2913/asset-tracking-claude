@@ -8,11 +8,15 @@ import GrowthSourceChart from './GrowthSourceChart';
 interface GrowthAnalysisCardProps {
   analysis: GrowthAnalysis | null;
   currency: Currency;
+  showIndex?: boolean;
+  periodNumber?: number;
 }
 
 export default function GrowthAnalysisCard({
   analysis,
   currency,
+  showIndex = false,
+  periodNumber,
 }: GrowthAnalysisCardProps) {
   const { language } = useI18n();
 
@@ -40,6 +44,11 @@ export default function GrowthAnalysisCard({
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           {language === 'zh-TW' ? '資產成長來源分析' : 'Asset Growth Source Analysis'}
+          {showIndex && periodNumber && (
+            <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+              {language === 'zh-TW' ? `期間 ${periodNumber}` : `Period ${periodNumber}`}
+            </span>
+          )}
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           {formatDate(analysis.period.start)} → {formatDate(analysis.period.end)}
