@@ -266,9 +266,9 @@ export default function DashboardPage() {
     return { snapshotValues, currentValues, ma3M, ma1Y };
   }, [snapshots, displayCurrency, stockPrices, currentAssets.assets, portfolioValues, totalTWD, totalUSD]);
 
-  // Calculate asset breakdown
+  // Calculate asset breakdown (exclude liabilities)
   const assetBreakdown = useMemo(() => {
-    return getAssetSummary(currentAssets.assets, currentAssets.exchangeRate);
+    return getAssetSummary(currentAssets.assets, currentAssets.exchangeRate, true);
   }, [currentAssets]);
 
   // Calculate growth rates
@@ -283,14 +283,27 @@ export default function DashboardPage() {
 
     const latest = sortedSnapshots[0];
     const prevMonth = sortedSnapshots[1];
-    const prevYear = sortedSnapshots.find((s) => {
+    
+    // Find the snapshot closest to 12 months ago for yearly growth
+    const latestDate = parseSnapshotDate(latest.date);
+    let prevYear = null;
+    let minDiff = Infinity;
+    
+    for (const s of sortedSnapshots) {
       const date = parseSnapshotDate(s.date);
-      const latestDate = parseSnapshotDate(latest.date);
       const monthsDiff =
         (latestDate.getFullYear() - date.getFullYear()) * 12 +
         (latestDate.getMonth() - date.getMonth());
-      return monthsDiff >= 11 && monthsDiff <= 13;
-    });
+      
+      // Look for snapshots between 11-13 months ago and find the one closest to 12 months
+      if (monthsDiff >= 11 && monthsDiff <= 13) {
+        const diff = Math.abs(monthsDiff - 12);
+        if (diff < minDiff) {
+          minDiff = diff;
+          prevYear = s;
+        }
+      }
+    }
 
     const latestValue = displayCurrency === 'TWD' ? latest.totalValueTWD : latest.totalValueUSD;
     const prevMonthValue =

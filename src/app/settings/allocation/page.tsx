@@ -12,7 +12,7 @@ const ASSET_TYPES: AssetType[] = [
   'stock_tw',
   'stock_us',
   'us_tbills',
-  'liability',
+  // Note: 'liability' is intentionally excluded from allocation settings
 ];
 
 export default function AllocationSettingsPage() {
