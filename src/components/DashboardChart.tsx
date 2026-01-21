@@ -122,6 +122,20 @@ export default function DashboardChart({
       },
       tooltip: {
         callbacks: {
+          title: function (context: any) {
+            const index = context[0].dataIndex;
+            const dataPoint = snapshotValues[index];
+            if (dataPoint && dataPoint.date) {
+              // Format the date to show full date instead of just month
+              const date = new Date(dataPoint.date);
+              return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
+            }
+            return context[0].label;
+          },
           label: function (context: any) {
             const value = context.raw as number;
             return `${context.dataset.label}: ${formatCurrency(value, currency)}`;
