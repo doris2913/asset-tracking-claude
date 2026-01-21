@@ -123,6 +123,8 @@ export default function DashboardChart({
       tooltip: {
         callbacks: {
           title: function (context: any) {
+            if (!context || context.length === 0) return '';
+            
             const index = context[0].dataIndex;
             const dataPoint = snapshotValues[index];
             if (dataPoint && dataPoint.date) {
