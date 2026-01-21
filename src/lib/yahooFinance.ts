@@ -28,7 +28,7 @@ interface YahooFinanceResponse {
   };
 }
 
-// Stock price with moving averages
+// Stock price with moving averages and historical data
 export interface StockPriceWithMA {
   symbol: string;
   currentPrice: number;
@@ -36,6 +36,7 @@ export interface StockPriceWithMA {
   movingAvg1Y: number;
   currency: Currency;
   lastUpdated: string;
+  historicalPrices: Record<string, number>;  // date string (YYYY-MM-DD) -> price
 }
 
 // Fetch stock quote from Yahoo Finance
@@ -158,10 +159,23 @@ export async function fetchStockQuoteWithMA(symbol: string): Promise<StockPriceW
 
     const result = data.chart.result[0];
     const meta = result.meta;
+    const timestamps = result.timestamp || [];
     const closePrices = result.indicators?.quote?.[0]?.close || [];
 
-    // Filter out null values
-    const validPrices = closePrices.filter((p): p is number => p !== null);
+    // Build historical prices map (date -> price)
+    const historicalPrices: Record<string, number> = {};
+    const validPrices: number[] = [];
+
+    for (let i = 0; i < timestamps.length; i++) {
+      const price = closePrices[i];
+      if (price !== null && price !== undefined) {
+        validPrices.push(price);
+        // Convert timestamp to date string (YYYY-MM-DD)
+        const date = new Date(timestamps[i] * 1000);
+        const dateStr = date.toISOString().split('T')[0];
+        historicalPrices[dateStr] = price;
+      }
+    }
 
     if (validPrices.length === 0) {
       return null;
@@ -191,6 +205,7 @@ export async function fetchStockQuoteWithMA(symbol: string): Promise<StockPriceW
       movingAvg1Y,
       currency,
       lastUpdated: new Date().toISOString(),
+      historicalPrices,
     };
   } catch (error) {
     console.error(`Failed to fetch quote with MA for ${symbol}:`, error);

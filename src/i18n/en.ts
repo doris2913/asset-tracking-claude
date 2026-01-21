@@ -44,6 +44,7 @@ export const en = {
     assetAllocation: 'Asset Allocation',
     assetSummary: 'Asset Summary by Type',
     allocationHistory: 'Asset Allocation History',
+    allocationComparison: 'Current vs Target Allocation',
     type: 'Type',
     count: 'Count',
     value: 'Value',
@@ -170,6 +171,37 @@ export const en = {
   analysis: {
     title: 'Growth Analysis',
     subtitle: 'Analyze asset growth sources',
+  // Allocation Settings
+  allocationSettings: {
+    title: 'Target Asset Allocation',
+    subtitle: 'Set your target allocation percentages for each asset type',
+    targetAllocation: 'Target Allocation',
+    description: 'Set the target percentage for each asset type. Total should equal 100%.',
+    total: 'Total',
+    totalWarning: 'Total allocation should equal 100%',
+    reset: 'Reset',
+    info: 'These target allocations will be used to compare your current portfolio allocation and help you rebalance your assets.',
+  },
+
+  // Allocation Comparison
+  allocationComparison: {
+    current: 'Current',
+    target: 'Target',
+  },
+
+  // Allocation Adjustment
+  allocationAdjustment: {
+    title: 'Rebalancing Recommendations',
+    description: 'Based on your target allocation, here are the recommended adjustments to rebalance your portfolio:',
+    current: 'Current',
+    target: 'Target',
+    difference: 'Difference',
+    action: 'Recommended Action',
+    sell: 'Sell',
+    buy: 'Buy',
+    balanced: 'Portfolio is well balanced!',
+    balancedDesc: 'Your current allocation is close to your target allocation.',
+    note: 'Note: These are suggestions based on percentage targets. Consider transaction costs, tax implications, and market conditions before making changes.',
   },
 };
 
