@@ -5,7 +5,6 @@ import Navigation from '@/components/Navigation';
 import DashboardChart from '@/components/DashboardChart';
 import AssetBreakdownChart from '@/components/AssetBreakdownChart';
 import AllocationHistoryChart from '@/components/AllocationHistoryChart';
-import GrowthAnalysisCard from '@/components/GrowthAnalysisCard';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
@@ -18,7 +17,6 @@ import {
   getLatestSnapshotDate,
   toTWD,
   toUSD,
-  analyzeGrowthSources,
 } from '@/utils/calculations';
 
 // Calculate portfolio value with given price type
@@ -257,21 +255,6 @@ export default function DashboardPage() {
     };
   }, [snapshots, displayCurrency]);
 
-  // Calculate growth analysis for the most recent period
-  const growthAnalysis = useMemo(() => {
-    if (snapshots.length < 2) return null;
-
-    const sortedSnapshots = [...snapshots].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-
-    // Compare latest snapshot with previous one
-    const latestSnapshot = sortedSnapshots[0];
-    const previousSnapshot = sortedSnapshots[1];
-
-    return analyzeGrowthSources(previousSnapshot, latestSnapshot);
-  }, [snapshots]);
-
   // Get latest snapshot info
   const latestSnapshotDate = getLatestSnapshotDate(snapshots);
 
@@ -377,11 +360,6 @@ export default function DashboardPage() {
             </h2>
             <AssetBreakdownChart breakdown={assetBreakdown} currency={displayCurrency} />
           </div>
-        </div>
-
-        {/* Growth Source Analysis */}
-        <div className="mb-8">
-          <GrowthAnalysisCard analysis={growthAnalysis} currency={displayCurrency} />
         </div>
 
         {/* Allocation History Chart */}

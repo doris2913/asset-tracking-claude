@@ -24,6 +24,7 @@ export const zhTW: Translations = {
     assets: '資產',
     details: '明細',
     snapshots: '快照',
+    analysis: '分析',
     migrate: '遷移',
     settings: '設定',
     appName: '資產追蹤器',
@@ -165,5 +166,11 @@ export const zhTW: Translations = {
     currentValue: '目前價值',
     movingAverage3M: '3個月移動平均',
     movingAverage1Y: '1年移動平均',
+  },
+
+  // Analysis
+  analysis: {
+    title: '成長分析',
+    subtitle: '分析資產成長來源',
   },
 };

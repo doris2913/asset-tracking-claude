@@ -22,6 +22,7 @@ export const en = {
     assets: 'Assets',
     details: 'Details',
     snapshots: 'Snapshots',
+    analysis: 'Analysis',
     migrate: 'Migrate',
     settings: 'Settings',
     appName: 'Asset Tracker',
@@ -163,6 +164,12 @@ export const en = {
     currentValue: 'Current Value',
     movingAverage3M: '3-Month Moving Average',
     movingAverage1Y: '1-Year Moving Average',
+  },
+
+  // Analysis
+  analysis: {
+    title: 'Growth Analysis',
+    subtitle: 'Analyze asset growth sources',
   },
 };
 
