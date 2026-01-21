@@ -158,6 +158,7 @@ export const zhTW: Translations = {
 
   // Chart
   chart: {
+    snapshotValue: '快照價值',
     currentValue: '目前價值',
     movingAverage3M: '3個月移動平均',
     movingAverage1Y: '1年移動平均',

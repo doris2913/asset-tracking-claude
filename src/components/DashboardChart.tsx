@@ -29,6 +29,7 @@ ChartJS.register(
 );
 
 interface DashboardChartProps {
+  snapshotValues: ChartDataPoint[];
   currentValues: ChartDataPoint[];
   movingAverage3M: ChartDataPoint[];
   movingAverage1Y: ChartDataPoint[];
@@ -36,6 +37,7 @@ interface DashboardChartProps {
 }
 
 export default function DashboardChart({
+  snapshotValues,
   currentValues,
   movingAverage3M,
   movingAverage1Y,
@@ -44,7 +46,7 @@ export default function DashboardChart({
   const chartRef = useRef<ChartJS<'line'>>(null);
   const { t } = useI18n();
 
-  if (currentValues.length === 0) {
+  if (snapshotValues.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
         <div className="text-center">
@@ -55,20 +57,30 @@ export default function DashboardChart({
     );
   }
 
-  const labels = currentValues.map((point) => point.label || point.date);
+  const labels = snapshotValues.map((point) => point.label || point.date);
 
   const data = {
     labels,
     datasets: [
       {
-        label: t.chart.currentValue,
-        data: currentValues.map((point) => point.value),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        label: t.chart.snapshotValue,
+        data: snapshotValues.map((point) => point.value),
+        borderColor: 'rgb(156, 163, 175)',
+        backgroundColor: 'rgba(156, 163, 175, 0.1)',
         fill: true,
         tension: 0.4,
         pointRadius: 4,
         pointHoverRadius: 6,
+      },
+      {
+        label: t.chart.currentValue,
+        data: currentValues.map((point) => point.value),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'transparent',
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        borderWidth: 2,
       },
       {
         label: t.chart.movingAverage3M,

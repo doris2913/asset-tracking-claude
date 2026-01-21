@@ -156,6 +156,7 @@ export const en = {
 
   // Chart
   chart: {
+    snapshotValue: 'Snapshot Value',
     currentValue: 'Current Value',
     movingAverage3M: '3-Month Moving Average',
     movingAverage1Y: '1-Year Moving Average',
