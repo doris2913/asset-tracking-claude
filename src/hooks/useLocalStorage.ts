@@ -26,17 +26,20 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleStorageChange = (e: StorageEvent | CustomEvent) => {
+    const handleStorageChange = (e: Event) => {
       let eventKey: string | null;
       let newValue: string | null;
       
       if (e instanceof StorageEvent) {
+        // Cross-tab storage event
         eventKey = e.key;
         newValue = e.newValue;
+      } else if (e instanceof CustomEvent) {
+        // Same-tab custom event
+        eventKey = e.detail?.key;
+        newValue = e.detail?.newValue;
       } else {
-        // CustomEvent from same tab
-        eventKey = e.detail.key;
-        newValue = e.detail.newValue;
+        return;
       }
       
       if (eventKey === key) {
@@ -53,8 +56,14 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
       }
     };
 
-    window.addEventListener('storage', handleStorageChange as EventListener);
-    return () => window.removeEventListener('storage', handleStorageChange as EventListener);
+    // Listen to both native storage events (cross-tab) and custom events (same-tab)
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('local-storage-change', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('local-storage-change', handleStorageChange);
+    };
   }, [key, initialValue]);
 
   // Return a wrapped version of useState's setter function that persists to localStorage
@@ -67,8 +76,8 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
 
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
-          // Dispatch a custom event for same-tab updates
-          const event = new CustomEvent('storage', {
+          // Dispatch a custom event for same-tab updates to trigger other hook instances
+          const event = new CustomEvent('local-storage-change', {
             detail: { key, newValue: JSON.stringify(valueToStore) }
           });
           window.dispatchEvent(event);
