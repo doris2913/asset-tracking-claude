@@ -20,15 +20,11 @@ export default function AllocationSettingsPage() {
   const { t } = useI18n();
 
   const [allocations, setAllocations] = useState<Record<AssetType, number>>(() => {
-    const initial: Record<AssetType, number> = {
-      cash_twd: 0,
-      cash_usd: 0,
-      stock_tw: 0,
-      stock_us: 0,
-      liability: 0,
-      us_tbills: 0,
-    };
-    return settings.targetAllocation || initial;
+    const initial: Partial<Record<AssetType, number>> = {};
+    ASSET_TYPES.forEach(type => {
+      initial[type] = 0;
+    });
+    return (settings.targetAllocation || initial) as Record<AssetType, number>;
   });
 
   const [saveStatus, setSaveStatus] = useState<string>('');
@@ -56,15 +52,11 @@ export default function AllocationSettingsPage() {
   };
 
   const handleReset = () => {
-    const reset: Record<AssetType, number> = {
-      cash_twd: 0,
-      cash_usd: 0,
-      stock_tw: 0,
-      stock_us: 0,
-      liability: 0,
-      us_tbills: 0,
-    };
-    setAllocations(reset);
+    const reset: Partial<Record<AssetType, number>> = {};
+    ASSET_TYPES.forEach(type => {
+      reset[type] = 0;
+    });
+    setAllocations(reset as Record<AssetType, number>);
   };
 
   if (!isLoaded) {
