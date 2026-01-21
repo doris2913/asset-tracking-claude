@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -45,6 +45,13 @@ export default function DashboardChart({
 }: DashboardChartProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
   const { t } = useI18n();
+
+  // Force chart update when data changes
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.update();
+    }
+  }, [snapshotValues, currentValues, movingAverage3M, movingAverage1Y, currency]);
 
   if (snapshotValues.length === 0) {
     return (
