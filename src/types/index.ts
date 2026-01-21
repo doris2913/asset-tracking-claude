@@ -41,7 +41,7 @@ export interface CurrentAssets {
   exchangeRate: number;      // Current USD/TWD exchange rate
 }
 
-// Stock price with moving averages
+// Stock price with moving averages and historical data
 export interface StockPrice {
   symbol: string;
   currentPrice: number;
@@ -49,6 +49,7 @@ export interface StockPrice {
   movingAvg1Y: number;
   currency: Currency;
   lastUpdated: string;
+  historicalPrices?: Record<string, number>;  // date string (YYYY-MM-DD) -> price
 }
 
 // Application data structure

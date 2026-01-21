@@ -42,12 +42,19 @@ export default function SnapshotsPage() {
   // Asset types to show in the history table
   const ASSET_TYPES: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'us_tbills', 'liability'];
 
+  // Helper to parse date safely
+  const parseDate = (dateStr: string): Date => {
+    return dateStr.includes('/')
+      ? new Date(dateStr.replace(/\//g, '-'))
+      : new Date(dateStr);
+  };
+
   // Calculate category history data
   const categoryHistory = useMemo(() => {
     if (snapshots.length === 0) return [];
 
     const sortedSnapshots = [...snapshots].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()
     );
 
     return sortedSnapshots.map((snapshot) => {

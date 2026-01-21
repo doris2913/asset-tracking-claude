@@ -63,10 +63,17 @@ export default function AllocationHistoryChart({
     );
   }
 
-  // Sort snapshots by date
-  const sortedSnapshots = [...snapshots].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
+  // Sort snapshots by date (oldest to newest for left-to-right display)
+  const sortedSnapshots = [...snapshots].sort((a, b) => {
+    // Parse dates safely - handle both ISO and YYYY/MM/DD formats
+    const dateA = a.date.includes('/')
+      ? new Date(a.date.replace(/\//g, '-'))
+      : new Date(a.date);
+    const dateB = b.date.includes('/')
+      ? new Date(b.date.replace(/\//g, '-'))
+      : new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   // Calculate allocation for each snapshot
   const calculateAllocation = (snapshot: Snapshot) => {
@@ -100,12 +107,15 @@ export default function AllocationHistoryChart({
   };
 
   // Create labels from snapshot dates
-  const labels = sortedSnapshots.map((snapshot) =>
-    new Date(snapshot.date).toLocaleDateString('en-US', {
+  const labels = sortedSnapshots.map((snapshot) => {
+    const date = snapshot.date.includes('/')
+      ? new Date(snapshot.date.replace(/\//g, '-'))
+      : new Date(snapshot.date);
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-    })
-  );
+    });
+  });
 
   // Create datasets for each asset type
   const datasets = ASSET_TYPES.map((type) => ({

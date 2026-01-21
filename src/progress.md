@@ -22,6 +22,7 @@
 | 3 | Add allocation comparison chart to Dashboard | ✅ Completed | Added stacked bar chart showing allocation history |
 | 4 | Add migrate page to navigation menu | ✅ Completed | Added with 📥 icon |
 | 5 | Add category history table to Snapshots page | ✅ Completed | Shows each asset type value across all snapshots |
+| 6 | Use historical prices for snapshot stock values | ✅ Completed | When syncing prices, updates old snapshots with historical prices |
 
 ## Legend
 - ⏳ Pending

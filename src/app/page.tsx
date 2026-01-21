@@ -102,6 +102,13 @@ export default function DashboardPage() {
     return { current, ma3m, ma1y };
   }, [currentAssets.assets, stockPrices, currentAssets.exchangeRate, displayCurrency]);
 
+  // Helper to parse date safely
+  const parseSnapshotDate = (dateStr: string): Date => {
+    return dateStr.includes('/')
+      ? new Date(dateStr.replace(/\//g, '-'))
+      : new Date(dateStr);
+  };
+
   // Calculate chart data with 4 lines:
   // 1. Snapshot values (actual recorded history)
   // 2. Current price values (recalculated with current prices)
@@ -110,16 +117,16 @@ export default function DashboardPage() {
   const chartData = useMemo(() => {
     const hasStockPrices = Object.keys(stockPrices).length > 0;
 
-    // Get sorted snapshots
+    // Get sorted snapshots (oldest to newest)
     const sortedSnapshots = [...snapshots].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => parseSnapshotDate(a.date).getTime() - parseSnapshotDate(b.date).getTime()
     );
 
     // Snapshot values - actual recorded history
     const snapshotValues = sortedSnapshots.map((snapshot) => ({
       date: snapshot.date,
       value: displayCurrency === 'TWD' ? snapshot.totalValueTWD : snapshot.totalValueUSD,
-      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+      label: parseSnapshotDate(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
     }));
 
     if (!hasStockPrices) {
@@ -176,19 +183,19 @@ export default function DashboardPage() {
     const currentValues = sortedSnapshots.map((snapshot) => ({
       date: snapshot.date,
       value: recalculateSnapshotValue(snapshot, 'current'),
-      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+      label: parseSnapshotDate(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
     }));
 
     const ma3M = sortedSnapshots.map((snapshot) => ({
       date: snapshot.date,
       value: recalculateSnapshotValue(snapshot, 'ma3m'),
-      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+      label: parseSnapshotDate(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
     }));
 
     const ma1Y = sortedSnapshots.map((snapshot) => ({
       date: snapshot.date,
       value: recalculateSnapshotValue(snapshot, 'ma1y'),
-      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+      label: parseSnapshotDate(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
     }));
 
     // Add current portfolio as the latest point
@@ -226,14 +233,14 @@ export default function DashboardPage() {
     }
 
     const sortedSnapshots = [...snapshots].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => parseSnapshotDate(b.date).getTime() - parseSnapshotDate(a.date).getTime()
     );
 
     const latest = sortedSnapshots[0];
     const prevMonth = sortedSnapshots[1];
     const prevYear = sortedSnapshots.find((s) => {
-      const date = new Date(s.date);
-      const latestDate = new Date(latest.date);
+      const date = parseSnapshotDate(s.date);
+      const latestDate = parseSnapshotDate(latest.date);
       const monthsDiff =
         (latestDate.getFullYear() - date.getFullYear()) * 12 +
         (latestDate.getMonth() - date.getMonth());
