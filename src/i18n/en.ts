@@ -20,7 +20,9 @@ export const en = {
   nav: {
     dashboard: 'Dashboard',
     assets: 'Assets',
+    details: 'Details',
     snapshots: 'Snapshots',
+    migrate: 'Migrate',
     settings: 'Settings',
     appName: 'Asset Tracker',
   },
@@ -40,6 +42,7 @@ export const en = {
     assetGrowthChart: 'Asset Growth Over Time',
     assetAllocation: 'Asset Allocation',
     assetSummary: 'Asset Summary by Type',
+    allocationHistory: 'Asset Allocation History',
     type: 'Type',
     count: 'Count',
     value: 'Value',
@@ -87,7 +90,7 @@ export const en = {
     cash_usd: 'Cash (USD)',
     stock_tw: 'TW Stocks',
     stock_us: 'US Stocks',
-    rent: 'Rent/Property',
+    liability: 'Liability',
     us_tbills: 'US T-Bills',
   },
 
@@ -113,6 +116,7 @@ export const en = {
     snapshotDate: 'Snapshot',
     assets: 'Assets',
     rate: 'Rate',
+    categoryHistory: 'Category History',
   },
 
   // Settings
@@ -155,6 +159,7 @@ export const en = {
 
   // Chart
   chart: {
+    snapshotValue: 'Snapshot Value',
     currentValue: 'Current Value',
     movingAverage3M: '3-Month Moving Average',
     movingAverage1Y: '1-Year Moving Average',

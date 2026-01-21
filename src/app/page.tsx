@@ -4,23 +4,69 @@ import { useState, useMemo } from 'react';
 import Navigation from '@/components/Navigation';
 import DashboardChart from '@/components/DashboardChart';
 import AssetBreakdownChart from '@/components/AssetBreakdownChart';
+import AllocationHistoryChart from '@/components/AllocationHistoryChart';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Currency } from '@/types';
+import { Currency, StockPrice, Asset } from '@/types';
 import {
   snapshotsToChartData,
-  calculateMovingAverage,
   getAssetSummary,
   formatCurrency,
   calculateGrowthRate,
   getLatestSnapshotDate,
+  toTWD,
+  toUSD,
 } from '@/utils/calculations';
+
+// Calculate portfolio value with given price type
+function calculatePortfolioValue(
+  assets: Asset[],
+  stockPrices: Record<string, StockPrice>,
+  exchangeRate: number,
+  priceType: 'current' | 'ma3m' | 'ma1y',
+  currency: Currency
+): number {
+  let total = 0;
+
+  for (const asset of assets) {
+    let assetValue = asset.value;
+
+    // For stocks with price data, recalculate using the specified price type
+    if (asset.symbol && asset.shares && stockPrices[asset.symbol]) {
+      const priceData = stockPrices[asset.symbol];
+      let price: number;
+
+      switch (priceType) {
+        case 'ma3m':
+          price = priceData.movingAvg3M;
+          break;
+        case 'ma1y':
+          price = priceData.movingAvg1Y;
+          break;
+        default:
+          price = priceData.currentPrice;
+      }
+
+      assetValue = asset.shares * price;
+    }
+
+    // Convert to display currency
+    if (currency === 'TWD') {
+      total += toTWD(assetValue, asset.currency, exchangeRate);
+    } else {
+      total += toUSD(assetValue, asset.currency, exchangeRate);
+    }
+  }
+
+  return total;
+}
 
 export default function DashboardPage() {
   const {
     currentAssets,
     snapshots,
+    stockPrices,
     totalTWD,
     totalUSD,
     isLoaded,
@@ -29,16 +75,144 @@ export default function DashboardPage() {
   const { t } = useI18n();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
 
-  // Calculate chart data
-  const chartData = useMemo(() => {
-    const currentValues = snapshotsToChartData(snapshots, displayCurrency);
-    // 3-month MA (assuming monthly snapshots, window = 3)
-    const ma3M = calculateMovingAverage(currentValues, 3);
-    // 1-year MA (assuming monthly snapshots, window = 12)
-    const ma1Y = calculateMovingAverage(currentValues, 12);
+  // Calculate current portfolio values with different price bases
+  const portfolioValues = useMemo(() => {
+    const current = calculatePortfolioValue(
+      currentAssets.assets,
+      stockPrices,
+      currentAssets.exchangeRate,
+      'current',
+      displayCurrency
+    );
+    const ma3m = calculatePortfolioValue(
+      currentAssets.assets,
+      stockPrices,
+      currentAssets.exchangeRate,
+      'ma3m',
+      displayCurrency
+    );
+    const ma1y = calculatePortfolioValue(
+      currentAssets.assets,
+      stockPrices,
+      currentAssets.exchangeRate,
+      'ma1y',
+      displayCurrency
+    );
 
-    return { currentValues, ma3M, ma1Y };
-  }, [snapshots, displayCurrency]);
+    return { current, ma3m, ma1y };
+  }, [currentAssets.assets, stockPrices, currentAssets.exchangeRate, displayCurrency]);
+
+  // Calculate chart data with 4 lines:
+  // 1. Snapshot values (actual recorded history)
+  // 2. Current price values (recalculated with current prices)
+  // 3. 3M MA values (recalculated with 3M MA prices)
+  // 4. 1Y MA values (recalculated with 1Y MA prices)
+  const chartData = useMemo(() => {
+    const hasStockPrices = Object.keys(stockPrices).length > 0;
+
+    // Get sorted snapshots
+    const sortedSnapshots = [...snapshots].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    // Snapshot values - actual recorded history
+    const snapshotValues = sortedSnapshots.map((snapshot) => ({
+      date: snapshot.date,
+      value: displayCurrency === 'TWD' ? snapshot.totalValueTWD : snapshot.totalValueUSD,
+      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    }));
+
+    if (!hasStockPrices) {
+      // If no stock prices, all lines show snapshot values
+      return {
+        snapshotValues,
+        currentValues: snapshotValues,
+        ma3M: snapshotValues,
+        ma1Y: snapshotValues
+      };
+    }
+
+    // Recalculate each snapshot's value using current stock prices and MAs
+    const recalculateSnapshotValue = (
+      snapshot: typeof sortedSnapshots[0],
+      priceType: 'current' | 'ma3m' | 'ma1y'
+    ): number => {
+      let total = 0;
+
+      for (const asset of snapshot.assets) {
+        let assetValue = asset.value;
+
+        // For stocks with price data, recalculate using the specified price type
+        if (asset.symbol && asset.shares && stockPrices[asset.symbol]) {
+          const priceData = stockPrices[asset.symbol];
+          let price: number;
+
+          switch (priceType) {
+            case 'ma3m':
+              price = priceData.movingAvg3M;
+              break;
+            case 'ma1y':
+              price = priceData.movingAvg1Y;
+              break;
+            default:
+              price = priceData.currentPrice;
+          }
+
+          assetValue = asset.shares * price;
+        }
+
+        // Convert to display currency
+        if (displayCurrency === 'TWD') {
+          total += toTWD(assetValue, asset.currency, snapshot.exchangeRate);
+        } else {
+          total += toUSD(assetValue, asset.currency, snapshot.exchangeRate);
+        }
+      }
+
+      return total;
+    };
+
+    // Calculate values for each snapshot using different price bases
+    const currentValues = sortedSnapshots.map((snapshot) => ({
+      date: snapshot.date,
+      value: recalculateSnapshotValue(snapshot, 'current'),
+      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    }));
+
+    const ma3M = sortedSnapshots.map((snapshot) => ({
+      date: snapshot.date,
+      value: recalculateSnapshotValue(snapshot, 'ma3m'),
+      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    }));
+
+    const ma1Y = sortedSnapshots.map((snapshot) => ({
+      date: snapshot.date,
+      value: recalculateSnapshotValue(snapshot, 'ma1y'),
+      label: new Date(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    }));
+
+    // Add current portfolio as the latest point
+    const today = new Date().toISOString().split('T')[0];
+    const todayLabel = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+    // Only add today's point if it's different from the last snapshot
+    const lastSnapshotDate = sortedSnapshots.length > 0
+      ? sortedSnapshots[sortedSnapshots.length - 1].date.split('T')[0]
+      : null;
+
+    if (lastSnapshotDate !== today && currentAssets.assets.length > 0) {
+      currentValues.push({ date: today, value: portfolioValues.current, label: todayLabel });
+      ma3M.push({ date: today, value: portfolioValues.ma3m, label: todayLabel });
+      ma1Y.push({ date: today, value: portfolioValues.ma1y, label: todayLabel });
+      snapshotValues.push({
+        date: today,
+        value: displayCurrency === 'TWD' ? totalTWD : totalUSD,
+        label: todayLabel
+      });
+    }
+
+    return { snapshotValues, currentValues, ma3M, ma1Y };
+  }, [snapshots, displayCurrency, stockPrices, currentAssets.assets, portfolioValues, totalTWD, totalUSD]);
 
   // Calculate asset breakdown
   const assetBreakdown = useMemo(() => {
@@ -173,6 +347,7 @@ export default function DashboardPage() {
               {t.dashboard.assetGrowthChart}
             </h2>
             <DashboardChart
+              snapshotValues={chartData.snapshotValues}
               currentValues={chartData.currentValues}
               movingAverage3M={chartData.ma3M}
               movingAverage1Y={chartData.ma1Y}
@@ -186,6 +361,16 @@ export default function DashboardPage() {
             <AssetBreakdownChart breakdown={assetBreakdown} currency={displayCurrency} />
           </div>
         </div>
+
+        {/* Allocation History Chart */}
+        {snapshots.length > 0 && (
+          <div className="card mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {t.dashboard.allocationHistory}
+            </h2>
+            <AllocationHistoryChart snapshots={snapshots} currency={displayCurrency} />
+          </div>
+        )}
 
         {/* Asset Type Summary Table */}
         {assetBreakdown.length > 0 && (

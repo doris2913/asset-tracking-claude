@@ -23,7 +23,7 @@ const ASSET_TYPE_COLORS: Record<string, string> = {
   cash_usd: '#16a34a',
   stock_tw: '#3b82f6',
   stock_us: '#6366f1',
-  rent: '#f59e0b',
+  liability: '#ef4444',
   us_tbills: '#8b5cf6',
 };
 

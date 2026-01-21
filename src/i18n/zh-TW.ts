@@ -22,7 +22,9 @@ export const zhTW: Translations = {
   nav: {
     dashboard: '儀表板',
     assets: '資產',
+    details: '明細',
     snapshots: '快照',
+    migrate: '遷移',
     settings: '設定',
     appName: '資產追蹤器',
   },
@@ -42,6 +44,7 @@ export const zhTW: Translations = {
     assetGrowthChart: '資產成長趨勢',
     assetAllocation: '資產配置',
     assetSummary: '各類資產總覽',
+    allocationHistory: '資產配置歷史',
     type: '類型',
     count: '數量',
     value: '價值',
@@ -89,7 +92,7 @@ export const zhTW: Translations = {
     cash_usd: '現金（美元）',
     stock_tw: '台股',
     stock_us: '美股',
-    rent: '租金/房產',
+    liability: '負債',
     us_tbills: '美國國庫券',
   },
 
@@ -115,6 +118,7 @@ export const zhTW: Translations = {
     snapshotDate: '快照',
     assets: '資產',
     rate: '匯率',
+    categoryHistory: '類別歷史',
   },
 
   // Settings
@@ -157,6 +161,7 @@ export const zhTW: Translations = {
 
   // Chart
   chart: {
+    snapshotValue: '快照價值',
     currentValue: '目前價值',
     movingAverage3M: '3個月移動平均',
     movingAverage1Y: '1年移動平均',

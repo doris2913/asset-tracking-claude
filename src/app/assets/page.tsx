@@ -6,7 +6,7 @@ import AssetList from '@/components/AssetList';
 import AssetForm from '@/components/AssetForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
-import { useStockPrices, fetchExchangeRate } from '@/lib/yahooFinance';
+import { useStockPrices, fetchExchangeRate, StockPriceWithMA } from '@/lib/yahooFinance';
 import { useI18n } from '@/i18n';
 import { Asset } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
@@ -16,16 +16,18 @@ export default function AssetsPage() {
     currentAssets,
     totalTWD,
     totalUSD,
+    stockPrices,
     addAsset,
     updateAsset,
     deleteAsset,
     updateStockPrices,
+    updateStockPricesWithMA,
     updateExchangeRate,
     isLoaded,
   } = useAssetData();
 
   const { t, language } = useI18n();
-  const { fetchPrices } = useStockPrices();
+  const { fetchPrices, fetchPricesWithMA } = useStockPrices();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
@@ -53,7 +55,7 @@ export default function AssetsPage() {
 
   const handleUpdateStockPrices = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價...' : 'Fetching stock prices...');
+    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價與移動平均...' : 'Fetching stock prices with moving averages...');
 
     try {
       const stockAssets = currentAssets.assets.filter(
@@ -66,14 +68,14 @@ export default function AssetsPage() {
       }
 
       const symbols = stockAssets.map((a) => a.symbol!);
-      const prices = await fetchPrices(symbols);
+      const prices = await fetchPricesWithMA(symbols);
 
       if (Object.keys(prices).length > 0) {
-        updateStockPrices(prices);
+        updateStockPricesWithMA(prices);
         setPriceUpdateStatus(
           language === 'zh-TW'
-            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格！`
-            : `Updated ${Object.keys(prices).length} stock price(s) successfully!`
+            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
+            : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
         );
       } else {
         setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
