@@ -22,6 +22,50 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
     setIsInitialized(true);
   }, [key]);
 
+  // Listen for storage events (updates from other tabs/windows and same tab)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = (e: Event) => {
+      let eventKey: string | null;
+      let newValue: string | null;
+      
+      if (e instanceof StorageEvent) {
+        // Cross-tab storage event
+        eventKey = e.key;
+        newValue = e.newValue;
+      } else if (e instanceof CustomEvent) {
+        // Same-tab custom event
+        eventKey = e.detail?.key;
+        newValue = e.detail?.newValue;
+      } else {
+        return;
+      }
+      
+      if (eventKey === key) {
+        try {
+          if (newValue === null) {
+            // Item was removed, reset to initial value
+            setStoredValue(initialValue);
+          } else {
+            setStoredValue(JSON.parse(newValue));
+          }
+        } catch (error) {
+          console.error(`Error parsing storage event for key "${key}":`, error);
+        }
+      }
+    };
+
+    // Listen to both native storage events (cross-tab) and custom events (same-tab)
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('local-storage-change', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('local-storage-change', handleStorageChange);
+    };
+  }, [key, initialValue]);
+
   // Return a wrapped version of useState's setter function that persists to localStorage
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
@@ -32,6 +76,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
 
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          // Dispatch a custom event for same-tab updates to trigger other hook instances
+          const event = new CustomEvent('local-storage-change', {
+            detail: { key, newValue: JSON.stringify(valueToStore) }
+          });
+          window.dispatchEvent(event);
         }
       } catch (error) {
         console.error(`Error setting localStorage key "${key}":`, error);

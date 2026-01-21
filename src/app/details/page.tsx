@@ -22,6 +22,8 @@ export default function DetailsPage() {
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
   const [sortBy, setSortBy] = useState<'name' | 'type' | 'value'>('type');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedTypes, setSelectedTypes] = useState<Set<AssetType>>(new Set());
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const labels = {
     title: language === 'zh-TW' ? '資產明細' : 'Asset Details',
@@ -37,10 +39,58 @@ export default function DetailsPage() {
     sortBy: language === 'zh-TW' ? '排序' : 'Sort by',
     noAssets: language === 'zh-TW' ? '尚無資產' : 'No assets yet',
     total: language === 'zh-TW' ? '總計' : 'Total',
+    filter: language === 'zh-TW' ? '篩選' : 'Filter',
+    filterByType: language === 'zh-TW' ? '依類型篩選' : 'Filter by Type',
+    search: language === 'zh-TW' ? '搜尋' : 'Search',
+    searchPlaceholder: language === 'zh-TW' ? '搜尋資產名稱或代號...' : 'Search by name or symbol...',
+    clearFilters: language === 'zh-TW' ? '清除篩選' : 'Clear Filters',
+    noMatchingAssets: language === 'zh-TW' ? '沒有符合篩選條件的資產' : 'No assets match the filters',
   };
 
+  // Get unique asset types from current assets
+  const availableTypes = useMemo(() => {
+    const types = new Set<AssetType>();
+    currentAssets.assets.forEach(asset => types.add(asset.type));
+    return Array.from(types).sort();
+  }, [currentAssets.assets]);
+
+  const toggleType = (type: AssetType) => {
+    setSelectedTypes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(type)) {
+        newSet.delete(type);
+      } else {
+        newSet.add(type);
+      }
+      return newSet;
+    });
+  };
+
+  const clearFilters = () => {
+    setSelectedTypes(new Set());
+    setSearchQuery('');
+  };
+
+  const hasActiveFilters = selectedTypes.size > 0 || searchQuery.length > 0;
+
   const sortedAssets = useMemo(() => {
-    const assets = [...currentAssets.assets];
+    let assets = [...currentAssets.assets];
+    
+    // Apply type filter
+    if (selectedTypes.size > 0) {
+      assets = assets.filter(asset => selectedTypes.has(asset.type));
+    }
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      assets = assets.filter(asset => 
+        asset.name.toLowerCase().includes(query) ||
+        (asset.symbol && asset.symbol.toLowerCase().includes(query))
+      );
+    }
+    
+    // Sort
     return assets.sort((a, b) => {
       let comparison = 0;
 
@@ -66,7 +116,20 @@ export default function DetailsPage() {
 
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [currentAssets.assets, currentAssets.exchangeRate, sortBy, sortOrder]);
+  }, [currentAssets.assets, currentAssets.exchangeRate, sortBy, sortOrder, selectedTypes, searchQuery]);
+
+  // Calculate filtered totals
+  const filteredTotalTWD = useMemo(() => {
+    return sortedAssets.reduce((total, asset) => {
+      return total + toTWD(asset.value, asset.currency, currentAssets.exchangeRate);
+    }, 0);
+  }, [sortedAssets, currentAssets.exchangeRate]);
+
+  const filteredTotalUSD = useMemo(() => {
+    return sortedAssets.reduce((total, asset) => {
+      return total + toUSD(asset.value, asset.currency, currentAssets.exchangeRate);
+    }, 0);
+  }, [sortedAssets, currentAssets.exchangeRate]);
 
   const getDisplayValue = (value: number, currency: Currency) => {
     if (displayCurrency === 'TWD') {
@@ -82,8 +145,8 @@ export default function DetailsPage() {
 
   const getPercentage = (value: number, currency: Currency) => {
     const valueTWD = toTWD(value, currency, currentAssets.exchangeRate);
-    if (totalTWD === 0) return 0;
-    return (valueTWD / totalTWD) * 100;
+    if (filteredTotalTWD === 0) return 0;
+    return (valueTWD / filteredTotalTWD) * 100;
   };
 
   const handleSort = (newSortBy: 'name' | 'type' | 'value') => {
@@ -136,13 +199,13 @@ export default function DetailsPage() {
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{labels.total} (TWD)</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalTWD, 'TWD')}
+              {formatCurrency(filteredTotalTWD, 'TWD')}
             </p>
           </div>
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{labels.total} (USD)</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalUSD, 'USD')}
+              {formatCurrency(filteredTotalUSD, 'USD')}
             </p>
           </div>
           <div className="card">
@@ -154,17 +217,70 @@ export default function DetailsPage() {
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{t.nav.assets}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {currentAssets.assets.length}
+              {sortedAssets.length}
             </p>
           </div>
         </div>
 
+        {/* Filters */}
+        <div className="card mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {labels.filter}
+            </h2>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {labels.clearFilters}
+              </button>
+            )}
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder={labels.searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="input w-full"
+            />
+          </div>
+
+          {/* Type Filters */}
+          {availableTypes.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {labels.filterByType}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {availableTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => toggleType(type)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      selectedTypes.has(type)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <span className="mr-1">{ASSET_TYPE_ICONS[type]}</span>
+                    {t.assetTypes[type]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Asset Table */}
         <div className="card overflow-hidden">
-          {currentAssets.assets.length === 0 ? (
+          {sortedAssets.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <p className="text-4xl mb-4">📦</p>
-              <p>{labels.noAssets}</p>
+              <p>{hasActiveFilters ? labels.noMatchingAssets : labels.noAssets}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -259,7 +375,7 @@ export default function DetailsPage() {
                       {labels.total}
                     </td>
                     <td className="py-3 px-4 text-right font-bold text-lg text-gray-900 dark:text-white">
-                      {formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
+                      {formatCurrency(displayCurrency === 'TWD' ? filteredTotalTWD : filteredTotalUSD, displayCurrency)}
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-gray-600 dark:text-gray-400">
                       100%

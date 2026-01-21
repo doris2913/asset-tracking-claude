@@ -30,8 +30,13 @@ export function calculateTotalUSD(assets: Asset[], exchangeRate: number): number
 }
 
 // Get asset summary by type
-export function getAssetSummary(assets: Asset[], exchangeRate: number): AssetSummary[] {
-  const totalTWD = calculateTotalTWD(assets, exchangeRate);
+export function getAssetSummary(assets: Asset[], exchangeRate: number, excludeLiabilities: boolean = false): AssetSummary[] {
+  // Filter out liabilities if requested
+  const filteredAssets = excludeLiabilities 
+    ? assets.filter(asset => asset.type !== 'liability')
+    : assets;
+  
+  const totalTWD = calculateTotalTWD(filteredAssets, exchangeRate);
   const summaryMap: Map<AssetType, AssetSummary> = new Map();
 
   // Initialize all types
@@ -46,7 +51,7 @@ export function getAssetSummary(assets: Asset[], exchangeRate: number): AssetSum
   });
 
   // Calculate totals per type
-  assets.forEach((asset) => {
+  filteredAssets.forEach((asset) => {
     const summary = summaryMap.get(asset.type)!;
     const valueTWD = toTWD(asset.value, asset.currency, exchangeRate);
     const valueUSD = toUSD(asset.value, asset.currency, exchangeRate);

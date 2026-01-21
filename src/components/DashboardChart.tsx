@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -45,6 +45,13 @@ export default function DashboardChart({
 }: DashboardChartProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
   const { t } = useI18n();
+
+  // Force chart update when data changes
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.update();
+    }
+  }, [snapshotValues, currentValues, movingAverage3M, movingAverage1Y, currency]);
 
   if (snapshotValues.length === 0) {
     return (
@@ -122,6 +129,22 @@ export default function DashboardChart({
       },
       tooltip: {
         callbacks: {
+          title: function (context: any) {
+            if (!context || context.length === 0) return '';
+            
+            const index = context[0].dataIndex;
+            const dataPoint = snapshotValues[index];
+            if (dataPoint && dataPoint.date) {
+              // Format the date to show full date instead of just month
+              const date = new Date(dataPoint.date);
+              return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
+            }
+            return context[0].label;
+          },
           label: function (context: any) {
             const value = context.raw as number;
             return `${context.dataset.label}: ${formatCurrency(value, currency)}`;
