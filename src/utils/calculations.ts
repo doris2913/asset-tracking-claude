@@ -221,3 +221,125 @@ export function parseStockSymbol(symbol: string): { isTW: boolean; cleanSymbol: 
 
   return { isTW: false, cleanSymbol: symbol };
 }
+
+// Analyze growth sources between two snapshots
+export function analyzeGrowthSources(
+  startSnapshot: Snapshot,
+  endSnapshot: Snapshot
+): import('@/types').GrowthAnalysis {
+  const startDate = startSnapshot.date;
+  const endDate = endSnapshot.date;
+  
+  // Calculate total growth
+  const startValueTWD = startSnapshot.totalValueTWD;
+  const endValueTWD = endSnapshot.totalValueTWD;
+  const totalGrowthTWD = endValueTWD - startValueTWD;
+  
+  const startValueUSD = startSnapshot.totalValueUSD;
+  const endValueUSD = endSnapshot.totalValueUSD;
+  const totalGrowthUSD = endValueUSD - startValueUSD;
+  
+  // Track stock contributions
+  const stockContributions: Array<{
+    symbol: string;
+    name: string;
+    priceReturn: number;
+    quantityChange: number;
+    totalContribution: number;
+  }> = [];
+  
+  let totalInvestmentReturnsTWD = 0;
+  let totalInvestmentReturnsUSD = 0;
+  
+  // Create maps for easier lookup
+  const startAssetsMap = new Map(startSnapshot.assets.map(a => [a.id, a]));
+  const endAssetsMap = new Map(endSnapshot.assets.map(a => [a.id, a]));
+  
+  // Analyze stock assets that exist in both snapshots
+  startSnapshot.assets.forEach(startAsset => {
+    if ((startAsset.type === 'stock_tw' || startAsset.type === 'stock_us') && 
+        startAsset.symbol && startAsset.shares) {
+      
+      // Find matching asset in end snapshot (by symbol, not ID)
+      const endAsset = endSnapshot.assets.find(a => 
+        a.symbol === startAsset.symbol && 
+        (a.type === 'stock_tw' || a.type === 'stock_us')
+      );
+      
+      if (endAsset && endAsset.shares) {
+        // Calculate price per share at each time
+        const startPrice = startAsset.value / startAsset.shares;
+        const endPrice = endAsset.value / endAsset.shares;
+        
+        // Investment return = price change on original shares
+        const priceReturn = (endPrice - startPrice) * startAsset.shares;
+        
+        // Quantity change contribution (new capital)
+        const sharesDiff = endAsset.shares - startAsset.shares;
+        const quantityChange = sharesDiff * endPrice;
+        
+        // Convert to TWD for aggregation
+        const priceReturnTWD = toTWD(priceReturn, startAsset.currency, startSnapshot.exchangeRate);
+        const priceReturnUSD = toUSD(priceReturn, startAsset.currency, startSnapshot.exchangeRate);
+        
+        totalInvestmentReturnsTWD += priceReturnTWD;
+        totalInvestmentReturnsUSD += priceReturnUSD;
+        
+        // Store contribution details
+        if (Math.abs(priceReturn) > 0.01 || Math.abs(quantityChange) > 0.01) {
+          stockContributions.push({
+            symbol: startAsset.symbol,
+            name: startAsset.name,
+            priceReturn: priceReturnTWD,
+            quantityChange: toTWD(quantityChange, startAsset.currency, startSnapshot.exchangeRate),
+            totalContribution: priceReturnTWD + toTWD(quantityChange, startAsset.currency, startSnapshot.exchangeRate),
+          });
+        }
+      }
+    }
+  });
+  
+  // Calculate new capital as remaining growth
+  const newCapitalTWD = totalGrowthTWD - totalInvestmentReturnsTWD;
+  const newCapitalUSD = totalGrowthUSD - totalInvestmentReturnsUSD;
+  
+  // Calculate percentages
+  const getPercentages = (newCapital: number, investmentReturns: number, totalGrowth: number) => {
+    if (Math.abs(totalGrowth) < 0.01) {
+      return { newCapitalPercentage: 0, investmentReturnsPercentage: 0 };
+    }
+    return {
+      newCapitalPercentage: (newCapital / totalGrowth) * 100,
+      investmentReturnsPercentage: (investmentReturns / totalGrowth) * 100,
+    };
+  };
+  
+  const percentagesTWD = getPercentages(newCapitalTWD, totalInvestmentReturnsTWD, totalGrowthTWD);
+  const percentagesUSD = getPercentages(newCapitalUSD, totalInvestmentReturnsUSD, totalGrowthUSD);
+  
+  return {
+    period: {
+      start: startDate,
+      end: endDate,
+    },
+    startValue: startValueTWD,
+    endValue: endValueTWD,
+    growthTWD: {
+      newCapital: newCapitalTWD,
+      investmentReturns: totalInvestmentReturnsTWD,
+      totalGrowth: totalGrowthTWD,
+      newCapitalPercentage: percentagesTWD.newCapitalPercentage,
+      investmentReturnsPercentage: percentagesTWD.investmentReturnsPercentage,
+    },
+    growthUSD: {
+      newCapital: newCapitalUSD,
+      investmentReturns: totalInvestmentReturnsUSD,
+      totalGrowth: totalGrowthUSD,
+      newCapitalPercentage: percentagesUSD.newCapitalPercentage,
+      investmentReturnsPercentage: percentagesUSD.investmentReturnsPercentage,
+    },
+    stockContributions: stockContributions.sort((a, b) => 
+      Math.abs(b.totalContribution) - Math.abs(a.totalContribution)
+    ),
+  };
+}

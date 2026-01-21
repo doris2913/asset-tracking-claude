@@ -96,6 +96,34 @@ export interface AssetSummary {
 // Moving average types
 export type MovingAverageType = '3M' | '1Y';
 
+// Growth source breakdown
+export interface GrowthSource {
+  newCapital: number;          // New money added (salary, deposits, etc.)
+  investmentReturns: number;   // Returns from stock appreciation
+  totalGrowth: number;         // Total asset growth
+  newCapitalPercentage: number;
+  investmentReturnsPercentage: number;
+}
+
+// Detailed growth analysis
+export interface GrowthAnalysis {
+  period: {
+    start: string;             // Start date (ISO string)
+    end: string;               // End date (ISO string)
+  };
+  startValue: number;          // Starting total value
+  endValue: number;            // Ending total value
+  growthTWD: GrowthSource;     // Growth breakdown in TWD
+  growthUSD: GrowthSource;     // Growth breakdown in USD
+  stockContributions: Array<{  // Individual stock contributions
+    symbol: string;
+    name: string;
+    priceReturn: number;       // Return from price change
+    quantityChange: number;    // Capital from share changes
+    totalContribution: number;
+  }>;
+}
+
 // Dashboard data
 export interface DashboardData {
   currentTotal: ChartDataPoint[];
