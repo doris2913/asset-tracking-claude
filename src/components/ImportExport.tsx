@@ -9,21 +9,28 @@ interface ImportExportProps {
   onClear: () => void;
 }
 
-// Convert Google Drive sharing URL to direct download URL
-function convertGoogleDriveUrl(url: string): string {
-  // Pattern 1: https://drive.google.com/file/d/{fileId}/view?usp=sharing
-  const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (fileIdMatch) {
-    return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+// Convert sharing URLs to direct download URLs for supported services
+function convertToDirectUrl(url: string): string {
+  // Dropbox: change www.dropbox.com to dl.dropboxusercontent.com and ensure dl=1
+  if (url.includes('dropbox.com')) {
+    let directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    // Remove dl=0 if present and ensure dl=1
+    directUrl = directUrl.replace(/[?&]dl=0/, '');
+    if (!directUrl.includes('dl=1')) {
+      directUrl += (directUrl.includes('?') ? '&' : '?') + 'dl=1';
+    }
+    return directUrl;
   }
 
-  // Pattern 2: https://drive.google.com/open?id={fileId}
-  const openIdMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (openIdMatch) {
-    return `https://drive.google.com/uc?export=download&id=${openIdMatch[1]}`;
+  // GitHub Gist: convert to raw URL if needed
+  if (url.includes('gist.github.com') && !url.includes('gist.githubusercontent.com')) {
+    // Convert gist.github.com/user/id to raw format
+    const gistMatch = url.match(/gist\.github\.com\/([^/]+)\/([^/]+)/);
+    if (gistMatch) {
+      return `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
+    }
   }
 
-  // Not a Google Drive URL, return as-is
   return url;
 }
 
@@ -115,8 +122,8 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
     setIsLoadingUrl(true);
 
     try {
-      // Convert Google Drive URLs to direct download format
-      const downloadUrl = convertGoogleDriveUrl(trimmedUrl);
+      // Convert sharing URLs to direct download format
+      const downloadUrl = convertToDirectUrl(trimmedUrl);
 
       const response = await fetch(downloadUrl);
       if (!response.ok) {

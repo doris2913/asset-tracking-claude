@@ -144,7 +144,7 @@ export const en = {
     clearDataConfirm: 'Are you sure you want to clear all data? This action cannot be undone. Please export your data first if you want to keep a backup.',
     dataNote: 'Export your data to keep a backup. Import previously exported data to restore. Data is stored locally in your browser.',
     loadFromUrl: 'Load from URL',
-    urlPlaceholder: 'Enter JSON file URL (supports Google Drive sharing links)',
+    urlPlaceholder: 'Enter JSON file URL (GitHub Raw, Gist, Dropbox)',
     loadingFromUrl: 'Loading...',
     urlLoadFailed: 'Failed to load data from URL.',
     invalidUrl: 'Please enter a valid URL.',
