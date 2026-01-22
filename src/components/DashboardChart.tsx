@@ -58,6 +58,8 @@ export default function DashboardChart({
   }
 
   const labels = snapshotValues.map((point) => point.label || point.date);
+  // Store full dates for tooltip display
+  const fullDates = snapshotValues.map((point) => point.date);
 
   const data = {
     labels,
@@ -122,6 +124,19 @@ export default function DashboardChart({
       },
       tooltip: {
         callbacks: {
+          title: function (context: any) {
+            const index = context[0].dataIndex;
+            const date = fullDates[index];
+            if (date) {
+              const d = new Date(date);
+              return d.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+            }
+            return context[0].label;
+          },
           label: function (context: any) {
             const value = context.raw as number;
             return `${context.dataset.label}: ${formatCurrency(value, currency)}`;

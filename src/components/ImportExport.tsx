@@ -9,11 +9,38 @@ interface ImportExportProps {
   onClear: () => void;
 }
 
+// Convert sharing URLs to direct download URLs for supported services
+function convertToDirectUrl(url: string): string {
+  // Dropbox: change www.dropbox.com to dl.dropboxusercontent.com and ensure dl=1
+  if (url.includes('dropbox.com')) {
+    let directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+    // Remove dl=0 if present and ensure dl=1
+    directUrl = directUrl.replace(/[?&]dl=0/, '');
+    if (!directUrl.includes('dl=1')) {
+      directUrl += (directUrl.includes('?') ? '&' : '?') + 'dl=1';
+    }
+    return directUrl;
+  }
+
+  // GitHub Gist: convert to raw URL if needed
+  if (url.includes('gist.github.com') && !url.includes('gist.githubusercontent.com')) {
+    // Convert gist.github.com/user/id to raw format
+    const gistMatch = url.match(/gist\.github\.com\/([^/]+)\/([^/]+)/);
+    if (gistMatch) {
+      return `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
+    }
+  }
+
+  return url;
+}
+
 export default function ImportExport({ onExport, onImport, onClear }: ImportExportProps) {
   const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [urlInput, setUrlInput] = useState('');
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false);
 
   const handleExport = () => {
     const data = onExport();
@@ -73,6 +100,57 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
     }
   };
 
+  const handleLoadFromUrl = async () => {
+    const trimmedUrl = urlInput.trim();
+    if (!trimmedUrl) {
+      setImportStatus('error');
+      setStatusMessage(t.settings.invalidUrl);
+      setTimeout(() => setImportStatus('idle'), 3000);
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(trimmedUrl);
+    } catch {
+      setImportStatus('error');
+      setStatusMessage(t.settings.invalidUrl);
+      setTimeout(() => setImportStatus('idle'), 3000);
+      return;
+    }
+
+    setIsLoadingUrl(true);
+
+    try {
+      // Convert sharing URLs to direct download format
+      const downloadUrl = convertToDirectUrl(trimmedUrl);
+
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const text = await response.text();
+      const success = onImport(text);
+
+      if (success) {
+        setImportStatus('success');
+        setStatusMessage(t.settings.dataImported);
+        setUrlInput('');
+      } else {
+        setImportStatus('error');
+        setStatusMessage(t.settings.importFailed);
+      }
+    } catch (error) {
+      console.error('Failed to load from URL:', error);
+      setImportStatus('error');
+      setStatusMessage(t.settings.urlLoadFailed);
+    } finally {
+      setIsLoadingUrl(false);
+      setTimeout(() => setImportStatus('idle'), 3000);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
@@ -92,6 +170,25 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
           onChange={handleFileChange}
           className="hidden"
         />
+      </div>
+
+      {/* URL Import Section */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="text"
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          placeholder={t.settings.urlPlaceholder}
+          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isLoadingUrl}
+        />
+        <button
+          onClick={handleLoadFromUrl}
+          disabled={isLoadingUrl || !urlInput.trim()}
+          className="btn btn-secondary whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoadingUrl ? t.settings.loadingFromUrl : t.settings.loadFromUrl}
+        </button>
       </div>
 
       {importStatus !== 'idle' && (

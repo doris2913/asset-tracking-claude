@@ -16,6 +16,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface AssetBreakdownChartProps {
   breakdown: AssetSummary[];
   currency: Currency;
+  excludeLiabilities?: boolean;
 }
 
 const ASSET_TYPE_COLORS: Record<string, string> = {
@@ -30,10 +31,29 @@ const ASSET_TYPE_COLORS: Record<string, string> = {
 export default function AssetBreakdownChart({
   breakdown,
   currency,
+  excludeLiabilities = true,
 }: AssetBreakdownChartProps) {
   const { t } = useI18n();
 
-  if (breakdown.length === 0) {
+  // Filter out liabilities if excludeLiabilities is true
+  const filteredBreakdown = excludeLiabilities
+    ? breakdown.filter(item => item.type !== 'liability')
+    : breakdown;
+
+  // Recalculate percentages based on filtered breakdown (excluding liabilities)
+  const totalFiltered = filteredBreakdown.reduce(
+    (sum, item) => sum + (currency === 'TWD' ? item.totalTWD : item.totalUSD),
+    0
+  );
+
+  const adjustedBreakdown = filteredBreakdown.map(item => ({
+    ...item,
+    percentage: totalFiltered > 0
+      ? ((currency === 'TWD' ? item.totalTWD : item.totalUSD) / totalFiltered) * 100
+      : 0,
+  }));
+
+  if (adjustedBreakdown.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
         <div className="text-center">
@@ -45,13 +65,13 @@ export default function AssetBreakdownChart({
   }
 
   const data = {
-    labels: breakdown.map((item) => t.assetTypes[item.type]),
+    labels: adjustedBreakdown.map((item) => t.assetTypes[item.type]),
     datasets: [
       {
-        data: breakdown.map((item) =>
+        data: adjustedBreakdown.map((item) =>
           currency === 'TWD' ? item.totalTWD : item.totalUSD
         ),
-        backgroundColor: breakdown.map((item) => ASSET_TYPE_COLORS[item.type]),
+        backgroundColor: adjustedBreakdown.map((item) => ASSET_TYPE_COLORS[item.type]),
         borderWidth: 2,
         borderColor: 'white',
       },
@@ -71,7 +91,7 @@ export default function AssetBreakdownChart({
             const data = chart.data;
             if (data.labels && data.datasets.length) {
               return data.labels.map((label: string, i: number) => ({
-                text: `${label} (${formatNumber(breakdown[i].percentage, 1)}%)`,
+                text: `${label} (${formatNumber(adjustedBreakdown[i].percentage, 1)}%)`,
                 fillStyle: data.datasets[0].backgroundColor[i],
                 hidden: false,
                 index: i,
@@ -85,7 +105,7 @@ export default function AssetBreakdownChart({
         callbacks: {
           label: function (context: any) {
             const value = context.raw as number;
-            const percentage = breakdown[context.dataIndex].percentage;
+            const percentage = adjustedBreakdown[context.dataIndex].percentage;
             return `${formatCurrency(value, currency)} (${formatNumber(percentage, 1)}%)`;
           },
         },

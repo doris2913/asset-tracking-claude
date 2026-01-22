@@ -143,6 +143,11 @@ export const en = {
     dataCleared: 'All data cleared.',
     clearDataConfirm: 'Are you sure you want to clear all data? This action cannot be undone. Please export your data first if you want to keep a backup.',
     dataNote: 'Export your data to keep a backup. Import previously exported data to restore. Data is stored locally in your browser.',
+    loadFromUrl: 'Load from URL',
+    urlPlaceholder: 'Enter JSON file URL (GitHub Raw, Gist, Dropbox)',
+    loadingFromUrl: 'Loading...',
+    urlLoadFailed: 'Failed to load data from URL.',
+    invalidUrl: 'Please enter a valid URL.',
     about: 'About',
     aboutDesc: 'This application stores all data locally in your browser using localStorage. No data is sent to any server. Use the export feature to backup your data.',
     version: 'Version',
@@ -197,6 +202,24 @@ export const en = {
     balanced: 'Portfolio is well balanced!',
     balancedDesc: 'Your current allocation is close to your target allocation.',
     note: 'Note: These are suggestions based on percentage targets. Consider transaction costs, tax implications, and market conditions before making changes.',
+  },
+
+  // Asset Growth Analysis
+  growthAnalysis: {
+    title: 'Asset Growth Analysis',
+    subtitle: 'Distinguish between new capital and investment returns',
+    period: 'Period',
+    totalPeriod: 'Total Period',
+    startValue: 'Starting Value',
+    endValue: 'Ending Value',
+    totalGrowth: 'Total Growth',
+    newCapital: 'New Capital',
+    investmentReturns: 'Investment Returns',
+    newCapitalDesc: 'Includes salary deposits, savings, new investments',
+    investmentReturnsDesc: 'From stock price appreciation and investment gains',
+    noData: 'Need at least 2 snapshots for analysis',
+    contribution: 'Contribution',
+    growthComposition: 'Growth Composition',
   },
 };
 

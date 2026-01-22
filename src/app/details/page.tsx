@@ -16,12 +16,16 @@ const ASSET_TYPE_ICONS: Record<AssetType, string> = {
   us_tbills: '🏛️',
 };
 
+const ALL_ASSET_TYPES: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'liability', 'us_tbills'];
+
 export default function DetailsPage() {
   const { currentAssets, totalTWD, totalUSD, isLoaded } = useAssetData();
   const { t, language } = useI18n();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
   const [sortBy, setSortBy] = useState<'name' | 'type' | 'value'>('type');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const labels = {
     title: language === 'zh-TW' ? '資產明細' : 'Asset Details',
@@ -37,10 +41,35 @@ export default function DetailsPage() {
     sortBy: language === 'zh-TW' ? '排序' : 'Sort by',
     noAssets: language === 'zh-TW' ? '尚無資產' : 'No assets yet',
     total: language === 'zh-TW' ? '總計' : 'Total',
+    filter: language === 'zh-TW' ? '篩選' : 'Filter',
+    allTypes: language === 'zh-TW' ? '全部類型' : 'All Types',
+    search: language === 'zh-TW' ? '搜尋名稱...' : 'Search name...',
+    clearFilter: language === 'zh-TW' ? '清除篩選' : 'Clear Filter',
+    noMatchingAssets: language === 'zh-TW' ? '沒有符合條件的資產' : 'No matching assets',
+    showing: language === 'zh-TW' ? '顯示' : 'Showing',
+    of: language === 'zh-TW' ? '筆，共' : ' of ',
+    items: language === 'zh-TW' ? '筆資產' : ' assets',
   };
 
-  const sortedAssets = useMemo(() => {
-    const assets = [...currentAssets.assets];
+  const filteredAndSortedAssets = useMemo(() => {
+    // First filter the assets
+    let assets = [...currentAssets.assets];
+
+    // Filter by asset type
+    if (filterType !== 'all') {
+      assets = assets.filter(a => a.type === filterType);
+    }
+
+    // Filter by search query (name or symbol)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      assets = assets.filter(a =>
+        a.name.toLowerCase().includes(query) ||
+        (a.symbol && a.symbol.toLowerCase().includes(query))
+      );
+    }
+
+    // Then sort
     return assets.sort((a, b) => {
       let comparison = 0;
 
@@ -66,7 +95,25 @@ export default function DetailsPage() {
 
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [currentAssets.assets, currentAssets.exchangeRate, sortBy, sortOrder]);
+  }, [currentAssets.assets, currentAssets.exchangeRate, sortBy, sortOrder, filterType, searchQuery]);
+
+  // Calculate filtered totals
+  const filteredTotals = useMemo(() => {
+    const filteredTWD = filteredAndSortedAssets.reduce((sum, asset) => {
+      return sum + toTWD(asset.value, asset.currency, currentAssets.exchangeRate);
+    }, 0);
+    const filteredUSD = filteredAndSortedAssets.reduce((sum, asset) => {
+      return sum + toUSD(asset.value, asset.currency, currentAssets.exchangeRate);
+    }, 0);
+    return { filteredTWD, filteredUSD };
+  }, [filteredAndSortedAssets, currentAssets.exchangeRate]);
+
+  const hasActiveFilters = filterType !== 'all' || searchQuery.trim() !== '';
+
+  const clearFilters = () => {
+    setFilterType('all');
+    setSearchQuery('');
+  };
 
   const getDisplayValue = (value: number, currency: Currency) => {
     if (displayCurrency === 'TWD') {
@@ -131,6 +178,58 @@ export default function DetailsPage() {
           </div>
         </div>
 
+        {/* Filter Controls */}
+        <div className="card mb-6">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex-1 flex flex-col sm:flex-row gap-4">
+              {/* Search Input */}
+              <div className="relative flex-1 max-w-xs">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={labels.search}
+                  className="input w-full pl-10"
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  🔍
+                </span>
+              </div>
+
+              {/* Asset Type Filter */}
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as AssetType | 'all')}
+                className="select"
+              >
+                <option value="all">{labels.allTypes}</option>
+                {ALL_ASSET_TYPES.map(type => (
+                  <option key={type} value={type}>
+                    {ASSET_TYPE_ICONS[type]} {t.assetTypes[type]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Filter Button & Filter Status */}
+            <div className="flex items-center gap-3">
+              {hasActiveFilters && (
+                <>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {labels.showing} {filteredAndSortedAssets.length} {labels.of} {currentAssets.assets.length} {labels.items}
+                  </span>
+                  <button
+                    onClick={clearFilters}
+                    className="btn btn-secondary text-sm"
+                  >
+                    {labels.clearFilter}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="card">
@@ -165,6 +264,11 @@ export default function DetailsPage() {
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <p className="text-4xl mb-4">📦</p>
               <p>{labels.noAssets}</p>
+            </div>
+          ) : filteredAndSortedAssets.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <p className="text-4xl mb-4">🔍</p>
+              <p>{labels.noMatchingAssets}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -207,7 +311,7 @@ export default function DetailsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedAssets.map((asset) => {
+                  {filteredAndSortedAssets.map((asset) => {
                     const unitPrice = getUnitPrice(asset);
                     const displayValue = getDisplayValue(asset.value, asset.currency);
                     const percentage = getPercentage(asset.value, asset.currency);
@@ -256,13 +360,21 @@ export default function DetailsPage() {
                 <tfoot>
                   <tr className="border-t-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
                     <td colSpan={5} className="py-3 px-4 font-semibold text-gray-900 dark:text-white">
-                      {labels.total}
+                      {labels.total} {hasActiveFilters && `(${filteredAndSortedAssets.length} ${labels.items})`}
                     </td>
                     <td className="py-3 px-4 text-right font-bold text-lg text-gray-900 dark:text-white">
-                      {formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
+                      {formatCurrency(
+                        hasActiveFilters
+                          ? (displayCurrency === 'TWD' ? filteredTotals.filteredTWD : filteredTotals.filteredUSD)
+                          : (displayCurrency === 'TWD' ? totalTWD : totalUSD),
+                        displayCurrency
+                      )}
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-gray-600 dark:text-gray-400">
-                      100%
+                      {hasActiveFilters
+                        ? `${((displayCurrency === 'TWD' ? filteredTotals.filteredTWD / totalTWD : filteredTotals.filteredUSD / totalUSD) * 100).toFixed(1)}%`
+                        : '100%'
+                      }
                     </td>
                     <td></td>
                   </tr>
