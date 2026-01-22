@@ -200,4 +200,22 @@ export const zhTW: Translations = {
     balancedDesc: '您目前的配置已接近目標配置。',
     note: '注意：這些建議基於百分比目標。在進行調整前，請考慮交易成本、稅務影響和市場狀況。',
   },
+
+  // Asset Growth Analysis
+  growthAnalysis: {
+    title: '資產成長分析',
+    subtitle: '區分新資金投入與投資報酬',
+    period: '期間',
+    totalPeriod: '全部期間',
+    startValue: '期初資產',
+    endValue: '期末資產',
+    totalGrowth: '總成長',
+    newCapital: '新資金投入',
+    investmentReturns: '投資報酬',
+    newCapitalDesc: '包含薪資存入、儲蓄、新增投資等',
+    investmentReturnsDesc: '來自股價上漲等投資收益',
+    noData: '需要至少2個快照才能進行分析',
+    contribution: '貢獻比例',
+    growthComposition: '成長組成',
+  },
 };

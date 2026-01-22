@@ -7,6 +7,7 @@ import AssetBreakdownChart from '@/components/AssetBreakdownChart';
 import AllocationHistoryChart from '@/components/AllocationHistoryChart';
 import AllocationComparisonChart from '@/components/AllocationComparisonChart';
 import AllocationAdjustmentRecommendation from '@/components/AllocationAdjustmentRecommendation';
+import AssetGrowthAnalysis from '@/components/AssetGrowthAnalysis';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useStockPrices } from '@/lib/yahooFinance';
@@ -430,6 +431,16 @@ export default function DashboardPage() {
             <AssetBreakdownChart breakdown={assetBreakdown} currency={displayCurrency} />
           </div>
         </div>
+
+        {/* Asset Growth Analysis */}
+        {snapshots.length >= 2 && (
+          <div className="card mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {language === 'zh-TW' ? '資產成長分析' : 'Asset Growth Analysis'}
+            </h2>
+            <AssetGrowthAnalysis snapshots={snapshots} currency={displayCurrency} />
+          </div>
+        )}
 
         {/* Allocation History Chart */}
         {snapshots.length > 0 && (
