@@ -198,6 +198,24 @@ export const en = {
     balancedDesc: 'Your current allocation is close to your target allocation.',
     note: 'Note: These are suggestions based on percentage targets. Consider transaction costs, tax implications, and market conditions before making changes.',
   },
+
+  // Asset Growth Analysis
+  growthAnalysis: {
+    title: 'Asset Growth Analysis',
+    subtitle: 'Distinguish between new capital and investment returns',
+    period: 'Period',
+    totalPeriod: 'Total Period',
+    startValue: 'Starting Value',
+    endValue: 'Ending Value',
+    totalGrowth: 'Total Growth',
+    newCapital: 'New Capital',
+    investmentReturns: 'Investment Returns',
+    newCapitalDesc: 'Includes salary deposits, savings, new investments',
+    investmentReturnsDesc: 'From stock price appreciation and investment gains',
+    noData: 'Need at least 2 snapshots for analysis',
+    contribution: 'Contribution',
+    growthComposition: 'Growth Composition',
+  },
 };
 
 export type Translations = typeof en;
