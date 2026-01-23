@@ -341,28 +341,28 @@ export default function DashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.dashboard.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t.dashboard.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
               {t.dashboard.subtitle}
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button
               onClick={handleUpdateStockPrices}
               disabled={isUpdatingPrices}
-              className="btn btn-secondary text-sm"
+              className="btn btn-secondary text-xs sm:text-sm"
               title={t.assets.updateStockPrices}
             >
               {isUpdatingPrices ? t.assets.updating : t.assets.updateStockPrices}
             </button>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
+            <div className="flex items-center gap-2">
+              <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
               <select
                 value={displayCurrency}
                 onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
-                className="select w-24"
+                className="select w-20 sm:w-24 text-sm"
               >
                 <option value="TWD">TWD</option>
                 <option value="USD">USD</option>
