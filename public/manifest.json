@@ -1,0 +1,24 @@
+{
+  "name": "Asset Tracker",
+  "short_name": "Assets",
+  "description": "Track your asset growth over time",
+  "start_url": "/asset-tracking-claude/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#1f2937",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/asset-tracking-claude/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/asset-tracking-claude/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
