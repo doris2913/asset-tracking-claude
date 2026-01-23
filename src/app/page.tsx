@@ -244,24 +244,37 @@ export default function DashboardPage() {
       label: parseSnapshotDate(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
     }));
 
-    // Add current portfolio as the latest point
+    // Always show current portfolio values as the latest point
     const today = new Date().toISOString().split('T')[0];
     const todayLabel = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 
-    // Only add today's point if it's different from the last snapshot
     const lastSnapshotDate = sortedSnapshots.length > 0
       ? sortedSnapshots[sortedSnapshots.length - 1].date.split('T')[0]
       : null;
 
-    if (lastSnapshotDate !== today && currentAssets.assets.length > 0) {
-      currentValues.push({ date: today, value: portfolioValues.current, label: todayLabel });
-      ma3M.push({ date: today, value: portfolioValues.ma3m, label: todayLabel });
-      ma1Y.push({ date: today, value: portfolioValues.ma1y, label: todayLabel });
-      snapshotValues.push({
-        date: today,
-        value: displayCurrency === 'TWD' ? totalTWD : totalUSD,
-        label: todayLabel
-      });
+    // If we have current assets, always update or append today's point
+    if (currentAssets.assets.length > 0) {
+      const todayPoint = {
+        snapshotValue: { date: today, value: displayCurrency === 'TWD' ? totalTWD : totalUSD, label: todayLabel },
+        currentValue: { date: today, value: portfolioValues.current, label: todayLabel },
+        ma3MValue: { date: today, value: portfolioValues.ma3m, label: todayLabel },
+        ma1YValue: { date: today, value: portfolioValues.ma1y, label: todayLabel },
+      };
+
+      if (lastSnapshotDate === today) {
+        // Update the last point with current values (snapshot exists from today)
+        const lastIndex = snapshotValues.length - 1;
+        snapshotValues[lastIndex] = todayPoint.snapshotValue;
+        currentValues[lastIndex] = todayPoint.currentValue;
+        ma3M[lastIndex] = todayPoint.ma3MValue;
+        ma1Y[lastIndex] = todayPoint.ma1YValue;
+      } else {
+        // Append new point (no snapshot from today)
+        snapshotValues.push(todayPoint.snapshotValue);
+        currentValues.push(todayPoint.currentValue);
+        ma3M.push(todayPoint.ma3MValue);
+        ma1Y.push(todayPoint.ma1YValue);
+      }
     }
 
     return { snapshotValues, currentValues, ma3M, ma1Y };
