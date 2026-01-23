@@ -44,6 +44,13 @@ body {
   }
 }
 
+/* Mobile bottom navigation spacing */
+@media (max-width: 767px) {
+  main {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
 @layer components {
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
