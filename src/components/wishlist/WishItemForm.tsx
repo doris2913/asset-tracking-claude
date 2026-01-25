@@ -31,6 +31,7 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
   );
 
   const [newCustomFieldKey, setNewCustomFieldKey] = useState('');
+  const [newCustomFieldValue, setNewCustomFieldValue] = useState('');
   const [showAddCustomField, setShowAddCustomField] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -84,11 +85,12 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
       ...updated[optionIndex],
       customFields: {
         ...updated[optionIndex].customFields,
-        [newCustomFieldKey]: '',
+        [newCustomFieldKey]: newCustomFieldValue,
       },
     };
     setAlternativeOptions(updated);
     setNewCustomFieldKey('');
+    setNewCustomFieldValue('');
     setShowAddCustomField(null);
   };
 
@@ -381,13 +383,13 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
         />
       </div>
 
-      {/* Alternative Options */}
+      {/* Product Options for Comparison */}
       <div className="border-t pt-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">替代選項比較</h3>
+            <h3 className="text-lg font-medium text-gray-900">產品選項比較</h3>
             <p className="text-sm text-gray-500 mt-1">
-              新增不同的產品選擇以便比較（價格、品牌、規格等）
+              新增不同的產品實體選擇以便比較（例如：不同型號、不同品牌的電視）
             </p>
           </div>
           <button
@@ -402,8 +404,8 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
         {alternativeOptions.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
             <div className="text-gray-400 text-3xl mb-2">📋</div>
-            <p className="text-gray-600">尚無替代選項</p>
-            <p className="text-sm text-gray-500 mt-1">新增不同的產品選擇以便比較</p>
+            <p className="text-gray-600">尚無產品選項</p>
+            <p className="text-sm text-gray-500 mt-1">新增不同的產品實體選擇以便比較</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -530,9 +532,19 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
                       </label>
                       <div className="space-y-2">
                         {Object.entries(option.customFields).map(([key, value]) => (
-                          <div key={key} className="flex gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
+                          <div key={key} className="flex gap-2 items-start">
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">欄位名稱</label>
+                                <input
+                                  type="text"
+                                  value={key}
+                                  disabled
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">欄位值</label>
                                 <input
                                   type="text"
                                   value={value}
@@ -540,18 +552,17 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
                                     updateCustomField(index, key, e.target.value)
                                   }
                                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                  placeholder={key}
+                                  placeholder="輸入值"
                                 />
-                                <button
-                                  type="button"
-                                  onClick={() => removeCustomField(index, key)}
-                                  className="text-red-600 hover:text-red-700 text-xs"
-                                >
-                                  ✕
-                                </button>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">{key}</div>
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => removeCustomField(index, key)}
+                              className="text-red-600 hover:text-red-700 text-sm mt-6"
+                            >
+                              ✕
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -561,37 +572,65 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
                   {/* Add Custom Field */}
                   <div className="border-t pt-3">
                     {showAddCustomField === index ? (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newCustomFieldKey}
-                          onChange={(e) => setNewCustomFieldKey(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                          placeholder="輸入比較項目名稱（例：電池容量）"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              addCustomField(index);
-                            }
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => addCustomField(index)}
-                          className="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
-                        >
-                          確認
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowAddCustomField(null);
-                            setNewCustomFieldKey('');
-                          }}
-                          className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
-                        >
-                          取消
-                        </button>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              欄位名稱
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomFieldKey}
+                              onChange={(e) => setNewCustomFieldKey(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                              placeholder="例：電池容量"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addCustomField(index);
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              欄位值
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomFieldValue}
+                              onChange={(e) => setNewCustomFieldValue(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                              placeholder="例：5000mAh"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addCustomField(index);
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => addCustomField(index)}
+                            className="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
+                          >
+                            確認
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowAddCustomField(null);
+                              setNewCustomFieldKey('');
+                              setNewCustomFieldValue('');
+                            }}
+                            className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
+                          >
+                            取消
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <button
