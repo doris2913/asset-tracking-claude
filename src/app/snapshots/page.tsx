@@ -113,18 +113,18 @@ export default function SnapshotsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.snapshots.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t.snapshots.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
               {t.snapshots.subtitle}
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <select
               value={displayCurrency}
               onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
-              className="select w-24"
+              className="select w-20 sm:w-24 text-sm"
             >
               <option value="TWD">TWD</option>
               <option value="USD">USD</option>
@@ -132,7 +132,7 @@ export default function SnapshotsPage() {
             <button
               onClick={() => setIsCreateModalOpen(true)}
               disabled={currentAssets.assets.length === 0}
-              className="btn btn-primary"
+              className="btn btn-primary text-sm whitespace-nowrap"
             >
               {t.snapshots.createSnapshot}
             </button>
