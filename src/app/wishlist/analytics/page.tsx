@@ -41,23 +41,23 @@ export default function AnalyticsPage() {
         <p className="text-gray-600">願望清單的深入分析和購買建議</p>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-4 mb-6 border-b">
+      {/* Navigation Tabs - Mobile optimized */}
+      <div className="flex gap-1 sm:gap-4 mb-6 border-b overflow-x-auto">
         <Link
           href="/wishlist"
-          className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
         >
           願望清單
         </Link>
         <Link
           href="/wishlist/purchased"
-          className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
         >
           已購買
         </Link>
         <Link
           href="/wishlist/analytics"
-          className="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-blue-600 border-b-2 border-blue-600 whitespace-nowrap min-h-[44px] flex items-center"
         >
           分析報告
         </Link>

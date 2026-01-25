@@ -172,23 +172,23 @@ export default function WishListPage() {
         <p className="text-gray-600">系統性記錄和分析你想要的物品</p>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-4 mb-6 border-b">
+      {/* Navigation Tabs - Mobile optimized */}
+      <div className="flex gap-1 sm:gap-4 mb-6 border-b overflow-x-auto">
         <Link
           href="/wishlist"
-          className="px-4 py-2 font-medium text-purple-600 border-b-2 border-purple-600"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-purple-600 border-b-2 border-purple-600 whitespace-nowrap min-h-[44px] flex items-center"
         >
           願望清單
         </Link>
         <Link
           href="/wishlist/purchased"
-          className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
         >
           已購買
         </Link>
         <Link
           href="/wishlist/analytics"
-          className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
         >
           分析報告
         </Link>
@@ -233,9 +233,9 @@ export default function WishListPage() {
         </div>
       </div>
 
-      {/* Need vs Want Summary */}
+      {/* Need vs Want Summary - Mobile optimized */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <div className="text-sm text-gray-600 mb-1">需要 vs 想要</div>
             <div className="flex gap-4">
@@ -258,22 +258,22 @@ export default function WishListPage() {
               setEditingItem(undefined);
               setShowForm(true);
             }}
-            className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors shadow-md"
+            className="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors shadow-md min-h-[48px]"
           >
             ➕ 新增願望
           </button>
         </div>
       </div>
 
-      {/* Filters, Sort, and Data Management */}
+      {/* Filters, Sort, and Data Management - Mobile optimized */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-wrap gap-4 items-end">
-          <div>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 items-end">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">優先級</label>
             <select
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0"
             >
               <option value="all">全部</option>
               <option value="high">高優先</option>
@@ -282,12 +282,12 @@ export default function WishListPage() {
             </select>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">類型</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0"
             >
               <option value="all">全部</option>
               <option value="need">需要</option>
@@ -295,12 +295,12 @@ export default function WishListPage() {
             </select>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">排序</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0"
             >
               <option value="dateAdded">新增時間</option>
               <option value="price">價格</option>
@@ -309,10 +309,11 @@ export default function WishListPage() {
             </select>
           </div>
 
-          <div className="ml-auto">
+          <div className="col-span-1 sm:ml-auto">
+            <label className="block text-sm font-medium text-gray-700 mb-1 sm:invisible">動作</label>
             <button
               onClick={() => setShowDataManagement(true)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="w-full px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 active:bg-gray-300 transition-colors min-h-[44px] sm:min-h-0"
             >
               📦 資料管理
             </button>
