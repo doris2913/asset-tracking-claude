@@ -24,6 +24,7 @@ export const zhTW: Translations = {
     assets: '資產',
     details: '明細',
     snapshots: '快照',
+    wishlist: '願望清單',
     migrate: '遷移',
     settings: '設定',
     appName: '資產追蹤器',

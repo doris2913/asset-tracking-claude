@@ -22,6 +22,7 @@ export const en = {
     assets: 'Assets',
     details: 'Details',
     snapshots: 'Snapshots',
+    wishlist: 'Wish List',
     migrate: 'Migrate',
     settings: 'Settings',
     appName: 'Asset Tracker',
