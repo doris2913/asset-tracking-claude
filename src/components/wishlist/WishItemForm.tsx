@@ -79,6 +79,8 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
 
   const addCustomField = (optionIndex: number) => {
     if (!newCustomFieldKey.trim()) return;
+    // Don't add field if value is empty
+    if (!newCustomFieldValue.trim()) return;
 
     const updated = [...alternativeOptions];
     updated[optionIndex] = {
