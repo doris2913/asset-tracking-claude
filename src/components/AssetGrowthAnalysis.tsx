@@ -343,16 +343,17 @@ export default function AssetGrowthAnalysis({
       </div>
 
       {/* Visual Breakdown Bar */}
-      {currentAnalysis.totalGrowth !== 0 && (
+      {Math.abs(currentAnalysis.totalGrowth) > 0.01 && (
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             {language === 'zh-TW' ? '成長組成' : 'Growth Composition'}
           </p>
-          <div className="flex h-8 rounded-lg overflow-hidden">
+          <div className="flex h-8 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
             {currentAnalysis.newCapitalPercentage > 0 && (
               <div
                 className={`flex items-center justify-center text-white text-sm font-medium ${capitalIsPositive ? 'bg-blue-500' : 'bg-orange-500'}`}
                 style={{ width: `${currentAnalysis.newCapitalPercentage}%` }}
+                title={`${labels.newCapital}: ${capitalIsPositive ? '+' : ''}${formatCurrency(currentAnalysis.newCapital, currency)}`}
               >
                 {currentAnalysis.newCapitalPercentage > 15 && `${currentAnalysis.newCapitalPercentage.toFixed(0)}%`}
               </div>
@@ -361,15 +362,27 @@ export default function AssetGrowthAnalysis({
               <div
                 className={`flex items-center justify-center text-white text-sm font-medium ${returnsIsPositive ? 'bg-green-500' : 'bg-red-500'}`}
                 style={{ width: `${currentAnalysis.investmentReturnsPercentage}%` }}
+                title={`${labels.investmentReturns}: ${returnsIsPositive ? '+' : ''}${formatCurrency(currentAnalysis.investmentReturns, currency)}`}
               >
                 {currentAnalysis.investmentReturnsPercentage > 15 && `${currentAnalysis.investmentReturnsPercentage.toFixed(0)}%`}
               </div>
             )}
           </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>{labels.newCapital}</span>
-            <span>{labels.investmentReturns}</span>
+          <div className="flex justify-between mt-2 text-xs">
+            <span className={capitalIsPositive ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}>
+              {labels.newCapital} {capitalIsPositive ? '↑' : '↓'}
+            </span>
+            <span className={returnsIsPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+              {labels.investmentReturns} {returnsIsPositive ? '↑' : '↓'}
+            </span>
           </div>
+          {(!capitalIsPositive || !returnsIsPositive) && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              {language === 'zh-TW'
+                ? '* 長條圖以絕對值顯示各項目佔比，箭頭表示增減方向'
+                : '* Bar shows relative contribution by absolute value, arrows indicate direction'}
+            </p>
+          )}
         </div>
       )}
     </div>

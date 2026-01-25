@@ -159,7 +159,13 @@ export default function AllocationHistoryChart({
             return `${context.dataset.label}: ${formatCurrency(value, currency)} (${percentage}%)`;
           },
           footer: function (tooltipItems: any[]) {
-            const total = tooltipItems.reduce((sum, item) => sum + (item.raw as number), 0);
+            // Calculate the total of ALL asset types for this snapshot (dataIndex)
+            if (tooltipItems.length === 0) return '';
+            const dataIndex = tooltipItems[0].dataIndex;
+            const total = tooltipItems[0].chart.data.datasets.reduce(
+              (sum: number, dataset: any) => sum + (dataset.data[dataIndex] || 0),
+              0
+            );
             return `Total: ${formatCurrency(total, currency)}`;
           },
         },

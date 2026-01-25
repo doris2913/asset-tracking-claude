@@ -244,24 +244,37 @@ export default function DashboardPage() {
       label: parseSnapshotDate(snapshot.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
     }));
 
-    // Add current portfolio as the latest point
+    // Always show current portfolio values as the latest point
     const today = new Date().toISOString().split('T')[0];
     const todayLabel = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 
-    // Only add today's point if it's different from the last snapshot
     const lastSnapshotDate = sortedSnapshots.length > 0
       ? sortedSnapshots[sortedSnapshots.length - 1].date.split('T')[0]
       : null;
 
-    if (lastSnapshotDate !== today && currentAssets.assets.length > 0) {
-      currentValues.push({ date: today, value: portfolioValues.current, label: todayLabel });
-      ma3M.push({ date: today, value: portfolioValues.ma3m, label: todayLabel });
-      ma1Y.push({ date: today, value: portfolioValues.ma1y, label: todayLabel });
-      snapshotValues.push({
-        date: today,
-        value: displayCurrency === 'TWD' ? totalTWD : totalUSD,
-        label: todayLabel
-      });
+    // If we have current assets, always update or append today's point
+    if (currentAssets.assets.length > 0) {
+      const todayPoint = {
+        snapshotValue: { date: today, value: displayCurrency === 'TWD' ? totalTWD : totalUSD, label: todayLabel },
+        currentValue: { date: today, value: portfolioValues.current, label: todayLabel },
+        ma3MValue: { date: today, value: portfolioValues.ma3m, label: todayLabel },
+        ma1YValue: { date: today, value: portfolioValues.ma1y, label: todayLabel },
+      };
+
+      if (lastSnapshotDate === today) {
+        // Update the last point with current values (snapshot exists from today)
+        const lastIndex = snapshotValues.length - 1;
+        snapshotValues[lastIndex] = todayPoint.snapshotValue;
+        currentValues[lastIndex] = todayPoint.currentValue;
+        ma3M[lastIndex] = todayPoint.ma3MValue;
+        ma1Y[lastIndex] = todayPoint.ma1YValue;
+      } else {
+        // Append new point (no snapshot from today)
+        snapshotValues.push(todayPoint.snapshotValue);
+        currentValues.push(todayPoint.currentValue);
+        ma3M.push(todayPoint.ma3MValue);
+        ma1Y.push(todayPoint.ma1YValue);
+      }
     }
 
     return { snapshotValues, currentValues, ma3M, ma1Y };
@@ -328,28 +341,28 @@ export default function DashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.dashboard.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t.dashboard.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
               {t.dashboard.subtitle}
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button
               onClick={handleUpdateStockPrices}
               disabled={isUpdatingPrices}
-              className="btn btn-secondary text-sm"
+              className="btn btn-secondary text-xs sm:text-sm"
               title={t.assets.updateStockPrices}
             >
               {isUpdatingPrices ? t.assets.updating : t.assets.updateStockPrices}
             </button>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
+            <div className="flex items-center gap-2">
+              <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t.common.currency}:</label>
               <select
                 value={displayCurrency}
                 onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
-                className="select w-24"
+                className="select w-20 sm:w-24 text-sm"
               >
                 <option value="TWD">TWD</option>
                 <option value="USD">USD</option>

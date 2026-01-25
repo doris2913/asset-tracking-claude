@@ -133,14 +133,14 @@ export default function AssetsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.assets.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t.assets.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
               {t.assets.subtitle}
             </p>
           </div>
-          <button onClick={handleAddAsset} className="btn btn-primary">
+          <button onClick={handleAddAsset} className="btn btn-primary w-full sm:w-auto">
             {t.assets.addAsset}
           </button>
         </div>
@@ -194,11 +194,11 @@ export default function AssetsPage() {
 
         {/* Asset List */}
         <div className="card">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t.assets.currentAssets}
             </h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               {t.assets.lastUpdated}: {new Date(currentAssets.lastModified).toLocaleString(dateLocale)}
             </span>
           </div>

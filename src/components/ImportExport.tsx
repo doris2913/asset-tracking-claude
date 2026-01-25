@@ -41,6 +41,7 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
   const [statusMessage, setStatusMessage] = useState('');
   const [urlInput, setUrlInput] = useState('');
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
   const handleExport = () => {
     const data = onExport();
@@ -151,6 +152,41 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
     }
   };
 
+  const handleLoadDemoData = async () => {
+    setIsLoadingDemo(true);
+
+    try {
+      // Construct URL with basePath for GitHub Pages
+      const basePath = process.env.NODE_ENV === 'production'
+        ? '/asset-tracking-claude'
+        : '';
+      const demoUrl = `${basePath}/mock.json`;
+
+      const response = await fetch(demoUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const text = await response.text();
+      const success = onImport(text);
+
+      if (success) {
+        setImportStatus('success');
+        setStatusMessage(t.settings.demoDataLoaded);
+      } else {
+        setImportStatus('error');
+        setStatusMessage(t.settings.importFailed);
+      }
+    } catch (error) {
+      console.error('Failed to load demo data:', error);
+      setImportStatus('error');
+      setStatusMessage(t.settings.demoLoadFailed);
+    } finally {
+      setIsLoadingDemo(false);
+      setTimeout(() => setImportStatus('idle'), 3000);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
@@ -170,6 +206,27 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
           onChange={handleFileChange}
           className="hidden"
         />
+      </div>
+
+      {/* Demo Data Section */}
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+        <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              {t.settings.tryDemoData}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t.settings.demoDataDesc}
+            </p>
+          </div>
+          <button
+            onClick={handleLoadDemoData}
+            disabled={isLoadingDemo}
+            className="btn btn-secondary whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoadingDemo ? t.settings.loadingDemo : t.settings.loadDemoData}
+          </button>
+        </div>
       </div>
 
       {/* URL Import Section */}

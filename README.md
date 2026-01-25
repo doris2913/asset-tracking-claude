@@ -4,14 +4,25 @@ A personal asset tracking web application built with Next.js. Track your asset g
 
 ## Features
 
-- **Multi-Asset Support**: Track Cash (TWD/USD), Taiwan Stocks, US Stocks, Rent/Property, and US Treasury Bills
+- **Multi-Asset Support**: Track Cash (TWD/USD), Taiwan Stocks, US Stocks, Liabilities, and US Treasury Bills
 - **Dual Currency**: View totals in TWD or USD with configurable exchange rates
 - **Stock Price Updates**: Automatic stock price fetching via Yahoo Finance API
-- **Snapshot System**: Create monthly snapshots to track asset growth over time
-- **Growth Visualization**: Dashboard with charts showing current value, 3-month and 1-year moving averages
+- **Snapshot System**: Create snapshots to track asset growth over time with configurable intervals
+- **Growth Visualization**: Dashboard with multiple charts:
+  - Asset growth over time with current value, 3-month and 1-year moving averages
+  - Asset allocation breakdown pie chart
+  - Allocation history stacked bar chart
+  - Current vs target allocation comparison
+- **Asset Growth Analysis**: Distinguish between new capital contributions and investment returns, with support for negative returns
+- **Portfolio Rebalancing**:
+  - Set target allocation percentages for each asset type
+  - View current vs target allocation comparison
+  - Get specific buy/sell recommendations (with 3% tolerance threshold)
 - **Data Portability**: Export/Import your data as JSON for backup and portability
+- **Demo Mode**: Import mock data to explore all features before adding your own
 - **Static Deployment**: Deployable on GitHub Pages (no server required)
 - **Privacy Focused**: All data stored locally in your browser (localStorage)
+- **Internationalization**: Support for English and Traditional Chinese (繁體中文)
 
 ## Getting Started
 
@@ -73,21 +84,42 @@ The app will remind you when it's time for a new snapshot based on your configur
 
 The **Dashboard** shows:
 - Total asset value
-- Asset allocation breakdown
+- Asset allocation breakdown (pie chart)
 - Growth chart with:
   - Current values (blue line)
   - 3-month moving average (green dashed)
   - 1-year moving average (orange dashed)
 - Month-over-month and year-over-year growth rates
+- **Asset Growth Analysis**: Breaks down growth into:
+  - New capital contributions (salary deposits, savings, new investments)
+  - Investment returns (stock price appreciation, gains/losses)
+  - Supports analysis for different time periods
+- **Allocation History**: Stacked bar chart showing how your asset allocation has changed over time
+- **Rebalancing Recommendations**:
+  - Set target allocation percentages in Settings
+  - View comparison between current and target allocation
+  - Get specific buy/sell recommendations when allocation differs by more than 3%
 
 ### Data Management
 
 In **Settings** you can:
-- Adjust snapshot interval
-- Update exchange rate
+- Adjust snapshot interval (how often to create snapshots)
+- Update exchange rate (USD to TWD)
+- Set target allocation percentages for portfolio rebalancing
 - Export data (JSON backup)
-- Import data (restore from backup)
+- Import data (restore from backup or load demo data)
 - Clear all data
+
+### Demo Mode
+
+Want to explore the app before adding your own data?
+
+1. Download `mock.json` from the repository
+2. Go to **Settings** > **Data Management**
+3. Click **Import Data** and select `mock.json`
+4. Explore all features with realistic sample data
+
+See `MOCK_DATA_README.md` for details about what's included in the demo data.
 
 ## Deployment on GitHub Pages
 
@@ -111,8 +143,8 @@ In **Settings** you can:
 | Cash USD | Cash in US Dollar | USD |
 | TW Stocks | Taiwan stock market | TWD |
 | US Stocks | US stock market | USD |
-| Rent | Rental property/deposits | TWD/USD |
 | US T-Bills | US Treasury Bills | USD |
+| Liability | Mortgages, loans, debts | TWD/USD |
 
 ## Stock Symbols
 
@@ -124,11 +156,39 @@ For automatic price updates, use Yahoo Finance symbols:
 ## Technical Details
 
 - **Framework**: Next.js 14 with App Router
-- **Styling**: Tailwind CSS
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with dark mode support
 - **Charts**: Chart.js with react-chartjs-2
 - **Data Storage**: Browser localStorage
 - **Stock API**: Yahoo Finance (via CORS proxy for client-side)
+- **i18n**: Support for English and Traditional Chinese
 - **Deployment**: Static export for GitHub Pages
+
+## Key Features Explained
+
+### Asset Growth Analysis
+
+This feature helps you understand where your wealth growth comes from:
+- **New Capital**: Money you actively added (salary deposits, savings, new investments)
+- **Investment Returns**: Gains or losses from your investments (stock price changes, interest)
+- Supports both positive and negative returns
+- Can analyze different time periods between snapshots
+
+### Portfolio Rebalancing
+
+Maintain your desired asset allocation:
+1. Set target percentages for each asset type in **Settings** > **Target Allocation**
+2. View comparison chart on Dashboard showing current vs target allocation
+3. Get specific recommendations when allocation differs by more than 3%
+4. Recommendations show exact amounts to buy or sell for rebalancing
+
+### Allocation History
+
+Track how your portfolio composition changes over time:
+- Stacked bar chart showing each snapshot
+- Hover to see exact values and percentages
+- Total portfolio value shown in tooltip
+- Color-coded by asset type
 
 ## License
 
