@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { WishItem, LifeAspect, LIFE_ASPECT_CONFIG, CATEGORY_OPTIONS } from '@/types/wishlist';
+import { WishItem, LifeAspect, LIFE_ASPECT_CONFIG, CATEGORY_OPTIONS, AlternativeOption } from '@/types/wishlist';
 
 interface WishItemFormProps {
   item?: WishItem;
@@ -26,18 +26,100 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
     status: item?.status || 'wishlist' as 'wishlist' | 'purchased' | 'rejected',
   });
 
+  const [alternativeOptions, setAlternativeOptions] = useState<AlternativeOption[]>(
+    item?.alternativeOptions || []
+  );
+
+  const [newCustomFieldKey, setNewCustomFieldKey] = useState('');
+  const [newCustomFieldValue, setNewCustomFieldValue] = useState('');
+  const [showAddCustomField, setShowAddCustomField] = useState<number | null>(null);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const submitData: Omit<WishItem, 'id' | 'dateAdded' | 'wantHistory'> = {
       ...formData,
       links: formData.links ? formData.links.split('\n').filter(l => l.trim()) : [],
-      alternativeOptions: item?.alternativeOptions || [],
+      alternativeOptions: alternativeOptions,
       imageUrl: item?.imageUrl,
       purchaseDate: item?.purchaseDate,
     };
 
     onSubmit(submitData);
+  };
+
+  const addAlternativeOption = () => {
+    setAlternativeOptions([
+      ...alternativeOptions,
+      {
+        name: '',
+        price: 0,
+        brand: '',
+        webLink: '',
+        pros: '',
+        cons: '',
+        customFields: {},
+      },
+    ]);
+  };
+
+  const removeAlternativeOption = (index: number) => {
+    setAlternativeOptions(alternativeOptions.filter((_, i) => i !== index));
+  };
+
+  const updateAlternativeOption = (
+    index: number,
+    field: keyof AlternativeOption,
+    value: string | number | Record<string, string>
+  ) => {
+    const updated = [...alternativeOptions];
+    updated[index] = { ...updated[index], [field]: value };
+    setAlternativeOptions(updated);
+  };
+
+  const addCustomField = (optionIndex: number) => {
+    if (!newCustomFieldKey.trim()) return;
+    // Don't add field if value is empty
+    if (!newCustomFieldValue.trim()) return;
+
+    const updated = [...alternativeOptions];
+    updated[optionIndex] = {
+      ...updated[optionIndex],
+      customFields: {
+        ...updated[optionIndex].customFields,
+        [newCustomFieldKey]: newCustomFieldValue,
+      },
+    };
+    setAlternativeOptions(updated);
+    setNewCustomFieldKey('');
+    setNewCustomFieldValue('');
+    setShowAddCustomField(null);
+  };
+
+  const updateCustomField = (
+    optionIndex: number,
+    fieldKey: string,
+    value: string
+  ) => {
+    const updated = [...alternativeOptions];
+    updated[optionIndex] = {
+      ...updated[optionIndex],
+      customFields: {
+        ...updated[optionIndex].customFields,
+        [fieldKey]: value,
+      },
+    };
+    setAlternativeOptions(updated);
+  };
+
+  const removeCustomField = (optionIndex: number, fieldKey: string) => {
+    const updated = [...alternativeOptions];
+    const { [fieldKey]: _, ...remainingFields } = updated[optionIndex].customFields || {};
+    updated[optionIndex] = {
+      ...updated[optionIndex],
+      customFields: remainingFields,
+    };
+    setAlternativeOptions(updated);
   };
 
   const toggleLifeAspect = (aspect: LifeAspect) => {
@@ -301,6 +383,272 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
           rows={3}
           placeholder="https://example.com/product"
         />
+      </div>
+
+      {/* Product Options for Comparison */}
+      <div className="border-t pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">產品選項比較</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              新增不同的產品實體選擇以便比較（例如：不同型號、不同品牌的電視）
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addAlternativeOption}
+            className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+          >
+            ➕ 新增選項
+          </button>
+        </div>
+
+        {alternativeOptions.length === 0 ? (
+          <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div className="text-gray-400 text-3xl mb-2">📋</div>
+            <p className="text-gray-600">尚無產品選項</p>
+            <p className="text-sm text-gray-500 mt-1">新增不同的產品實體選擇以便比較</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {alternativeOptions.map((option, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-gray-900">選項 {index + 1}</h4>
+                  <button
+                    type="button"
+                    onClick={() => removeAlternativeOption(index)}
+                    className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    ✕ 移除
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      產品名稱 *
+                    </label>
+                    <input
+                      type="text"
+                      value={option.name}
+                      onChange={(e) =>
+                        updateAlternativeOption(index, 'name', e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      placeholder="例：iPhone 15 Pro"
+                      required
+                    />
+                  </div>
+
+                  {/* Price and Brand */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        價格 (TWD) *
+                      </label>
+                      <input
+                        type="number"
+                        value={option.price}
+                        onChange={(e) =>
+                          updateAlternativeOption(index, 'price', Number(e.target.value))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        品牌
+                      </label>
+                      <input
+                        type="text"
+                        value={option.brand || ''}
+                        onChange={(e) =>
+                          updateAlternativeOption(index, 'brand', e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        placeholder="例：Apple"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Web Link */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      網頁連結
+                    </label>
+                    <input
+                      type="url"
+                      value={option.webLink || ''}
+                      onChange={(e) =>
+                        updateAlternativeOption(index, 'webLink', e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  {/* Pros */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      優點/規格
+                    </label>
+                    <textarea
+                      value={option.pros}
+                      onChange={(e) =>
+                        updateAlternativeOption(index, 'pros', e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      rows={2}
+                      placeholder="列出產品優點或重要規格"
+                    />
+                  </div>
+
+                  {/* Cons */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      缺點
+                    </label>
+                    <textarea
+                      value={option.cons}
+                      onChange={(e) =>
+                        updateAlternativeOption(index, 'cons', e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      rows={2}
+                      placeholder="列出產品缺點或限制"
+                    />
+                  </div>
+
+                  {/* Custom Fields */}
+                  {option.customFields && Object.keys(option.customFields).length > 0 && (
+                    <div className="border-t pt-3 mt-3">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        自訂比較項目
+                      </label>
+                      <div className="space-y-2">
+                        {Object.entries(option.customFields).map(([key, value]) => (
+                          <div key={key} className="flex gap-2 items-start">
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">欄位名稱</label>
+                                <input
+                                  type="text"
+                                  value={key}
+                                  disabled
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">欄位值</label>
+                                <input
+                                  type="text"
+                                  value={value}
+                                  onChange={(e) =>
+                                    updateCustomField(index, key, e.target.value)
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                  placeholder="輸入值"
+                                />
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeCustomField(index, key)}
+                              className="text-red-600 hover:text-red-700 text-sm mt-6"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add Custom Field */}
+                  <div className="border-t pt-3">
+                    {showAddCustomField === index ? (
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              欄位名稱
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomFieldKey}
+                              onChange={(e) => setNewCustomFieldKey(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                              placeholder="例：電池容量"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addCustomField(index);
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              欄位值
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomFieldValue}
+                              onChange={(e) => setNewCustomFieldValue(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                              placeholder="例：5000mAh"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addCustomField(index);
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => addCustomField(index)}
+                            className="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
+                          >
+                            確認
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowAddCustomField(null);
+                              setNewCustomFieldKey('');
+                              setNewCustomFieldValue('');
+                            }}
+                            className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
+                          >
+                            取消
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowAddCustomField(index)}
+                        className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        + 新增自訂比較項目
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

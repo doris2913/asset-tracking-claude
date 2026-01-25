@@ -472,7 +472,10 @@ export function calculateYearlySpending(purchasedItems: PurchasedItem[]): Array<
     yearlyData[year].categoryBreakdown[item.category] =
       (yearlyData[year].categoryBreakdown[item.category] || 0) + item.actualPrice;
 
-    if (item.isNeed) {
+    // Note: PurchasedItem doesn't have isNeed property
+    // Consider using item.type === 'daily_necessity' as a proxy if needed
+    // For now, we'll classify based on item type
+    if (item.type === 'daily_necessity') {
       yearlyData[year].needCount += 1;
     } else {
       yearlyData[year].wantCount += 1;

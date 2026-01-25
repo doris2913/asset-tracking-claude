@@ -27,7 +27,17 @@ export default function AnalyticsPage() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">分析報告</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <Link
+            href="/assets"
+            className="text-gray-600 hover:text-gray-900 transition-colors"
+            title="回到資產"
+          >
+            ← 回到資產
+          </Link>
+          <span className="text-gray-300">|</span>
+          <h1 className="text-3xl font-bold text-gray-900">分析報告</h1>
+        </div>
         <p className="text-gray-600">願望清單的深入分析和購買建議</p>
       </div>
 

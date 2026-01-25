@@ -136,10 +136,10 @@ export default function WishItemCard({
         <p className="text-sm text-gray-500 mb-3 italic">{item.notes}</p>
       )}
 
-      {/* Alternatives indicator */}
+      {/* Product options indicator */}
       {item.alternativeOptions && item.alternativeOptions.length > 0 && (
         <div className="mb-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
-          📋 有 {item.alternativeOptions.length} 個替代選項
+          📋 有 {item.alternativeOptions.length} 個產品選項
         </div>
       )}
 
