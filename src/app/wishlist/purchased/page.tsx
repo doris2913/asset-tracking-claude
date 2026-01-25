@@ -94,23 +94,23 @@ export default function PurchasedItemsPage() {
         <p className="text-gray-600">追蹤購買後的滿意度和使用心得</p>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-4 mb-6 border-b">
+      {/* Navigation Tabs - Mobile optimized */}
+      <div className="flex gap-1 sm:gap-4 mb-6 border-b overflow-x-auto">
         <Link
           href="/wishlist"
-          className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
         >
           願望清單
         </Link>
         <Link
           href="/wishlist/purchased"
-          className="px-4 py-2 font-medium text-green-600 border-b-2 border-green-600"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-green-600 border-b-2 border-green-600 whitespace-nowrap min-h-[44px] flex items-center"
         >
           已購買
         </Link>
         <Link
           href="/wishlist/analytics"
-          className="px-4 py-2 font-medium text-gray-600 hover:text-gray-900"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
         >
           分析報告
         </Link>
@@ -154,15 +154,15 @@ export default function PurchasedItemsPage() {
         </button>
       </div>
 
-      {/* Filters */}
+      {/* Filters - Mobile optimized */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-wrap gap-4">
-          <div>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">類型</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-base min-h-[44px] sm:min-h-0"
             >
               <option value="all">全部</option>
               <option value="daily_necessity">日常用品</option>
@@ -170,12 +170,12 @@ export default function PurchasedItemsPage() {
             </select>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">排序</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-base min-h-[44px] sm:min-h-0"
             >
               <option value="purchaseDate">購買時間</option>
               <option value="satisfaction">滿意度</option>
@@ -286,18 +286,18 @@ export default function PurchasedItemsPage() {
                   <p className="text-sm text-gray-600 mb-4 italic">{item.notes}</p>
                 )}
 
-                {/* Repurchase Status */}
+                {/* Repurchase Status - Mobile optimized */}
                 {item.type === 'daily_necessity' && (
                   <div className="mb-4">
                     <button
                       onClick={() => handleToggleRepurchase(item.id, item.wouldRepurchase)}
-                      className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                      className={`px-4 py-2.5 sm:py-1.5 text-sm font-medium rounded-lg transition-colors min-h-[44px] sm:min-h-0 ${
                         item.wouldRepurchase
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-green-100 text-green-700 active:bg-green-200'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                       }`}
                     >
-                      {item.wouldRepurchase ? '✓ 會再購買' : '不會再購買'}
+                      {item.wouldRepurchase ? '✓ 會再購買' : '✕ 不會再購買'}
                     </button>
                     {item.repurchaseNotes && (
                       <p className="text-sm text-gray-600 mt-2">{item.repurchaseNotes}</p>
@@ -305,19 +305,19 @@ export default function PurchasedItemsPage() {
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex flex-wrap gap-2 pt-4 border-t">
+                {/* Actions - Mobile optimized */}
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 pt-4 border-t">
                   <button
                     onClick={() => setRatingModal(item.id)}
-                    className="px-3 py-1.5 text-sm font-medium text-yellow-700 bg-yellow-50 rounded hover:bg-yellow-100 transition-colors"
+                    className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-yellow-700 bg-yellow-50 rounded-lg hover:bg-yellow-100 active:bg-yellow-200 transition-colors min-h-[44px] sm:min-h-0"
                   >
                     ⭐ 評分
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                    className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors min-h-[44px] sm:min-h-0"
                   >
-                    刪除
+                    🗑️ 刪除
                   </button>
                 </div>
               </div>
