@@ -69,7 +69,7 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
   const updateAlternativeOption = (
     index: number,
     field: keyof AlternativeOption,
-    value: any
+    value: string | number | Record<string, string>
   ) => {
     const updated = [...alternativeOptions];
     updated[index] = { ...updated[index], [field]: value };

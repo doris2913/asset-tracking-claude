@@ -14,14 +14,14 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
   }
 
   // Include the main item as one of the options
-  const mainOption = {
+  const mainOption: AlternativeOption = {
     name: `${item.name} (主要選擇)`,
     price: item.estimatedPrice,
     brand: item.category,
     webLink: item.links?.[0],
     pros: item.specifications || '',
     cons: '',
-    customFields: {},
+    customFields: undefined,
   };
 
   const allOptions = [mainOption, ...item.alternativeOptions];
@@ -170,7 +170,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                       {fieldKey}
                     </td>
                     {allOptions.map((option, index) => {
-                      const customFieldValue = option.customFields ? (option.customFields as Record<string, string>)[fieldKey] : undefined;
+                      const customFieldValue = option.customFields ? option.customFields[fieldKey] : undefined;
                       return (
                         <td
                           key={index}
