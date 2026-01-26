@@ -23,6 +23,75 @@ export default function WishListPage() {
   const [wantIntensity, setWantIntensity] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [showDataManagement, setShowDataManagement] = useState(false);
   const [comparisonItem, setComparisonItem] = useState<WishItem | null>(null);
+  const [urlInput, setUrlInput] = useState('');
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false);
+  const [urlStatus, setUrlStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Convert sharing URLs to direct download URLs for supported services
+  const convertToDirectUrl = (url: string): string => {
+    // Dropbox: change www.dropbox.com to dl.dropboxusercontent.com and ensure dl=1
+    if (url.includes('dropbox.com')) {
+      let directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com');
+      directUrl = directUrl.replace(/[?&]dl=0/, '');
+      if (!directUrl.includes('dl=1')) {
+        directUrl += (directUrl.includes('?') ? '&' : '?') + 'dl=1';
+      }
+      return directUrl;
+    }
+
+    // GitHub Gist: convert to raw URL if needed
+    if (url.includes('gist.github.com') && !url.includes('gist.githubusercontent.com')) {
+      const gistMatch = url.match(/gist\.github\.com\/([^/]+)\/([^/]+)/);
+      if (gistMatch) {
+        return `https://gist.githubusercontent.com/${gistMatch[1]}/${gistMatch[2]}/raw`;
+      }
+    }
+
+    return url;
+  };
+
+  const handleLoadFromUrl = async () => {
+    const trimmedUrl = urlInput.trim();
+    if (!trimmedUrl) {
+      setUrlStatus({ type: 'error', message: '請輸入有效的網址' });
+      setTimeout(() => setUrlStatus(null), 3000);
+      return;
+    }
+
+    try {
+      new URL(trimmedUrl);
+    } catch {
+      setUrlStatus({ type: 'error', message: '網址格式不正確' });
+      setTimeout(() => setUrlStatus(null), 3000);
+      return;
+    }
+
+    setIsLoadingUrl(true);
+
+    try {
+      const downloadUrl = convertToDirectUrl(trimmedUrl);
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const text = await response.text();
+      const success = wishListData.importData(text);
+
+      if (success) {
+        setUrlStatus({ type: 'success', message: '願望清單資料載入成功！' });
+        setUrlInput('');
+      } else {
+        setUrlStatus({ type: 'error', message: '匯入失敗，請檢查檔案格式是否正確。' });
+      }
+    } catch (error) {
+      console.error('Failed to load from URL:', error);
+      setUrlStatus({ type: 'error', message: '無法從網址載入資料，請確認網址可公開存取。' });
+    } finally {
+      setIsLoadingUrl(false);
+      setTimeout(() => setUrlStatus(null), 3000);
+    }
+  };
 
   const handleExport = () => {
     const jsonData = wishListData.exportData();
@@ -474,9 +543,54 @@ export default function WishListPage() {
               </button>
             </div>
 
+            {/* URL Import Section */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🌐</span>
+                  <span className="font-semibold text-gray-900">從公開網址載入</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  支援 Dropbox、GitHub Gist 或其他公開 JSON 檔案連結
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="https://..."
+                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px]"
+                  disabled={isLoadingUrl}
+                />
+                <button
+                  onClick={handleLoadFromUrl}
+                  disabled={isLoadingUrl || !urlInput.trim()}
+                  className="px-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] whitespace-nowrap"
+                >
+                  {isLoadingUrl ? '載入中...' : '載入'}
+                </button>
+              </div>
+              {urlStatus && (
+                <div
+                  className={`mt-2 p-2 rounded-lg text-sm ${
+                    urlStatus.type === 'success'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}
+                >
+                  {urlStatus.message}
+                </div>
+              )}
+            </div>
+
             <div className="mt-6">
               <button
-                onClick={() => setShowDataManagement(false)}
+                onClick={() => {
+                  setShowDataManagement(false);
+                  setUrlInput('');
+                  setUrlStatus(null);
+                }}
                 className="w-full px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
               >
                 關閉
