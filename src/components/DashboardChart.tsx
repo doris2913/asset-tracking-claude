@@ -16,6 +16,7 @@ import { Line } from 'react-chartjs-2';
 import { ChartDataPoint, Currency } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
 
 ChartJS.register(
   CategoryScale,
@@ -45,6 +46,8 @@ export default function DashboardChart({
 }: DashboardChartProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
   const { t } = useI18n();
+  const { theme } = useChartTheme();
+  const lineColors = theme.lineColors;
 
   if (snapshotValues.length === 0) {
     return (
@@ -67,8 +70,8 @@ export default function DashboardChart({
       {
         label: t.chart.snapshotValue,
         data: snapshotValues.map((point) => point.value),
-        borderColor: 'rgb(156, 163, 175)',
-        backgroundColor: 'rgba(156, 163, 175, 0.1)',
+        borderColor: lineColors.snapshotValue,
+        backgroundColor: lineColors.snapshotValueBg,
         fill: true,
         tension: 0.4,
         pointRadius: 4,
@@ -77,7 +80,7 @@ export default function DashboardChart({
       {
         label: t.chart.currentValue,
         data: currentValues.map((point) => point.value),
-        borderColor: 'rgb(59, 130, 246)',
+        borderColor: lineColors.currentValue,
         backgroundColor: 'transparent',
         tension: 0.4,
         pointRadius: 3,
@@ -87,7 +90,7 @@ export default function DashboardChart({
       {
         label: t.chart.movingAverage3M,
         data: movingAverage3M.map((point) => point.value),
-        borderColor: 'rgb(34, 197, 94)',
+        borderColor: lineColors.movingAverage3M,
         backgroundColor: 'transparent',
         borderDash: [5, 5],
         tension: 0.4,
@@ -97,7 +100,7 @@ export default function DashboardChart({
       {
         label: t.chart.movingAverage1Y,
         data: movingAverage1Y.map((point) => point.value),
-        borderColor: 'rgb(249, 115, 22)',
+        borderColor: lineColors.movingAverage1Y,
         backgroundColor: 'transparent',
         borderDash: [10, 5],
         tension: 0.4,
