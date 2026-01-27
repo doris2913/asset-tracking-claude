@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { LifeAspect, LIFE_ASPECT_CONFIG, CATEGORY_OPTIONS } from '@/types/wishlist';
+import { useState, useEffect } from 'react';
+import { LifeAspect, LIFE_ASPECT_CONFIG, CATEGORY_OPTIONS, PurchasedItem } from '@/types/wishlist';
 
 interface PurchasedItemFormData {
   name: string;
@@ -13,17 +13,20 @@ interface PurchasedItemFormData {
   priority: 'low' | 'medium' | 'high';
   purchaseDate: string;
   store?: string;
+  link?: string;
   notes?: string;
   type: 'daily_necessity' | 'one_time_purchase';
 }
 
 interface PurchasedItemFormProps {
+  item?: PurchasedItem;  // If provided, form is in edit mode
   onSubmit: (data: PurchasedItemFormData) => void;
   onCancel: () => void;
 }
 
-export default function PurchasedItemForm({ onSubmit, onCancel }: PurchasedItemFormProps) {
+export default function PurchasedItemForm({ item, onSubmit, onCancel }: PurchasedItemFormProps) {
   const today = new Date().toISOString().split('T')[0];
+  const isEditMode = !!item;
 
   const [formData, setFormData] = useState<PurchasedItemFormData>({
     name: '',
@@ -35,9 +38,30 @@ export default function PurchasedItemForm({ onSubmit, onCancel }: PurchasedItemF
     priority: 'medium',
     purchaseDate: today,
     store: '',
+    link: '',
     notes: '',
     type: 'one_time_purchase',
   });
+
+  // Initialize form with item data when in edit mode
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        name: item.name,
+        category: item.category,
+        estimatedPrice: 0,
+        actualPrice: item.actualPrice,
+        lifeAspects: item.lifeAspects,
+        isNeed: false,
+        priority: 'medium',
+        purchaseDate: item.purchaseDate,
+        store: item.store || '',
+        link: item.link || '',
+        notes: item.notes || '',
+        type: item.type,
+      });
+    }
+  }, [item]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +176,21 @@ export default function PurchasedItemForm({ onSubmit, onCancel }: PurchasedItemF
             placeholder="例如：Apple Store"
           />
         </div>
+      </div>
+
+      {/* Product Link */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          產品連結（選填）
+        </label>
+        <input
+          type="url"
+          value={formData.link}
+          onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="https://..."
+        />
+        <p className="text-xs text-gray-500 mt-1">購買頁面、評測文章或相關連結</p>
       </div>
 
       {/* Type */}
@@ -274,7 +313,7 @@ export default function PurchasedItemForm({ onSubmit, onCancel }: PurchasedItemF
           type="submit"
           className="flex-1 px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
         >
-          新增購買記錄
+          {isEditMode ? '儲存變更' : '新增購買記錄'}
         </button>
         <button
           type="button"
