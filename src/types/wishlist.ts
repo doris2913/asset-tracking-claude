@@ -107,6 +107,7 @@ export interface PurchasedItem {
   actualPrice: number;
   purchaseDate: string;
   store?: string;
+  link?: string;  // Product link (purchase page, review, etc.)
 
   // Classification
   category: string;

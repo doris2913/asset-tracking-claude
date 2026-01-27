@@ -20,6 +20,7 @@ export default function PurchasedItemsPage() {
   const [filterType, setFilterType] = useState<'all' | 'daily_necessity' | 'one_time_purchase'>('all');
   const [sortBy, setSortBy] = useState<'purchaseDate' | 'satisfaction' | 'price'>('purchaseDate');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<PurchasedItem | null>(null);
 
   const handleAddRating = () => {
     if (ratingModal) {
@@ -43,11 +44,33 @@ export default function PurchasedItemsPage() {
   };
 
   const handleManualAdd = (data: any) => {
-    wishListData.addPurchasedItem({
-      ...data,
-      satisfactionRatings: [],
-    });
+    if (editingItem) {
+      // Edit mode - update existing item
+      wishListData.updatePurchasedItem(editingItem.id, {
+        name: data.name,
+        category: data.category,
+        actualPrice: data.actualPrice,
+        purchaseDate: data.purchaseDate,
+        store: data.store || undefined,
+        link: data.link || undefined,
+        notes: data.notes || undefined,
+        type: data.type,
+        lifeAspects: data.lifeAspects,
+      });
+      setEditingItem(null);
+    } else {
+      // Add mode - create new item
+      wishListData.addPurchasedItem({
+        ...data,
+        satisfactionRatings: [],
+      });
+    }
     setShowAddForm(false);
+  };
+
+  const handleEdit = (item: PurchasedItem) => {
+    setEditingItem(item);
+    setShowAddForm(true);
   };
 
   // Filter and sort
@@ -274,10 +297,23 @@ export default function PurchasedItemsPage() {
                   )}
                 </div>
 
-                {/* Store */}
-                {item.store && (
-                  <div className="text-sm text-gray-600 mb-4">
-                    購買商店: {item.store}
+                {/* Store and Link */}
+                {(item.store || item.link) && (
+                  <div className="text-sm text-gray-600 mb-4 space-y-1">
+                    {item.store && <div>購買商店: {item.store}</div>}
+                    {item.link && (
+                      <div>
+                        產品連結:{' '}
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          🔗 查看連結
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -306,12 +342,18 @@ export default function PurchasedItemsPage() {
                 )}
 
                 {/* Actions - Mobile optimized */}
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 pt-4 border-t">
+                <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 pt-4 border-t">
                   <button
                     onClick={() => setRatingModal(item.id)}
                     className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-yellow-700 bg-yellow-50 rounded-lg hover:bg-yellow-100 active:bg-yellow-200 transition-colors min-h-[44px] sm:min-h-0"
                   >
                     ⭐ 評分
+                  </button>
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0"
+                  >
+                    ✏️ 編輯
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
@@ -381,14 +423,20 @@ export default function PurchasedItemsPage() {
         </div>
       )}
 
-      {/* Add Purchased Item Form Modal */}
+      {/* Add/Edit Purchased Item Form Modal */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">新增購買記錄</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {editingItem ? '編輯購買記錄' : '新增購買記錄'}
+            </h2>
             <PurchasedItemForm
+              item={editingItem || undefined}
               onSubmit={handleManualAdd}
-              onCancel={() => setShowAddForm(false)}
+              onCancel={() => {
+                setShowAddForm(false);
+                setEditingItem(null);
+              }}
             />
           </div>
         </div>
