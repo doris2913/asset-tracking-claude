@@ -6,7 +6,9 @@ import Navigation from '@/components/Navigation';
 import ImportExport from '@/components/ImportExport';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Currency } from '@/types';
+import { Currency, ChartColorTheme } from '@/types';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
+import { CHART_THEME_OPTIONS, CHART_THEMES } from '@/config/chartThemes';
 
 export default function SettingsPage() {
   const {
@@ -21,18 +23,22 @@ export default function SettingsPage() {
   } = useAssetData();
 
   const { t } = useI18n();
+  const { themeId, setThemeId } = useChartTheme();
 
   const [snapshotInterval, setSnapshotInterval] = useState(settings.snapshotIntervalDays);
   const [exchangeRate, setExchangeRate] = useState(currentAssets.exchangeRate);
   const [defaultCurrency, setDefaultCurrency] = useState(settings.defaultCurrency);
   const [saveStatus, setSaveStatus] = useState<string>('');
+  const [selectedTheme, setSelectedTheme] = useState<ChartColorTheme>(themeId);
 
   const handleSaveSettings = () => {
     updateSettings({
       snapshotIntervalDays: snapshotInterval,
       defaultCurrency,
+      chartColorTheme: selectedTheme,
     });
     updateExchangeRate(exchangeRate);
+    setThemeId(selectedTheme);
     setSaveStatus(t.settings.settingsSaved);
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -106,6 +112,47 @@ export default function SettingsPage() {
               />
               <p className="text-xs text-gray-500 mt-1">
                 {t.settings.exchangeRateHint}
+              </p>
+            </div>
+
+            <div>
+              <label className="label">{t.settings.chartColorTheme}</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                {CHART_THEME_OPTIONS.map((option) => {
+                  const themeConfig = CHART_THEMES[option.id];
+                  const isSelected = selectedTheme === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => setSelectedTheme(option.id)}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1 mb-2">
+                        {Object.values(themeConfig.assetColors).slice(0, 4).map((color, i) => (
+                          <div
+                            key={i}
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                      <p className={`text-sm font-medium ${
+                        isSelected
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}>
+                        {t.settings.chartThemes[option.labelKey as keyof typeof t.settings.chartThemes]}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {t.settings.chartColorThemeHint}
               </p>
             </div>
 

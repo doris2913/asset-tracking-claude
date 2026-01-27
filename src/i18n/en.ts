@@ -168,6 +168,15 @@ export const en = {
       importExport: 'Import/Export for data portability',
     },
     language: 'Language',
+    chartColorTheme: 'Chart Color Theme',
+    chartColorThemeHint: 'Choose a color scheme for your charts. The Ocean theme features blue tones.',
+    chartThemes: {
+      default: 'Default',
+      ocean: 'Ocean',
+      forest: 'Forest',
+      sunset: 'Sunset',
+      monochrome: 'Monochrome',
+    },
   },
 
   // Chart

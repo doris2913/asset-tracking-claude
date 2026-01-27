@@ -61,12 +61,16 @@ export interface AppData {
   version: string;           // Data schema version for migrations
 }
 
+// Chart color theme type
+export type ChartColorTheme = 'default' | 'ocean' | 'forest' | 'sunset' | 'monochrome';
+
 // Application settings
 export interface AppSettings {
   snapshotIntervalDays: number;  // Default 30 (monthly)
   defaultCurrency: Currency;
   exchangeRate: number;          // Default USD/TWD rate
   targetAllocation?: Record<AssetType, number>;  // Target percentage for each asset type (0-100)
+  chartColorTheme?: ChartColorTheme;  // Chart color theme (default: 'default')
 }
 
 // Stock quote from Yahoo Finance

@@ -10,6 +10,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { AssetSummary, Currency } from '@/types';
 import { formatCurrency, formatNumber } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -19,21 +20,14 @@ interface AssetBreakdownChartProps {
   excludeLiabilities?: boolean;
 }
 
-const ASSET_TYPE_COLORS: Record<string, string> = {
-  cash_twd: '#22c55e',
-  cash_usd: '#16a34a',
-  stock_tw: '#3b82f6',
-  stock_us: '#6366f1',
-  liability: '#ef4444',
-  us_tbills: '#8b5cf6',
-};
-
 export default function AssetBreakdownChart({
   breakdown,
   currency,
   excludeLiabilities = true,
 }: AssetBreakdownChartProps) {
   const { t } = useI18n();
+  const { theme } = useChartTheme();
+  const assetColors = theme.assetColors;
 
   // Filter out liabilities if excludeLiabilities is true
   const filteredBreakdown = excludeLiabilities
@@ -71,7 +65,7 @@ export default function AssetBreakdownChart({
         data: adjustedBreakdown.map((item) =>
           currency === 'TWD' ? item.totalTWD : item.totalUSD
         ),
-        backgroundColor: adjustedBreakdown.map((item) => ASSET_TYPE_COLORS[item.type]),
+        backgroundColor: adjustedBreakdown.map((item) => assetColors[item.type]),
         borderWidth: 2,
         borderColor: 'white',
       },

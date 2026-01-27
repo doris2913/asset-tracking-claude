@@ -170,6 +170,15 @@ export const zhTW: Translations = {
       importExport: '匯入/匯出資料可攜性',
     },
     language: '語言',
+    chartColorTheme: '圖表顏色主題',
+    chartColorThemeHint: '選擇圖表的配色方案。海洋主題以藍色為主色調。',
+    chartThemes: {
+      default: '預設',
+      ocean: '海洋',
+      forest: '森林',
+      sunset: '日落',
+      monochrome: '單色',
+    },
   },
 
   // Chart
