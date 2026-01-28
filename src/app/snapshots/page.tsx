@@ -49,16 +49,36 @@ export default function SnapshotsPage() {
       : new Date(dateStr);
   };
 
-  // Calculate category history data
-  const categoryHistory = useMemo(() => {
+  // Type for category history row with differences
+  type CategoryHistoryRow = {
+    date: string;
+    total: number;
+    cash_twd: number;
+    cash_usd: number;
+    stock_tw: number;
+    stock_us: number;
+    liability: number;
+    us_tbills: number;
+    total_diff: number | null;
+    cash_twd_diff: number | null;
+    cash_usd_diff: number | null;
+    stock_tw_diff: number | null;
+    stock_us_diff: number | null;
+    liability_diff: number | null;
+    us_tbills_diff: number | null;
+  };
+
+  // Calculate category history data with differences from previous period
+  const categoryHistory = useMemo((): CategoryHistoryRow[] => {
     if (snapshots.length === 0) return [];
 
     const sortedSnapshots = [...snapshots].sort(
       (a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()
     );
 
-    return sortedSnapshots.map((snapshot) => {
-      const categoryValues: Record<AssetType, number> = {
+    // First pass: calculate all category values
+    const historyData = sortedSnapshots.map((snapshot) => {
+      const categoryValues = {
         cash_twd: 0,
         cash_usd: 0,
         stock_tw: 0,
@@ -86,6 +106,22 @@ export default function SnapshotsPage() {
         date: snapshot.date,
         total: displayCurrency === 'TWD' ? snapshot.totalValueTWD : snapshot.totalValueUSD,
         ...categoryValues,
+      };
+    });
+
+    // Second pass: calculate differences from previous period
+    return historyData.map((row, index): CategoryHistoryRow => {
+      const prevRow = historyData[index + 1]; // Previous period (older)
+
+      return {
+        ...row,
+        total_diff: prevRow ? row.total - prevRow.total : null,
+        cash_twd_diff: prevRow ? row.cash_twd - prevRow.cash_twd : null,
+        cash_usd_diff: prevRow ? row.cash_usd - prevRow.cash_usd : null,
+        stock_tw_diff: prevRow ? row.stock_tw - prevRow.stock_tw : null,
+        stock_us_diff: prevRow ? row.stock_us - prevRow.stock_us : null,
+        liability_diff: prevRow ? row.liability - prevRow.liability : null,
+        us_tbills_diff: prevRow ? row.us_tbills - prevRow.us_tbills : null,
       };
     });
   }, [snapshots, displayCurrency]);
@@ -231,37 +267,70 @@ export default function SnapshotsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {categoryHistory.map((row, index) => (
-                    <tr
-                      key={row.date}
-                      className={`border-b border-gray-100 dark:border-gray-800 ${
-                        index === 0 ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
-                      }`}
-                    >
-                      <td className="py-2 px-3 text-gray-900 dark:text-white whitespace-nowrap">
-                        {new Date(row.date).toLocaleDateString(dateLocale, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </td>
-                      {ASSET_TYPES.map((type) => (
-                        <td
-                          key={type}
-                          className={`py-2 px-3 text-right ${
-                            row[type] > 0
-                              ? 'text-gray-900 dark:text-white'
-                              : 'text-gray-400 dark:text-gray-600'
-                          }`}
-                        >
-                          {row[type] > 0 ? formatCurrency(row[type], displayCurrency) : '-'}
+                  {categoryHistory.map((row, index) => {
+                    const totalDiff = row.total_diff as number | null;
+                    return (
+                      <tr
+                        key={row.date}
+                        className={`border-b border-gray-100 dark:border-gray-800 ${
+                          index === 0 ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                        }`}
+                      >
+                        <td className="py-2 px-3 text-gray-900 dark:text-white whitespace-nowrap">
+                          {new Date(row.date).toLocaleDateString(dateLocale, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
                         </td>
-                      ))}
-                      <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white">
-                        {formatCurrency(row.total, displayCurrency)}
-                      </td>
-                    </tr>
-                  ))}
+                        {ASSET_TYPES.map((type) => {
+                          const diffKey = `${type}_diff` as keyof CategoryHistoryRow;
+                          const diff = row[diffKey] as number | null;
+                          return (
+                            <td
+                              key={type}
+                              className={`py-2 px-3 text-right ${
+                                row[type] > 0
+                                  ? 'text-gray-900 dark:text-white'
+                                  : 'text-gray-400 dark:text-gray-600'
+                              }`}
+                            >
+                              <div>
+                                {row[type] > 0 ? formatCurrency(row[type], displayCurrency) : '-'}
+                              </div>
+                              {diff !== null && diff !== 0 && (
+                                <div
+                                  className={`text-xs ${
+                                    diff > 0
+                                      ? 'text-green-600 dark:text-green-400'
+                                      : 'text-red-600 dark:text-red-400'
+                                  }`}
+                                >
+                                  {diff > 0 ? '+' : ''}
+                                  {formatCurrency(diff, displayCurrency)}
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
+                        <td className="py-2 px-3 text-right font-semibold text-gray-900 dark:text-white">
+                          <div>{formatCurrency(row.total, displayCurrency)}</div>
+                          {totalDiff !== null && totalDiff !== 0 && (
+                            <div
+                              className={`text-xs font-normal ${
+                                totalDiff > 0
+                                  ? 'text-green-600 dark:text-green-400'
+                                  : 'text-red-600 dark:text-red-400'
+                              }`}
+                            >
+                              {totalDiff > 0 ? '+' : ''}
+                              {formatCurrency(totalDiff, displayCurrency)}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
