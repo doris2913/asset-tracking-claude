@@ -73,14 +73,19 @@ function analyzeGrowthBetweenSnapshots(
         const endShares = endAsset.shares || 0;
         const sharesDiff = endShares - startShares;
 
-        if (sharesDiff !== 0 && endShares > 0) {
-          // Calculate average price per share at end
-          const pricePerShare = endAsset.value / endShares;
+        if (sharesDiff !== 0 && startShares > 0 && endShares > 0) {
+          // Calculate price per share at START and END periods
+          const pricePerShareStart = startAsset.value / startShares;
+          const pricePerShareEnd = endAsset.value / endShares;
 
-          // New capital from buying/selling shares
+          // Use AVERAGE of start and end price for new capital estimation
+          // This is more accurate for dollar-cost averaging (定期定額) investments
+          const avgPricePerShare = (pricePerShareStart + pricePerShareEnd) / 2;
+
+          // New capital from buying/selling shares (estimated at average price)
           const capitalFromShares = sharesDiff * (currency === 'TWD'
-            ? toTWD(pricePerShare, endAsset.currency, endSnapshot.exchangeRate)
-            : toUSD(pricePerShare, endAsset.currency, endSnapshot.exchangeRate));
+            ? toTWD(avgPricePerShare, startAsset.currency, (startSnapshot.exchangeRate + endSnapshot.exchangeRate) / 2)
+            : toUSD(avgPricePerShare, startAsset.currency, (startSnapshot.exchangeRate + endSnapshot.exchangeRate) / 2));
 
           if (sharesDiff > 0) {
             newCapital += capitalFromShares;
@@ -89,11 +94,15 @@ function analyzeGrowthBetweenSnapshots(
             newCapital += capitalFromShares;
           }
 
-          // The rest is investment return (price appreciation)
+          // Investment return = total value change - new capital contribution
+          // This captures price appreciation on all shares (both old and newly bought)
           const valueDiff = endAssetValue - startAssetValue;
           investmentReturns += valueDiff - capitalFromShares;
+        } else if (startShares === 0 && endShares > 0) {
+          // New stock position - all value is new capital
+          newCapital += endAssetValue;
         } else {
-          // Same number of shares - all difference is investment returns
+          // Same number of shares - all difference is investment returns (price change)
           investmentReturns += endAssetValue - startAssetValue;
         }
       } else if (endAsset.type === 'cash_twd' || endAsset.type === 'cash_usd' || endAsset.type === 'us_tbills') {
