@@ -73,14 +73,14 @@ function analyzeGrowthBetweenSnapshots(
         const endShares = endAsset.shares || 0;
         const sharesDiff = endShares - startShares;
 
-        if (sharesDiff !== 0 && endShares > 0) {
-          // Calculate average price per share at end
-          const pricePerShare = endAsset.value / endShares;
+        if (sharesDiff !== 0 && startShares > 0 && endShares > 0) {
+          // Calculate price per share at START period (more accurate for new capital estimation)
+          const pricePerShareStart = startAsset.value / startShares;
 
-          // New capital from buying/selling shares
+          // New capital from buying/selling shares (estimated at start period price)
           const capitalFromShares = sharesDiff * (currency === 'TWD'
-            ? toTWD(pricePerShare, endAsset.currency, endSnapshot.exchangeRate)
-            : toUSD(pricePerShare, endAsset.currency, endSnapshot.exchangeRate));
+            ? toTWD(pricePerShareStart, startAsset.currency, startSnapshot.exchangeRate)
+            : toUSD(pricePerShareStart, startAsset.currency, startSnapshot.exchangeRate));
 
           if (sharesDiff > 0) {
             newCapital += capitalFromShares;
@@ -89,11 +89,15 @@ function analyzeGrowthBetweenSnapshots(
             newCapital += capitalFromShares;
           }
 
-          // The rest is investment return (price appreciation)
+          // Investment return = total value change - new capital contribution
+          // This captures price appreciation on all shares (both old and newly bought)
           const valueDiff = endAssetValue - startAssetValue;
           investmentReturns += valueDiff - capitalFromShares;
+        } else if (startShares === 0 && endShares > 0) {
+          // New stock position - all value is new capital
+          newCapital += endAssetValue;
         } else {
-          // Same number of shares - all difference is investment returns
+          // Same number of shares - all difference is investment returns (price change)
           investmentReturns += endAssetValue - startAssetValue;
         }
       } else if (endAsset.type === 'cash_twd' || endAsset.type === 'cash_usd' || endAsset.type === 'us_tbills') {

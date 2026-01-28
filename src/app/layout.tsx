@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: 'Asset Tracker',
   description: 'Track your asset growth over time',
   manifest: '/asset-tracking-claude/manifest.json',
+  icons: {
+    icon: '/asset-tracking-claude/icon.svg',
+    apple: '/asset-tracking-claude/icon.svg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
