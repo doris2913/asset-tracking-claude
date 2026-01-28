@@ -74,13 +74,18 @@ function analyzeGrowthBetweenSnapshots(
         const sharesDiff = endShares - startShares;
 
         if (sharesDiff !== 0 && startShares > 0 && endShares > 0) {
-          // Calculate price per share at START period (more accurate for new capital estimation)
+          // Calculate price per share at START and END periods
           const pricePerShareStart = startAsset.value / startShares;
+          const pricePerShareEnd = endAsset.value / endShares;
 
-          // New capital from buying/selling shares (estimated at start period price)
+          // Use AVERAGE of start and end price for new capital estimation
+          // This is more accurate for dollar-cost averaging (定期定額) investments
+          const avgPricePerShare = (pricePerShareStart + pricePerShareEnd) / 2;
+
+          // New capital from buying/selling shares (estimated at average price)
           const capitalFromShares = sharesDiff * (currency === 'TWD'
-            ? toTWD(pricePerShareStart, startAsset.currency, startSnapshot.exchangeRate)
-            : toUSD(pricePerShareStart, startAsset.currency, startSnapshot.exchangeRate));
+            ? toTWD(avgPricePerShare, startAsset.currency, (startSnapshot.exchangeRate + endSnapshot.exchangeRate) / 2)
+            : toUSD(avgPricePerShare, startAsset.currency, (startSnapshot.exchangeRate + endSnapshot.exchangeRate) / 2));
 
           if (sharesDiff > 0) {
             newCapital += capitalFromShares;
