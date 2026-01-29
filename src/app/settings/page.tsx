@@ -8,6 +8,7 @@ import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
 import { Currency, ChartColorTheme } from '@/types';
 import { useChartTheme } from '@/contexts/ChartThemeContext';
+import { useTheme, AppTheme } from '@/contexts/ThemeContext';
 import { CHART_THEME_OPTIONS, CHART_THEMES } from '@/config/chartThemes';
 
 export default function SettingsPage() {
@@ -24,21 +25,24 @@ export default function SettingsPage() {
 
   const { t } = useI18n();
   const { themeId, setThemeId } = useChartTheme();
+  const { theme: appTheme, setTheme: setAppTheme } = useTheme();
 
   const [snapshotInterval, setSnapshotInterval] = useState(settings.snapshotIntervalDays);
   const [exchangeRate, setExchangeRate] = useState(currentAssets.exchangeRate);
   const [defaultCurrency, setDefaultCurrency] = useState(settings.defaultCurrency);
   const [saveStatus, setSaveStatus] = useState<string>('');
-  const [selectedTheme, setSelectedTheme] = useState<ChartColorTheme>(themeId);
+  const [selectedChartTheme, setSelectedChartTheme] = useState<ChartColorTheme>(themeId);
+  const [selectedAppTheme, setSelectedAppTheme] = useState<AppTheme>(appTheme);
 
   const handleSaveSettings = () => {
     updateSettings({
       snapshotIntervalDays: snapshotInterval,
       defaultCurrency,
-      chartColorTheme: selectedTheme,
+      chartColorTheme: selectedChartTheme,
     });
     updateExchangeRate(exchangeRate);
-    setThemeId(selectedTheme);
+    setThemeId(selectedChartTheme);
+    setAppTheme(selectedAppTheme);
     setSaveStatus(t.settings.settingsSaved);
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -116,15 +120,63 @@ export default function SettingsPage() {
             </div>
 
             <div>
+              <label className="label">{t.settings.appTheme}</label>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <button
+                  onClick={() => setSelectedAppTheme('light')}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    selectedAppTheme === 'light'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-200 to-orange-300 flex items-center justify-center">
+                      <span className="text-xl">☀️</span>
+                    </div>
+                  </div>
+                  <p className={`text-sm font-medium text-center ${
+                    selectedAppTheme === 'light'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {t.settings.lightMode}
+                  </p>
+                </button>
+                <button
+                  onClick={() => setSelectedAppTheme('dark')}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    selectedAppTheme === 'dark'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                      <span className="text-xl">🌙</span>
+                    </div>
+                  </div>
+                  <p className={`text-sm font-medium text-center ${
+                    selectedAppTheme === 'dark'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {t.settings.darkMode}
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            <div>
               <label className="label">{t.settings.chartColorTheme}</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
                 {CHART_THEME_OPTIONS.map((option) => {
                   const themeConfig = CHART_THEMES[option.id];
-                  const isSelected = selectedTheme === option.id;
+                  const isSelected = selectedChartTheme === option.id;
                   return (
                     <button
                       key={option.id}
-                      onClick={() => setSelectedTheme(option.id)}
+                      onClick={() => setSelectedChartTheme(option.id)}
                       className={`p-3 rounded-lg border-2 transition-all ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
