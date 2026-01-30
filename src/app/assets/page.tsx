@@ -6,10 +6,11 @@ import AssetList from '@/components/AssetList';
 import AssetForm from '@/components/AssetForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
-import { useStockPrices, fetchExchangeRate, StockPriceWithMA } from '@/lib/yahooFinance';
+import { useStockPrices, fetchExchangeRate } from '@/lib/yahooFinance';
+import { fetchAlphaVantageQuote, getCachedPrice, fetchAlphaVantageExchangeRate } from '@/lib/stockApi';
 import { useI18n } from '@/i18n';
-import { Asset } from '@/types';
-import { formatCurrency } from '@/utils/calculations';
+import { Asset, StockPrice } from '@/types';
+import { formatCurrency, parseStockSymbol } from '@/utils/calculations';
 
 export default function AssetsPage() {
   const {
@@ -17,6 +18,7 @@ export default function AssetsPage() {
     totalTWD,
     totalUSD,
     stockPrices,
+    settings,
     addAsset,
     updateAsset,
     deleteAsset,
@@ -55,7 +57,17 @@ export default function AssetsPage() {
 
   const handleUpdateStockPrices = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價與移動平均...' : 'Fetching stock prices with moving averages...');
+
+    const dataSource = settings.stockDataSource || 'yahoo';
+    const apiKey = settings.alphaVantageApiKey;
+
+    const isAlphaVantage = dataSource === 'alphavantage' && apiKey;
+
+    setPriceUpdateStatus(
+      language === 'zh-TW'
+        ? (isAlphaVantage ? '正在透過 Alpha Vantage 取得股價...' : '正在取得股價與移動平均...')
+        : (isAlphaVantage ? 'Fetching stock prices via Alpha Vantage...' : 'Fetching stock prices with moving averages...')
+    );
 
     try {
       const stockAssets = currentAssets.assets.filter(
@@ -68,17 +80,84 @@ export default function AssetsPage() {
       }
 
       const symbols = stockAssets.map((a) => a.symbol!);
-      const prices = await fetchPricesWithMA(symbols);
 
-      if (Object.keys(prices).length > 0) {
-        updateStockPricesWithMA(prices);
-        setPriceUpdateStatus(
-          language === 'zh-TW'
-            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
-            : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
-        );
+      if (isAlphaVantage) {
+        // Use Alpha Vantage API with caching
+        const prices: Record<string, StockPrice> = {};
+        let fetchedCount = 0;
+        let cachedCount = 0;
+
+        for (let i = 0; i < symbols.length; i++) {
+          const symbol = symbols[i];
+          const { cleanSymbol, isTW } = parseStockSymbol(symbol);
+
+          // Check cache first
+          const cached = getCachedPrice(cleanSymbol);
+          if (cached) {
+            prices[symbol] = {
+              symbol: cleanSymbol,
+              currentPrice: cached.price,
+              movingAvg3M: cached.price,
+              movingAvg1Y: cached.price,
+              currency: cached.currency,
+              lastUpdated: new Date().toISOString(),
+              historicalPrices: {},
+            };
+            cachedCount++;
+            continue;
+          }
+
+          // Fetch from Alpha Vantage
+          setPriceUpdateStatus(
+            language === 'zh-TW'
+              ? `正在取得 ${cleanSymbol} 的股價... (${i + 1}/${symbols.length})`
+              : `Fetching ${cleanSymbol}... (${i + 1}/${symbols.length})`
+          );
+
+          const quote = await fetchAlphaVantageQuote(symbol, apiKey!);
+          if (quote) {
+            prices[symbol] = {
+              symbol: quote.symbol,
+              currentPrice: quote.price,
+              movingAvg3M: quote.price, // Alpha Vantage free tier doesn't provide MA
+              movingAvg1Y: quote.price,
+              currency: quote.currency,
+              lastUpdated: quote.lastUpdated,
+              historicalPrices: {},
+            };
+            fetchedCount++;
+          }
+
+          // Wait between requests (Alpha Vantage rate limit: 5/min for free tier)
+          if (i < symbols.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 12000));
+          }
+        }
+
+        if (Object.keys(prices).length > 0) {
+          updateStockPricesWithMA(prices);
+          setPriceUpdateStatus(
+            language === 'zh-TW'
+              ? `已更新 ${Object.keys(prices).length} 檔股票（${fetchedCount} 新取得，${cachedCount} 來自快取）`
+              : `Updated ${Object.keys(prices).length} stock(s) (${fetchedCount} fetched, ${cachedCount} from cache)`
+          );
+        } else {
+          setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。請檢查 API 金鑰是否正確。' : 'Could not fetch any stock prices. Please check your API key.');
+        }
       } else {
-        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
+        // Use Yahoo Finance (original behavior)
+        const prices = await fetchPricesWithMA(symbols);
+
+        if (Object.keys(prices).length > 0) {
+          updateStockPricesWithMA(prices);
+          setPriceUpdateStatus(
+            language === 'zh-TW'
+              ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
+              : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
+          );
+        } else {
+          setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
+        }
       }
     } catch (error) {
       setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
@@ -91,10 +170,25 @@ export default function AssetsPage() {
 
   const handleUpdateExchangeRate = async () => {
     setIsUpdatingPrices(true);
+
+    const dataSource = settings.stockDataSource || 'yahoo';
+    const apiKey = settings.alphaVantageApiKey;
+    const isAlphaVantage = dataSource === 'alphavantage' && apiKey;
+
     setPriceUpdateStatus(language === 'zh-TW' ? '正在取得匯率...' : 'Fetching exchange rate...');
 
     try {
-      const rate = await fetchExchangeRate();
+      let rate: number | null = null;
+
+      if (isAlphaVantage) {
+        rate = await fetchAlphaVantageExchangeRate(apiKey!);
+      }
+
+      // Fallback to Yahoo Finance if Alpha Vantage fails or not selected
+      if (!rate) {
+        rate = await fetchExchangeRate();
+      }
+
       if (rate) {
         updateExchangeRate(rate);
         setPriceUpdateStatus(
