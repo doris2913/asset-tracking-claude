@@ -8,18 +8,30 @@ const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart';
 
 // Free CORS proxy services (fallback chain)
 const CORS_PROXIES = [
+  '', // Try direct first (works in some environments)
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.org/?',
 ];
 
-// Try fetching with different proxies until one works
+// Try fetching with different methods until one works
 async function fetchWithProxy(targetUrl: string): Promise<Response> {
   let lastError: Error | null = null;
 
   for (const proxy of CORS_PROXIES) {
     try {
-      const url = `${proxy}${encodeURIComponent(targetUrl)}`;
-      const response = await fetch(url);
+      const url = proxy ? `${proxy}${encodeURIComponent(targetUrl)}` : targetUrl;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: proxy ? {} : {
+          'Accept': 'application/json',
+        },
+      });
+
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         return response;
       }
@@ -29,7 +41,7 @@ async function fetchWithProxy(targetUrl: string): Promise<Response> {
     }
   }
 
-  throw lastError || new Error('All CORS proxies failed');
+  throw lastError || new Error('All fetch methods failed');
 }
 
 interface YahooFinanceResponse {

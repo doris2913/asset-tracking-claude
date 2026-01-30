@@ -180,6 +180,16 @@ export const en = {
       sunset: 'Sunset',
       monochrome: 'Monochrome',
     },
+    stockDataSource: 'Stock Price Data Source',
+    yahooFinanceDesc: 'Free, uses CORS proxy',
+    alphaVantageDesc: 'Stable, requires API key',
+    alphaVantageApiKey: 'Alpha Vantage API Key',
+    alphaVantageApiKeyPlaceholder: 'Enter your API key',
+    alphaVantageApiKeyHint: 'Free tier: 25 requests/day.',
+    getApiKey: 'Get free API key',
+    priceCache: 'Stock Price Cache',
+    priceCacheDesc: '{count} prices cached (oldest: {age} min)',
+    clearCache: 'Clear',
   },
 
   // Chart
