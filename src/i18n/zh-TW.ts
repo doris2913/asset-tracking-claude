@@ -182,6 +182,16 @@ export const zhTW: Translations = {
       sunset: '日落',
       monochrome: '單色',
     },
+    stockDataSource: '股價資料來源',
+    yahooFinanceDesc: '免費，使用 CORS 代理',
+    alphaVantageDesc: '穩定，需要 API 金鑰',
+    alphaVantageApiKey: 'Alpha Vantage API 金鑰',
+    alphaVantageApiKeyPlaceholder: '輸入您的 API 金鑰',
+    alphaVantageApiKeyHint: '免費方案：每日 25 次請求。',
+    getApiKey: '取得免費 API 金鑰',
+    priceCache: '股價快取',
+    priceCacheDesc: '已快取 {count} 個股價（最舊：{age} 分鐘前）',
+    clearCache: '清除',
   },
 
   // Chart
