@@ -6,6 +6,7 @@ import { useAssetData } from '@/hooks/useAssetData';
 import WishItemCard from '@/components/wishlist/WishItemCard';
 import WishItemForm from '@/components/wishlist/WishItemForm';
 import ProductComparisonModal from '@/components/wishlist/ProductComparisonModal';
+import GroupManager from '@/components/wishlist/GroupManager';
 import { WishItem } from '@/types/wishlist';
 import { formatCurrency } from '@/utils/calculations';
 import Link from 'next/link';
@@ -26,6 +27,8 @@ export default function WishListPage() {
   const [urlInput, setUrlInput] = useState('');
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [urlStatus, setUrlStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [showGroupManager, setShowGroupManager] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'group'>('list');
 
   // Convert sharing URLs to direct download URLs for supported services
   const convertToDirectUrl = (url: string): string => {
@@ -334,15 +337,52 @@ export default function WishListPage() {
         </div>
       </div>
 
+      {/* View Mode and Group Management */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">顯示模式：</span>
+            <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                }`}
+              >
+                📋 清單
+              </button>
+              <button
+                onClick={() => setViewMode('group')}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  viewMode === 'group'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                }`}
+              >
+                📁 群組
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowGroupManager(true)}
+            className="px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+          >
+            ⚙️ 管理群組 ({wishListData.groups.length})
+          </button>
+        </div>
+      </div>
+
       {/* Filters, Sort, and Data Management - Mobile optimized */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 items-end">
           <div className="col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">優先級</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">優先級</label>
             <select
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">全部</option>
               <option value="high">高優先</option>
@@ -352,11 +392,11 @@ export default function WishListPage() {
           </div>
 
           <div className="col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">類型</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">類型</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">全部</option>
               <option value="need">需要</option>
@@ -365,11 +405,11 @@ export default function WishListPage() {
           </div>
 
           <div className="col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">排序</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">排序</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="dateAdded">新增時間</option>
               <option value="price">價格</option>
@@ -379,10 +419,10 @@ export default function WishListPage() {
           </div>
 
           <div className="col-span-1 sm:ml-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-1 sm:invisible">動作</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:invisible">動作</label>
             <button
               onClick={() => setShowDataManagement(true)}
-              className="w-full px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 active:bg-gray-300 transition-colors min-h-[44px] sm:min-h-0"
+              className="w-full px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 transition-colors min-h-[44px] sm:min-h-0"
             >
               📦 資料管理
             </button>
@@ -392,10 +432,10 @@ export default function WishListPage() {
 
       {/* Items Grid */}
       {filteredItems.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
           <div className="text-gray-400 text-5xl mb-4">📝</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">還沒有願望清單項目</h3>
-          <p className="text-gray-600 mb-6">開始記錄你想要的物品吧！</p>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">還沒有願望清單項目</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">開始記錄你想要的物品吧！</p>
           <button
             onClick={() => setShowForm(true)}
             className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
@@ -403,12 +443,13 @@ export default function WishListPage() {
             新增第一個願望
           </button>
         </div>
-      ) : (
+      ) : viewMode === 'list' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item) => (
             <WishItemCard
               key={item.id}
               item={item}
+              groups={wishListData.groups}
               assetImpact={wishListData.calculateAssetImpact(item.estimatedPrice)}
               onEdit={handleEdit}
               onDelete={handleDelete}
@@ -418,6 +459,97 @@ export default function WishListPage() {
               onCompare={handleCompare}
             />
           ))}
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Grouped items */}
+          {wishListData.groups.map(group => {
+            const groupItems = filteredItems.filter(item =>
+              (item.groupIds || []).includes(group.id)
+            );
+            if (groupItems.length === 0) return null;
+
+            return (
+              <div key={group.id} className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div
+                  className="px-4 py-3 flex items-center gap-3"
+                  style={{ backgroundColor: group.color + '20' }}
+                >
+                  <span className="text-xl">{group.icon || '📁'}</span>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{group.name}</h3>
+                    {group.description && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{group.description}</p>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {groupItems.length} 項目 · {formatCurrency(
+                      groupItems.reduce((sum, item) => sum + item.estimatedPrice, 0),
+                      'TWD'
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {groupItems.map((item) => (
+                    <WishItemCard
+                      key={item.id}
+                      item={item}
+                      groups={wishListData.groups}
+                      assetImpact={wishListData.calculateAssetImpact(item.estimatedPrice)}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onMarkPurchased={handleMarkPurchased}
+                      onMarkRejected={handleMarkRejected}
+                      onAddWant={handleAddWant}
+                      onCompare={handleCompare}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Ungrouped items */}
+          {(() => {
+            const ungroupedItems = filteredItems.filter(item =>
+              !item.groupIds || item.groupIds.length === 0
+            );
+            if (ungroupedItems.length === 0) return null;
+
+            return (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div className="px-4 py-3 flex items-center gap-3 bg-gray-100 dark:bg-gray-700">
+                  <span className="text-xl">📋</span>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">未分類</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">尚未歸類到任何群組的項目</p>
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {ungroupedItems.length} 項目 · {formatCurrency(
+                      ungroupedItems.reduce((sum, item) => sum + item.estimatedPrice, 0),
+                      'TWD'
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {ungroupedItems.map((item) => (
+                    <WishItemCard
+                      key={item.id}
+                      item={item}
+                      groups={wishListData.groups}
+                      assetImpact={wishListData.calculateAssetImpact(item.estimatedPrice)}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onMarkPurchased={handleMarkPurchased}
+                      onMarkRejected={handleMarkRejected}
+                      onAddWant={handleAddWant}
+                      onCompare={handleCompare}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -430,6 +562,7 @@ export default function WishListPage() {
             </h2>
             <WishItemForm
               item={editingItem}
+              groups={wishListData.groups}
               onSubmit={handleAddWishItem}
               onCancel={() => {
                 setShowForm(false);
@@ -605,6 +738,17 @@ export default function WishListPage() {
         <ProductComparisonModal
           item={comparisonItem}
           onClose={() => setComparisonItem(null)}
+        />
+      )}
+
+      {/* Group Manager Modal */}
+      {showGroupManager && (
+        <GroupManager
+          groups={wishListData.groups}
+          onAddGroup={wishListData.addGroup}
+          onUpdateGroup={wishListData.updateGroup}
+          onDeleteGroup={wishListData.deleteGroup}
+          onClose={() => setShowGroupManager(false)}
         />
       )}
     </div>

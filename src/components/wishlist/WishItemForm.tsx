@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { WishItem, LifeAspect, LIFE_ASPECT_CONFIG, CATEGORY_OPTIONS, AlternativeOption } from '@/types/wishlist';
+import { WishItem, WishlistGroup, LifeAspect, LIFE_ASPECT_CONFIG, CATEGORY_OPTIONS, AlternativeOption } from '@/types/wishlist';
 
 interface WishItemFormProps {
   item?: WishItem;
+  groups?: WishlistGroup[];
   onSubmit: (item: Omit<WishItem, 'id' | 'dateAdded' | 'wantHistory'>) => void;
   onCancel: () => void;
 }
 
-export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormProps) {
+export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: WishItemFormProps) {
   const [formData, setFormData] = useState({
     name: item?.name || '',
     category: item?.category || '',
+    groupIds: item?.groupIds || [] as string[],
     estimatedPrice: item?.estimatedPrice || 0,
     specifications: item?.specifications || '',
     isNeed: item?.isNeed || false,
@@ -39,6 +41,7 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
 
     const submitData: Omit<WishItem, 'id' | 'dateAdded' | 'wantHistory'> = {
       ...formData,
+      groupIds: formData.groupIds.length > 0 ? formData.groupIds : undefined,
       links: formData.links ? formData.links.split('\n').filter(l => l.trim()) : [],
       alternativeOptions: alternativeOptions,
       imageUrl: item?.imageUrl,
@@ -130,6 +133,17 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
     setFormData(prev => ({
       ...prev,
       lifeAspects: newAspects,
+    }));
+  };
+
+  const toggleGroup = (groupId: string) => {
+    const newGroupIds = formData.groupIds.includes(groupId)
+      ? formData.groupIds.filter(id => id !== groupId)
+      : [...formData.groupIds, groupId];
+
+    setFormData(prev => ({
+      ...prev,
+      groupIds: newGroupIds,
     }));
   };
 
@@ -253,6 +267,38 @@ export default function WishItemForm({ item, onSubmit, onCancel }: WishItemFormP
           ))}
         </div>
       </div>
+
+      {/* Groups */}
+      {groups.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            需求群組（可多選）
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {groups.map(group => (
+              <button
+                key={group.id}
+                type="button"
+                onClick={() => toggleGroup(group.id)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  formData.groupIds.includes(group.id)
+                    ? 'text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                style={{
+                  backgroundColor: formData.groupIds.includes(group.id) ? group.color : undefined,
+                }}
+              >
+                {group.icon && <span>{group.icon}</span>}
+                {group.name}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            群組可用來歸類相關物品，例如「客廳影音」、「冬季保暖」等
+          </p>
+        </div>
+      )}
 
       {/* Life Aspects */}
       <div>
