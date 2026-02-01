@@ -10,6 +10,7 @@ import {
   WishListAnalytics,
   WantEntry,
   SatisfactionRating,
+  WishlistGroup,
   DEFAULT_WISHLIST_DATA,
 } from '@/types/wishlist';
 import { generateId } from '@/utils/calculations';
@@ -307,6 +308,132 @@ export function useWishListData(props?: UseWishListDataProps) {
     [setData]
   );
 
+  // Add a new group
+  const addGroup = useCallback(
+    (group: Omit<WishlistGroup, 'id' | 'dateCreated'>) => {
+      const newGroup: WishlistGroup = {
+        ...group,
+        id: generateId(),
+        dateCreated: new Date().toISOString(),
+      };
+
+      setData(prev => ({
+        ...prev,
+        groups: [...(prev.groups || []), newGroup],
+      }));
+
+      return newGroup;
+    },
+    [setData]
+  );
+
+  // Update a group
+  const updateGroup = useCallback(
+    (id: string, updates: Partial<Omit<WishlistGroup, 'id' | 'dateCreated'>>) => {
+      setData(prev => {
+        const groups = prev.groups || [];
+        const groupIndex = groups.findIndex(g => g.id === id);
+        if (groupIndex === -1) return prev;
+
+        const updatedGroups = [...groups];
+        updatedGroups[groupIndex] = {
+          ...updatedGroups[groupIndex],
+          ...updates,
+        };
+
+        return {
+          ...prev,
+          groups: updatedGroups,
+        };
+      });
+    },
+    [setData]
+  );
+
+  // Delete a group (also removes from all items)
+  const deleteGroup = useCallback(
+    (id: string) => {
+      setData(prev => ({
+        ...prev,
+        groups: (prev.groups || []).filter(g => g.id !== id),
+        wishItems: prev.wishItems.map(item => ({
+          ...item,
+          groupIds: (item.groupIds || []).filter(gid => gid !== id),
+        })),
+      }));
+    },
+    [setData]
+  );
+
+  // Assign item to a group
+  const assignItemToGroup = useCallback(
+    (itemId: string, groupId: string) => {
+      setData(prev => {
+        const itemIndex = prev.wishItems.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) return prev;
+
+        const updatedItems = [...prev.wishItems];
+        const currentGroupIds = updatedItems[itemIndex].groupIds || [];
+
+        // Only add if not already in the group
+        if (!currentGroupIds.includes(groupId)) {
+          updatedItems[itemIndex] = {
+            ...updatedItems[itemIndex],
+            groupIds: [...currentGroupIds, groupId],
+          };
+        }
+
+        return {
+          ...prev,
+          wishItems: updatedItems,
+        };
+      });
+    },
+    [setData]
+  );
+
+  // Remove item from a group
+  const removeItemFromGroup = useCallback(
+    (itemId: string, groupId: string) => {
+      setData(prev => {
+        const itemIndex = prev.wishItems.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) return prev;
+
+        const updatedItems = [...prev.wishItems];
+        updatedItems[itemIndex] = {
+          ...updatedItems[itemIndex],
+          groupIds: (updatedItems[itemIndex].groupIds || []).filter(gid => gid !== groupId),
+        };
+
+        return {
+          ...prev,
+          wishItems: updatedItems,
+        };
+      });
+    },
+    [setData]
+  );
+
+  // Get items in a specific group
+  const getItemsByGroup = useCallback(
+    (groupId: string): WishItem[] => {
+      return data.wishItems.filter(item =>
+        item.status === 'wishlist' && (item.groupIds || []).includes(groupId)
+      );
+    },
+    [data.wishItems]
+  );
+
+  // Get items not in any group
+  const getUngroupedItems = useCallback(
+    (): WishItem[] => {
+      return data.wishItems.filter(item =>
+        item.status === 'wishlist' && (!item.groupIds || item.groupIds.length === 0)
+      );
+    },
+    [data.wishItems]
+  );
+
   // Export data as JSON
   const exportData = useCallback((): string => {
     return JSON.stringify(data, null, 2);
@@ -320,6 +447,10 @@ export function useWishListData(props?: UseWishListDataProps) {
         // Basic validation
         if (!imported.wishItems || !imported.purchasedItems || !imported.settings) {
           throw new Error('Invalid data format');
+        }
+        // Ensure groups array exists (for backward compatibility)
+        if (!imported.groups) {
+          imported.groups = [];
         }
         setData(imported);
         return true;
@@ -374,6 +505,7 @@ export function useWishListData(props?: UseWishListDataProps) {
     purchasedWishItems,
     rejectedWishItems,
     purchasedItems: data.purchasedItems,
+    groups: data.groups || [],
     settings: data.settings,
     isLoaded,
 
@@ -398,6 +530,15 @@ export function useWishListData(props?: UseWishListDataProps) {
     updatePurchasedItem,
     deletePurchasedItem,
     addSatisfactionRating,
+
+    // Group operations
+    addGroup,
+    updateGroup,
+    deleteGroup,
+    assignItemToGroup,
+    removeItemFromGroup,
+    getItemsByGroup,
+    getUngroupedItems,
 
     // Settings operations
     updateSettings,

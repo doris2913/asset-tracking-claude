@@ -1,6 +1,6 @@
 'use client';
 
-import { WishItem } from '@/types/wishlist';
+import { WishItem, WishlistGroup } from '@/types/wishlist';
 import { LIFE_ASPECT_CONFIG } from '@/types/wishlist';
 import { formatCurrency } from '@/utils/calculations';
 import {
@@ -12,6 +12,7 @@ import {
 
 interface WishItemCardProps {
   item: WishItem;
+  groups?: WishlistGroup[];
   assetImpact?: number;
   onEdit?: (item: WishItem) => void;
   onDelete?: (id: string) => void;
@@ -23,6 +24,7 @@ interface WishItemCardProps {
 
 export default function WishItemCard({
   item,
+  groups = [],
   assetImpact = 0,
   onEdit,
   onDelete,
@@ -42,20 +44,41 @@ export default function WishItemCard({
     high: 'bg-red-100 text-red-700',
   };
 
+  // Get item's groups
+  const itemGroups = groups.filter(g => (item.groupIds || []).includes(g.id));
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{item.name}</h3>
             {item.isNeed && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">
+              <span className="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 rounded">
                 需要
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500">{item.category}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{item.category}</p>
+          {/* Group Badges */}
+          {itemGroups.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {itemGroups.map(group => (
+                <span
+                  key={group.id}
+                  className="px-2 py-0.5 text-xs font-medium rounded-full flex items-center gap-1"
+                  style={{
+                    backgroundColor: group.color + '20',
+                    color: group.color,
+                  }}
+                >
+                  {group.icon && <span>{group.icon}</span>}
+                  {group.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <span
           className={`px-2 py-1 text-xs font-medium rounded ${priorityColors[item.priority]}`}

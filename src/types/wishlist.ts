@@ -22,6 +22,40 @@ export const LIFE_ASPECT_CONFIG: Record<LifeAspect, { label: string; labelZh: st
   home_appliances: { label: 'Home Appliances', labelZh: '家電', icon: '🏠', color: '#10b981' },
 };
 
+// Wishlist group/collection for organizing items by needs/pain points
+export interface WishlistGroup {
+  id: string;
+  name: string;           // e.g., "客廳影音", "2025冬季保暖"
+  description?: string;   // Optional description of the need/pain point
+  color: string;          // Color for visual distinction
+  icon?: string;          // Optional emoji icon
+  dateCreated: string;    // ISO date string
+}
+
+// Predefined group colors
+export const GROUP_COLORS = [
+  '#ef4444', // red
+  '#f97316', // orange
+  '#f59e0b', // amber
+  '#84cc16', // lime
+  '#22c55e', // green
+  '#14b8a6', // teal
+  '#06b6d4', // cyan
+  '#0ea5e9', // sky
+  '#3b82f6', // blue
+  '#6366f1', // indigo
+  '#8b5cf6', // violet
+  '#a855f7', // purple
+  '#d946ef', // fuchsia
+  '#ec4899', // pink
+];
+
+// Predefined group icons
+export const GROUP_ICONS = [
+  '🎯', '💡', '🏠', '🎮', '👔', '🏃', '💻', '📱', '🎵', '📚',
+  '🛋️', '🍳', '🚗', '✈️', '🎁', '❄️', '☀️', '🌙', '⭐', '🔥',
+];
+
 // Predefined categories with Chinese labels
 export const CATEGORY_OPTIONS = [
   { value: '3C產品', label: '3C產品', icon: '💻' },
@@ -64,6 +98,7 @@ export interface WishItem {
   id: string;
   name: string;
   category: string;       // User-defined or predefined categories
+  groupIds?: string[];    // IDs of groups this item belongs to
 
   // Purchase details
   estimatedPrice: number;
@@ -160,6 +195,7 @@ export interface WishListAnalytics {
 export interface WishListData {
   wishItems: WishItem[];
   purchasedItems: PurchasedItem[];
+  groups: WishlistGroup[];  // Custom groups for organizing items
   settings: WishListSettings;
   version: string;
 }
@@ -178,6 +214,7 @@ export const DEFAULT_WISHLIST_SETTINGS: WishListSettings = {
 export const DEFAULT_WISHLIST_DATA: WishListData = {
   wishItems: [],
   purchasedItems: [],
+  groups: [],
   settings: DEFAULT_WISHLIST_SETTINGS,
-  version: '1.0.0',
+  version: '1.1.0',
 };
