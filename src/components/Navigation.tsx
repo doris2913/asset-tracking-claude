@@ -15,6 +15,7 @@ export default function Navigation() {
     { href: '/assets', label: t.nav.assets, icon: '💰' },
     { href: '/details', label: t.nav.details, icon: '📋' },
     { href: '/snapshots', label: t.nav.snapshots, icon: '📸' },
+    { href: '/wishlist', label: t.nav.wishlist || 'Wish List', icon: '❤️' },
     { href: '/migrate', label: t.nav.migrate, icon: '📥' },
     { href: '/settings', label: t.nav.settings, icon: '⚙️' },
   ];
@@ -135,23 +136,23 @@ export default function Navigation() {
         )}
       </nav>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation - Touch optimized */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex justify-around items-center h-16">
           {bottomNavItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+                className={`flex flex-col items-center justify-center flex-1 h-full min-w-[64px] transition-colors active:bg-gray-100 dark:active:bg-gray-700 ${
                   isActive
                     ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-500 dark:text-gray-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <span className="text-xl">{item.icon}</span>
-                <span className="text-xs mt-1">{item.label}</span>
+                <span className="text-2xl mb-0.5">{item.icon}</span>
+                <span className={`text-[10px] leading-tight ${isActive ? 'font-medium' : ''}`}>{item.label}</span>
               </Link>
             );
           })}

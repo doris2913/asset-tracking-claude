@@ -3,11 +3,46 @@
 import { StockQuote, Currency } from '@/types';
 import { parseStockSymbol } from '@/utils/calculations';
 
-// Yahoo Finance query endpoint (using a CORS proxy for client-side requests)
+// Yahoo Finance query endpoint
 const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart';
 
-// Alternative: Use a CORS proxy service for client-side requests
-const CORS_PROXY = 'https://corsproxy.io/?';
+// Free CORS proxy services (fallback chain)
+const CORS_PROXIES = [
+  '', // Try direct first (works in some environments)
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.org/?',
+];
+
+// Try fetching with different methods until one works
+async function fetchWithProxy(targetUrl: string): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const url = proxy ? `${proxy}${encodeURIComponent(targetUrl)}` : targetUrl;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: proxy ? {} : {
+          'Accept': 'application/json',
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        return response;
+      }
+    } catch (error) {
+      lastError = error as Error;
+      continue;
+    }
+  }
+
+  throw lastError || new Error('All fetch methods failed');
+}
 
 interface YahooFinanceResponse {
   chart: {
@@ -43,17 +78,13 @@ export interface StockPriceWithMA {
 export async function fetchStockQuote(symbol: string): Promise<StockQuote | null> {
   try {
     const { cleanSymbol } = parseStockSymbol(symbol);
-    const url = `${CORS_PROXY}${encodeURIComponent(`${YAHOO_FINANCE_BASE}/${cleanSymbol}`)}`;
+    const targetUrl = `${YAHOO_FINANCE_BASE}/${cleanSymbol}`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
+    const response = await fetchWithProxy(targetUrl);
     const data: YahooFinanceResponse = await response.json();
 
-    if (data.chart.error || !data.chart.result?.[0]) {
-      console.error('Yahoo Finance error:', data.chart.error);
+    if (data.chart?.error || !data.chart?.result?.[0]) {
+      console.error('Yahoo Finance error:', data.chart?.error);
       return null;
     }
 
@@ -117,16 +148,12 @@ export async function fetchMultipleQuotes(
 export async function fetchExchangeRate(): Promise<number | null> {
   try {
     // Use Yahoo Finance to get USD/TWD exchange rate
-    const url = `${CORS_PROXY}${encodeURIComponent(`${YAHOO_FINANCE_BASE}/USDTWD=X`)}`;
+    const targetUrl = `${YAHOO_FINANCE_BASE}/USDTWD=X`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
+    const response = await fetchWithProxy(targetUrl);
     const data: YahooFinanceResponse = await response.json();
 
-    if (data.chart.error || !data.chart.result?.[0]) {
+    if (data.chart?.error || !data.chart?.result?.[0]) {
       console.error('Failed to fetch exchange rate');
       return null;
     }
@@ -143,17 +170,13 @@ export async function fetchStockQuoteWithMA(symbol: string): Promise<StockPriceW
   try {
     const { cleanSymbol } = parseStockSymbol(symbol);
     // Request 1 year of daily data
-    const url = `${CORS_PROXY}${encodeURIComponent(`${YAHOO_FINANCE_BASE}/${cleanSymbol}?interval=1d&range=1y`)}`;
+    const targetUrl = `${YAHOO_FINANCE_BASE}/${cleanSymbol}?interval=1d&range=1y`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
+    const response = await fetchWithProxy(targetUrl);
     const data: YahooFinanceResponse = await response.json();
 
-    if (data.chart.error || !data.chart.result?.[0]) {
-      console.error('Yahoo Finance error:', data.chart.error);
+    if (data.chart?.error || !data.chart?.result?.[0]) {
+      console.error('Yahoo Finance error:', data.chart?.error);
       return null;
     }
 

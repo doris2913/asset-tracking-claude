@@ -6,7 +6,11 @@ import Navigation from '@/components/Navigation';
 import ImportExport from '@/components/ImportExport';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Currency } from '@/types';
+import { Currency, ChartColorTheme, StockDataSource } from '@/types';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
+import { useTheme, AppTheme } from '@/contexts/ThemeContext';
+import { CHART_THEME_OPTIONS, CHART_THEMES } from '@/config/chartThemes';
+import { getCacheStats, clearStockCache } from '@/lib/stockApi';
 
 export default function SettingsPage() {
   const {
@@ -21,20 +25,37 @@ export default function SettingsPage() {
   } = useAssetData();
 
   const { t } = useI18n();
+  const { themeId, setThemeId } = useChartTheme();
+  const { theme: appTheme, setTheme: setAppTheme } = useTheme();
 
   const [snapshotInterval, setSnapshotInterval] = useState(settings.snapshotIntervalDays);
   const [exchangeRate, setExchangeRate] = useState(currentAssets.exchangeRate);
   const [defaultCurrency, setDefaultCurrency] = useState(settings.defaultCurrency);
   const [saveStatus, setSaveStatus] = useState<string>('');
+  const [selectedChartTheme, setSelectedChartTheme] = useState<ChartColorTheme>(themeId);
+  const [selectedAppTheme, setSelectedAppTheme] = useState<AppTheme>(appTheme);
+  const [stockDataSource, setStockDataSource] = useState<StockDataSource>(settings.stockDataSource || 'yahoo');
+  const [alphaVantageApiKey, setAlphaVantageApiKey] = useState(settings.alphaVantageApiKey || '');
+  const [cacheStats, setCacheStats] = useState(getCacheStats());
 
   const handleSaveSettings = () => {
     updateSettings({
       snapshotIntervalDays: snapshotInterval,
       defaultCurrency,
+      chartColorTheme: selectedChartTheme,
+      stockDataSource,
+      alphaVantageApiKey: alphaVantageApiKey || undefined,
     });
     updateExchangeRate(exchangeRate);
+    setThemeId(selectedChartTheme);
+    setAppTheme(selectedAppTheme);
     setSaveStatus(t.settings.settingsSaved);
     setTimeout(() => setSaveStatus(''), 3000);
+  };
+
+  const handleClearCache = () => {
+    clearStockCache();
+    setCacheStats(getCacheStats());
   };
 
   if (!isLoaded) {
@@ -107,6 +128,178 @@ export default function SettingsPage() {
               <p className="text-xs text-gray-500 mt-1">
                 {t.settings.exchangeRateHint}
               </p>
+            </div>
+
+            <div>
+              <label className="label">{t.settings.appTheme}</label>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <button
+                  onClick={() => setSelectedAppTheme('light')}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    selectedAppTheme === 'light'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-200 to-orange-300 flex items-center justify-center">
+                      <span className="text-xl">☀️</span>
+                    </div>
+                  </div>
+                  <p className={`text-sm font-medium text-center ${
+                    selectedAppTheme === 'light'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {t.settings.lightMode}
+                  </p>
+                </button>
+                <button
+                  onClick={() => setSelectedAppTheme('dark')}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    selectedAppTheme === 'dark'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                      <span className="text-xl">🌙</span>
+                    </div>
+                  </div>
+                  <p className={`text-sm font-medium text-center ${
+                    selectedAppTheme === 'dark'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {t.settings.darkMode}
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="label">{t.settings.chartColorTheme}</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                {CHART_THEME_OPTIONS.map((option) => {
+                  const themeConfig = CHART_THEMES[option.id];
+                  const isSelected = selectedChartTheme === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => setSelectedChartTheme(option.id)}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1 mb-2">
+                        {Object.values(themeConfig.assetColors).slice(0, 4).map((color, i) => (
+                          <div
+                            key={i}
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                      <p className={`text-sm font-medium ${
+                        isSelected
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}>
+                        {t.settings.chartThemes[option.labelKey as keyof typeof t.settings.chartThemes]}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {t.settings.chartColorThemeHint}
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+              <label className="label">{t.settings.stockDataSource}</label>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <button
+                  onClick={() => setStockDataSource('yahoo')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    stockDataSource === 'yahoo'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${
+                    stockDataSource === 'yahoo'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    Yahoo Finance
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{t.settings.yahooFinanceDesc}</p>
+                </button>
+                <button
+                  onClick={() => setStockDataSource('alphavantage')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    stockDataSource === 'alphavantage'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${
+                    stockDataSource === 'alphavantage'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    Alpha Vantage
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{t.settings.alphaVantageDesc}</p>
+                </button>
+              </div>
+
+              {stockDataSource === 'alphavantage' && (
+                <div className="mt-4">
+                  <label className="label">{t.settings.alphaVantageApiKey}</label>
+                  <input
+                    type="text"
+                    value={alphaVantageApiKey}
+                    onChange={(e) => setAlphaVantageApiKey(e.target.value)}
+                    placeholder={t.settings.alphaVantageApiKeyPlaceholder}
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t.settings.alphaVantageApiKeyHint}{' '}
+                    <a
+                      href="https://www.alphavantage.co/support/#api-key"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      {t.settings.getApiKey}
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t.settings.priceCache}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {t.settings.priceCacheDesc.replace('{count}', String(cacheStats.count)).replace('{age}', String(cacheStats.oldestAge))}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleClearCache}
+                    className="btn btn-secondary text-sm py-1 px-3"
+                  >
+                    {t.settings.clearCache}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="pt-4">

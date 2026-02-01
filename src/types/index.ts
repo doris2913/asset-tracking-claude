@@ -61,12 +61,21 @@ export interface AppData {
   version: string;           // Data schema version for migrations
 }
 
+// Chart color theme type
+export type ChartColorTheme = 'default' | 'ocean' | 'forest' | 'sunset' | 'monochrome';
+
+// Stock price data source
+export type StockDataSource = 'yahoo' | 'alphavantage';
+
 // Application settings
 export interface AppSettings {
   snapshotIntervalDays: number;  // Default 30 (monthly)
   defaultCurrency: Currency;
   exchangeRate: number;          // Default USD/TWD rate
   targetAllocation?: Record<AssetType, number>;  // Target percentage for each asset type (0-100)
+  chartColorTheme?: ChartColorTheme;  // Chart color theme (default: 'default')
+  stockDataSource?: StockDataSource;  // Stock price data source (default: 'yahoo')
+  alphaVantageApiKey?: string;  // Alpha Vantage API key (optional)
 }
 
 // Stock quote from Yahoo Finance

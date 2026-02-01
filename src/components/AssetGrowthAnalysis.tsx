@@ -73,14 +73,19 @@ function analyzeGrowthBetweenSnapshots(
         const endShares = endAsset.shares || 0;
         const sharesDiff = endShares - startShares;
 
-        if (sharesDiff !== 0 && endShares > 0) {
-          // Calculate average price per share at end
-          const pricePerShare = endAsset.value / endShares;
+        if (sharesDiff !== 0 && startShares > 0 && endShares > 0) {
+          // Calculate price per share at START and END periods
+          const pricePerShareStart = startAsset.value / startShares;
+          const pricePerShareEnd = endAsset.value / endShares;
 
-          // New capital from buying/selling shares
+          // Use AVERAGE of start and end price for new capital estimation
+          // This is more accurate for dollar-cost averaging (定期定額) investments
+          const avgPricePerShare = (pricePerShareStart + pricePerShareEnd) / 2;
+
+          // New capital from buying/selling shares (estimated at average price)
           const capitalFromShares = sharesDiff * (currency === 'TWD'
-            ? toTWD(pricePerShare, endAsset.currency, endSnapshot.exchangeRate)
-            : toUSD(pricePerShare, endAsset.currency, endSnapshot.exchangeRate));
+            ? toTWD(avgPricePerShare, startAsset.currency, (startSnapshot.exchangeRate + endSnapshot.exchangeRate) / 2)
+            : toUSD(avgPricePerShare, startAsset.currency, (startSnapshot.exchangeRate + endSnapshot.exchangeRate) / 2));
 
           if (sharesDiff > 0) {
             newCapital += capitalFromShares;
@@ -89,11 +94,15 @@ function analyzeGrowthBetweenSnapshots(
             newCapital += capitalFromShares;
           }
 
-          // The rest is investment return (price appreciation)
+          // Investment return = total value change - new capital contribution
+          // This captures price appreciation on all shares (both old and newly bought)
           const valueDiff = endAssetValue - startAssetValue;
           investmentReturns += valueDiff - capitalFromShares;
+        } else if (startShares === 0 && endShares > 0) {
+          // New stock position - all value is new capital
+          newCapital += endAssetValue;
         } else {
-          // Same number of shares - all difference is investment returns
+          // Same number of shares - all difference is investment returns (price change)
           investmentReturns += endAssetValue - startAssetValue;
         }
       } else if (endAsset.type === 'cash_twd' || endAsset.type === 'cash_usd' || endAsset.type === 'us_tbills') {
@@ -131,10 +140,29 @@ function analyzeGrowthBetweenSnapshots(
     investmentReturns = totalGrowth - newCapital;
   }
 
-  // Calculate percentages
-  const absTotal = Math.abs(newCapital) + Math.abs(investmentReturns);
-  const newCapitalPercentage = absTotal > 0 ? (Math.abs(newCapital) / absTotal) * 100 : 0;
-  const investmentReturnsPercentage = absTotal > 0 ? (Math.abs(investmentReturns) / absTotal) * 100 : 0;
+  // Calculate percentages relative to total growth (net change)
+  // This allows positive items to exceed 100% when there are negative items
+  // e.g., if totalGrowth=100, newCapital=150, investmentReturns=-50
+  //       newCapitalPercentage=150%, investmentReturnsPercentage=-50%
+  const absTotalGrowth = Math.abs(totalGrowth);
+  let newCapitalPercentage: number;
+  let investmentReturnsPercentage: number;
+
+  if (absTotalGrowth > 0) {
+    // Calculate as percentage of net growth (can be negative or >100%)
+    newCapitalPercentage = (newCapital / absTotalGrowth) * 100;
+    investmentReturnsPercentage = (investmentReturns / absTotalGrowth) * 100;
+    // If total growth is negative, flip the signs so they make sense
+    if (totalGrowth < 0) {
+      newCapitalPercentage = -newCapitalPercentage;
+      investmentReturnsPercentage = -investmentReturnsPercentage;
+    }
+  } else {
+    // When total growth is zero, use absolute value ratio
+    const absTotal = Math.abs(newCapital) + Math.abs(investmentReturns);
+    newCapitalPercentage = absTotal > 0 ? (newCapital / absTotal) * 100 : 0;
+    investmentReturnsPercentage = absTotal > 0 ? (investmentReturns / absTotal) * 100 : 0;
+  }
 
   // Format period string
   const startDate = new Date(startSnapshot.date);
@@ -300,16 +328,21 @@ export default function AssetGrowthAnalysis({
           <div className="mt-3">
             <div className="flex justify-between text-sm mb-1">
               <span className="text-gray-600 dark:text-gray-400">{labels.contribution}</span>
-              <span className="font-medium text-gray-900 dark:text-white">
-                {currentAnalysis.newCapitalPercentage.toFixed(1)}%
+              <span className={`font-medium ${currentAnalysis.newCapitalPercentage >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                {currentAnalysis.newCapitalPercentage >= 0 ? '+' : ''}{currentAnalysis.newCapitalPercentage.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
               <div
-                className={`h-2 rounded-full ${capitalIsPositive ? 'bg-blue-500' : 'bg-orange-500'}`}
-                style={{ width: `${Math.min(currentAnalysis.newCapitalPercentage, 100)}%` }}
+                className={`h-2 rounded-full ${currentAnalysis.newCapitalPercentage >= 0 ? 'bg-blue-500' : 'bg-orange-500'}`}
+                style={{ width: `${Math.min(Math.abs(currentAnalysis.newCapitalPercentage), 100)}%` }}
               ></div>
             </div>
+            {Math.abs(currentAnalysis.newCapitalPercentage) > 100 && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                * {currentAnalysis.newCapitalPercentage > 0 ? '超過' : '低於'} 100%（因另一項為負）
+              </p>
+            )}
           </div>
         </div>
 
@@ -328,16 +361,21 @@ export default function AssetGrowthAnalysis({
           <div className="mt-3">
             <div className="flex justify-between text-sm mb-1">
               <span className="text-gray-600 dark:text-gray-400">{labels.contribution}</span>
-              <span className="font-medium text-gray-900 dark:text-white">
-                {currentAnalysis.investmentReturnsPercentage.toFixed(1)}%
+              <span className={`font-medium ${currentAnalysis.investmentReturnsPercentage >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {currentAnalysis.investmentReturnsPercentage >= 0 ? '+' : ''}{currentAnalysis.investmentReturnsPercentage.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
               <div
-                className={`h-2 rounded-full ${returnsIsPositive ? 'bg-green-500' : 'bg-red-500'}`}
-                style={{ width: `${Math.min(currentAnalysis.investmentReturnsPercentage, 100)}%` }}
+                className={`h-2 rounded-full ${currentAnalysis.investmentReturnsPercentage >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                style={{ width: `${Math.min(Math.abs(currentAnalysis.investmentReturnsPercentage), 100)}%` }}
               ></div>
             </div>
+            {Math.abs(currentAnalysis.investmentReturnsPercentage) > 100 && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                * {currentAnalysis.investmentReturnsPercentage > 0 ? '超過' : '低於'} 100%（因另一項為負）
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -346,41 +384,77 @@ export default function AssetGrowthAnalysis({
       {Math.abs(currentAnalysis.totalGrowth) > 0.01 && (
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            {language === 'zh-TW' ? '成長組成' : 'Growth Composition'}
+            {language === 'zh-TW' ? '成長組成（相對於淨成長 = 100%）' : 'Growth Composition (relative to net growth = 100%)'}
           </p>
-          <div className="flex h-8 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
-            {currentAnalysis.newCapitalPercentage > 0 && (
-              <div
-                className={`flex items-center justify-center text-white text-sm font-medium ${capitalIsPositive ? 'bg-blue-500' : 'bg-orange-500'}`}
-                style={{ width: `${currentAnalysis.newCapitalPercentage}%` }}
-                title={`${labels.newCapital}: ${capitalIsPositive ? '+' : ''}${formatCurrency(currentAnalysis.newCapital, currency)}`}
-              >
-                {currentAnalysis.newCapitalPercentage > 15 && `${currentAnalysis.newCapitalPercentage.toFixed(0)}%`}
+
+          {/* Show stacked bar for contributions */}
+          <div className="space-y-2">
+            {/* New Capital bar */}
+            <div className="flex items-center gap-2">
+              <span className="w-20 text-xs text-gray-600 dark:text-gray-400 truncate">{labels.newCapital}</span>
+              <div className="flex-1 flex items-center">
+                {currentAnalysis.newCapitalPercentage >= 0 ? (
+                  <div className="flex-1 h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 flex items-center justify-end pr-2 text-white text-xs font-medium"
+                      style={{ width: `${Math.min(currentAnalysis.newCapitalPercentage, 100)}%`, minWidth: currentAnalysis.newCapitalPercentage > 0 ? '40px' : '0' }}
+                    >
+                      +{currentAnalysis.newCapitalPercentage.toFixed(0)}%
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-orange-500 flex items-center justify-end pr-2 text-white text-xs font-medium"
+                      style={{ width: `${Math.min(Math.abs(currentAnalysis.newCapitalPercentage), 100)}%`, minWidth: '40px' }}
+                    >
+                      {currentAnalysis.newCapitalPercentage.toFixed(0)}%
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            {currentAnalysis.investmentReturnsPercentage > 0 && (
-              <div
-                className={`flex items-center justify-center text-white text-sm font-medium ${returnsIsPositive ? 'bg-green-500' : 'bg-red-500'}`}
-                style={{ width: `${currentAnalysis.investmentReturnsPercentage}%` }}
-                title={`${labels.investmentReturns}: ${returnsIsPositive ? '+' : ''}${formatCurrency(currentAnalysis.investmentReturns, currency)}`}
-              >
-                {currentAnalysis.investmentReturnsPercentage > 15 && `${currentAnalysis.investmentReturnsPercentage.toFixed(0)}%`}
+            </div>
+
+            {/* Investment Returns bar */}
+            <div className="flex items-center gap-2">
+              <span className="w-20 text-xs text-gray-600 dark:text-gray-400 truncate">{labels.investmentReturns}</span>
+              <div className="flex-1 flex items-center">
+                {currentAnalysis.investmentReturnsPercentage >= 0 ? (
+                  <div className="flex-1 h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-green-500 flex items-center justify-end pr-2 text-white text-xs font-medium"
+                      style={{ width: `${Math.min(currentAnalysis.investmentReturnsPercentage, 100)}%`, minWidth: currentAnalysis.investmentReturnsPercentage > 0 ? '40px' : '0' }}
+                    >
+                      +{currentAnalysis.investmentReturnsPercentage.toFixed(0)}%
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 h-6 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-red-500 flex items-center justify-end pr-2 text-white text-xs font-medium"
+                      style={{ width: `${Math.min(Math.abs(currentAnalysis.investmentReturnsPercentage), 100)}%`, minWidth: '40px' }}
+                    >
+                      {currentAnalysis.investmentReturnsPercentage.toFixed(0)}%
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-          <div className="flex justify-between mt-2 text-xs">
-            <span className={capitalIsPositive ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}>
-              {labels.newCapital} {capitalIsPositive ? '↑' : '↓'}
-            </span>
-            <span className={returnsIsPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-              {labels.investmentReturns} {returnsIsPositive ? '↑' : '↓'}
+
+          <div className="flex justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <span>
+              {language === 'zh-TW'
+                ? `淨成長: ${growthIsPositive ? '+' : ''}${formatCurrency(currentAnalysis.totalGrowth, currency)} = 100%`
+                : `Net Growth: ${growthIsPositive ? '+' : ''}${formatCurrency(currentAnalysis.totalGrowth, currency)} = 100%`}
             </span>
           </div>
-          {(!capitalIsPositive || !returnsIsPositive) && (
+
+          {(currentAnalysis.newCapitalPercentage < 0 || currentAnalysis.investmentReturnsPercentage < 0) && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {language === 'zh-TW'
-                ? '* 長條圖以絕對值顯示各項目佔比，箭頭表示增減方向'
-                : '* Bar shows relative contribution by absolute value, arrows indicate direction'}
+                ? '* 當有正負混合時，正向貢獻可能超過 100%，負向貢獻顯示為負百分比'
+                : '* When mixed positive/negative, positive contributions may exceed 100%, negative shown as negative percentage'}
             </p>
           )}
         </div>
