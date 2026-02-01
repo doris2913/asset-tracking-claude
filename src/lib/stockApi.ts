@@ -86,45 +86,64 @@ export async function fetchAlphaVantageQuote(
   try {
     const { cleanSymbol, isTW } = parseStockSymbol(symbol);
 
-    // Alpha Vantage uses different symbol format for TW stocks
-    const avSymbol = isTW
-      ? cleanSymbol.replace('.TW', '.TWO').replace('.TWO', '.TPE')
-      : cleanSymbol;
+    // Alpha Vantage uses different symbol formats for TW stocks
+    // Try multiple formats: .TPE (preferred), .TWO (OTC), and original
+    const symbolsToTry: string[] = [];
 
-    const url = `${ALPHA_VANTAGE_BASE}?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(avSymbol)}&apikey=${apiKey}`;
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (isTW) {
+      // Extract the numeric part for Taiwan stocks
+      const numericPart = cleanSymbol.replace('.TW', '').replace('.TWO', '');
+      symbolsToTry.push(`${numericPart}.TPE`);  // Main exchange
+      symbolsToTry.push(`${numericPart}.TWO`);  // OTC market
+      symbolsToTry.push(cleanSymbol);  // Original format
+    } else {
+      symbolsToTry.push(cleanSymbol);
     }
 
-    const data: AlphaVantageQuote = await response.json();
+    for (const avSymbol of symbolsToTry) {
+      const url = `${ALPHA_VANTAGE_BASE}?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(avSymbol)}&apikey=${apiKey}`;
 
-    if (!data['Global Quote'] || !data['Global Quote']['05. price']) {
-      console.error('Alpha Vantage: No data for symbol', symbol);
-      return null;
+      const response = await fetch(url);
+      if (!response.ok) {
+        continue;
+      }
+
+      const data: AlphaVantageQuote = await response.json();
+
+      // Check for rate limit error
+      const dataObj = data as unknown as Record<string, unknown>;
+      if ('Note' in dataObj || 'Information' in dataObj) {
+        console.warn('Alpha Vantage: Rate limit reached');
+        return null;
+      }
+
+      if (!data['Global Quote'] || !data['Global Quote']['05. price']) {
+        continue;  // Try next symbol format
+      }
+
+      const quote = data['Global Quote'];
+      const price = parseFloat(quote['05. price']);
+      const change = parseFloat(quote['09. change'] || '0');
+      const changePercent = parseFloat((quote['10. change percent'] || '0%').replace('%', ''));
+
+      // Determine currency based on symbol
+      const currency: Currency = isTW ? 'TWD' : 'USD';
+
+      // Cache the price
+      setCachedPrice(cleanSymbol, price, currency);
+
+      return {
+        symbol: cleanSymbol,
+        price,
+        currency,
+        change,
+        changePercent,
+        lastUpdated: new Date().toISOString(),
+      };
     }
 
-    const quote = data['Global Quote'];
-    const price = parseFloat(quote['05. price']);
-    const previousClose = parseFloat(quote['08. previous close']);
-    const change = parseFloat(quote['09. change']);
-    const changePercent = parseFloat(quote['10. change percent'].replace('%', ''));
-
-    // Determine currency based on symbol
-    const currency: Currency = isTW ? 'TWD' : 'USD';
-
-    // Cache the price
-    setCachedPrice(cleanSymbol, price, currency);
-
-    return {
-      symbol: cleanSymbol,
-      price,
-      currency,
-      change,
-      changePercent,
-      lastUpdated: new Date().toISOString(),
-    };
+    console.error('Alpha Vantage: No data for symbol', symbol);
+    return null;
   } catch (error) {
     console.error(`Failed to fetch Alpha Vantage quote for ${symbol}:`, error);
     return null;

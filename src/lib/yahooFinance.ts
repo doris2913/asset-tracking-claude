@@ -3,14 +3,17 @@
 import { StockQuote, Currency } from '@/types';
 import { parseStockSymbol } from '@/utils/calculations';
 
-// Yahoo Finance query endpoint
+// Yahoo Finance query endpoint (v8 chart API)
 const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart';
 
-// Free CORS proxy services (fallback chain)
+// Free CORS proxy services (fallback chain) - Updated 2024
+// These proxies help bypass CORS restrictions for client-side requests
 const CORS_PROXIES = [
-  '', // Try direct first (works in some environments)
+  '', // Try direct first (works in some environments like localhost)
   'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.org/?',
+  'https://corsproxy.io/?',
+  'https://proxy.cors.sh/',
+  'https://thingproxy.freeboard.io/fetch/',
 ];
 
 // Try fetching with different methods until one works
