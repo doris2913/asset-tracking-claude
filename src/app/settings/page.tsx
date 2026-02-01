@@ -11,6 +11,7 @@ import { useChartTheme } from '@/contexts/ChartThemeContext';
 import { useTheme, AppTheme } from '@/contexts/ThemeContext';
 import { CHART_THEME_OPTIONS, CHART_THEMES } from '@/config/chartThemes';
 import { getCacheStats, clearStockCache } from '@/lib/stockApi';
+import { testApiConnection, API_SOURCE_CONFIG } from '@/lib/stockPriceManager';
 
 export default function SettingsPage() {
   const {
@@ -36,7 +37,11 @@ export default function SettingsPage() {
   const [selectedAppTheme, setSelectedAppTheme] = useState<AppTheme>(appTheme);
   const [stockDataSource, setStockDataSource] = useState<StockDataSource>(settings.stockDataSource || 'yahoo');
   const [alphaVantageApiKey, setAlphaVantageApiKey] = useState(settings.alphaVantageApiKey || '');
+  const [finnhubApiKey, setFinnhubApiKey] = useState(settings.finnhubApiKey || '');
+  const [fmpApiKey, setFmpApiKey] = useState(settings.fmpApiKey || '');
   const [cacheStats, setCacheStats] = useState(getCacheStats());
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   const handleSaveSettings = () => {
     updateSettings({
@@ -45,12 +50,26 @@ export default function SettingsPage() {
       chartColorTheme: selectedChartTheme,
       stockDataSource,
       alphaVantageApiKey: alphaVantageApiKey || undefined,
+      finnhubApiKey: finnhubApiKey || undefined,
+      fmpApiKey: fmpApiKey || undefined,
     });
     updateExchangeRate(exchangeRate);
     setThemeId(selectedChartTheme);
     setAppTheme(selectedAppTheme);
     setSaveStatus(t.settings.settingsSaved);
+    setTestResult(null);
     setTimeout(() => setSaveStatus(''), 3000);
+  };
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+    const apiKey = stockDataSource === 'alphavantage' ? alphaVantageApiKey :
+                   stockDataSource === 'finnhub' ? finnhubApiKey :
+                   stockDataSource === 'fmp' ? fmpApiKey : undefined;
+    const result = await testApiConnection(stockDataSource, apiKey);
+    setTestResult(result);
+    setIsTesting(false);
   };
 
   const handleClearCache = () => {
@@ -223,7 +242,7 @@ export default function SettingsPage() {
               <label className="label">{t.settings.stockDataSource}</label>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <button
-                  onClick={() => setStockDataSource('yahoo')}
+                  onClick={() => { setStockDataSource('yahoo'); setTestResult(null); }}
                   className={`p-3 rounded-lg border-2 transition-all ${
                     stockDataSource === 'yahoo'
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
@@ -240,7 +259,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500 mt-1">{t.settings.yahooFinanceDesc}</p>
                 </button>
                 <button
-                  onClick={() => setStockDataSource('alphavantage')}
+                  onClick={() => { setStockDataSource('alphavantage'); setTestResult(null); }}
                   className={`p-3 rounded-lg border-2 transition-all ${
                     stockDataSource === 'alphavantage'
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
@@ -255,6 +274,40 @@ export default function SettingsPage() {
                     Alpha Vantage
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{t.settings.alphaVantageDesc}</p>
+                </button>
+                <button
+                  onClick={() => { setStockDataSource('finnhub'); setTestResult(null); }}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    stockDataSource === 'finnhub'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${
+                    stockDataSource === 'finnhub'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    Finnhub
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{t.settings.finnhubDesc}</p>
+                </button>
+                <button
+                  onClick={() => { setStockDataSource('fmp'); setTestResult(null); }}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    stockDataSource === 'fmp'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <p className={`text-sm font-medium ${
+                    stockDataSource === 'fmp'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    FMP
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{t.settings.fmpDesc}</p>
                 </button>
               </div>
 
@@ -281,6 +334,69 @@ export default function SettingsPage() {
                   </p>
                 </div>
               )}
+
+              {stockDataSource === 'finnhub' && (
+                <div className="mt-4">
+                  <label className="label">{t.settings.finnhubApiKey}</label>
+                  <input
+                    type="text"
+                    value={finnhubApiKey}
+                    onChange={(e) => setFinnhubApiKey(e.target.value)}
+                    placeholder={t.settings.finnhubApiKeyPlaceholder}
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t.settings.finnhubApiKeyHint}{' '}
+                    <a
+                      href="https://finnhub.io/register"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      {t.settings.getApiKey}
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              {stockDataSource === 'fmp' && (
+                <div className="mt-4">
+                  <label className="label">{t.settings.fmpApiKey}</label>
+                  <input
+                    type="text"
+                    value={fmpApiKey}
+                    onChange={(e) => setFmpApiKey(e.target.value)}
+                    placeholder={t.settings.fmpApiKeyPlaceholder}
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t.settings.fmpApiKeyHint}{' '}
+                    <a
+                      href="https://site.financialmodelingprep.com/developer/docs"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      {t.settings.getApiKey}
+                    </a>
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-4">
+                <button
+                  onClick={handleTestConnection}
+                  disabled={isTesting}
+                  className="btn btn-secondary text-sm"
+                >
+                  {isTesting ? t.settings.testing : t.settings.testConnection}
+                </button>
+                {testResult && (
+                  <span className={`ml-3 text-sm ${testResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {testResult.message}
+                  </span>
+                )}
+              </div>
 
               <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center justify-between">
