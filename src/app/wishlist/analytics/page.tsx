@@ -71,7 +71,7 @@ export default function AnalyticsPage() {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <div className="text-sm text-gray-600 mb-1">總價值</div>
-          <div className="text-3xl font-bold text-purple-600">
+          <div className="text-3xl font-bold text-blue-600">
             {formatCurrency(analytics.totalValue, 'TWD')}
           </div>
         </div>
@@ -281,7 +281,7 @@ export default function AnalyticsPage() {
                   <div className="flex-1">
                     <div className="h-8 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-purple-500 flex items-center justify-end pr-3 text-white text-sm font-medium"
+                        className="h-full bg-blue-500 flex items-center justify-end pr-3 text-white text-sm font-medium"
                         style={{
                           width: `${(count / analytics.totalWishItems) * 100}%`,
                           minWidth: '60px',
@@ -314,7 +314,7 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-medium text-purple-600">
+                  <div className="text-sm font-medium text-blue-600">
                     {formatCurrency(data.item.estimatedPrice, 'TWD')}
                   </div>
                 </div>
@@ -327,7 +327,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Purchase Recommendations */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow p-6 mb-8">
+      <div className="bg-gradient-to-r from-blue-50 to-blue-50 rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-bold text-gray-900 mb-2">購買建議</h2>
         <p className="text-sm text-gray-600 mb-4">
           基於預算、優先級和生活品質 ROI 的購買建議
@@ -344,7 +344,7 @@ export default function AnalyticsPage() {
                       <p className="text-sm text-gray-600">{item.category}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-purple-600">
+                      <div className="text-lg font-bold text-blue-600">
                         {formatCurrency(item.estimatedPrice, 'TWD')}
                       </div>
                       <div className="text-sm text-gray-500">優先分數: {priorityScore}</div>
@@ -376,7 +376,7 @@ export default function AnalyticsPage() {
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-900">建議總花費</span>
-                <span className="text-xl font-bold text-purple-600">
+                <span className="text-xl font-bold text-blue-600">
                   {formatCurrency(
                     recommendations.reduce((sum, item) => sum + item.estimatedPrice, 0),
                     'TWD'
@@ -489,7 +489,7 @@ export default function AnalyticsPage() {
               <div key={data.year} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-900">{data.year} 年</h3>
-                  <div className="text-2xl font-bold text-purple-600">
+                  <div className="text-2xl font-bold text-blue-600">
                     {formatCurrency(data.totalSpent, 'TWD')}
                   </div>
                 </div>
@@ -530,7 +530,7 @@ export default function AnalyticsPage() {
                             <div className="flex-1">
                               <div className="h-6 bg-gray-100 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-purple-500 flex items-center justify-end pr-2 text-white text-xs font-medium"
+                                  className="h-full bg-blue-500 flex items-center justify-end pr-2 text-white text-xs font-medium"
                                   style={{
                                     width: `${(amount / data.totalSpent) * 100}%`,
                                     minWidth: '60px',

@@ -108,7 +108,7 @@ export default function GroupManager({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="例如：客廳影音設備"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -121,7 +121,7 @@ export default function GroupManager({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="描述這個需求或痛點"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -137,7 +137,7 @@ export default function GroupManager({
                         onClick={() => setIcon(i)}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
                           icon === i
-                            ? 'bg-purple-100 dark:bg-purple-900 ring-2 ring-purple-500'
+                            ? 'bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500'
                             : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
@@ -170,7 +170,7 @@ export default function GroupManager({
                   <button
                     onClick={handleSubmit}
                     disabled={!name.trim()}
-                    className="flex-1 px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {editingId ? '儲存變更' : '新增群組'}
                   </button>
@@ -186,7 +186,7 @@ export default function GroupManager({
           ) : (
             <button
               onClick={() => setIsAdding(true)}
-              className="w-full px-4 py-3 mb-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-colors"
+              className="w-full px-4 py-3 mb-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 dark:hover:text-blue-400 transition-colors"
             >
               ➕ 新增群組
             </button>
