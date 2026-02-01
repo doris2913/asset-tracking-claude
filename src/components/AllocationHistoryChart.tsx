@@ -1,0 +1,195 @@
+'use client';
+
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { Snapshot, Currency, AssetType } from '@/types';
+import { formatCurrency } from '@/utils/calculations';
+import { useI18n } from '@/i18n';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+interface AllocationHistoryChartProps {
+  snapshots: Snapshot[];
+  currency: Currency;
+}
+
+const ASSET_TYPES: AssetType[] = [
+  'cash_twd',
+  'cash_usd',
+  'stock_tw',
+  'stock_us',
+  'us_tbills',
+  'liability',
+];
+
+export default function AllocationHistoryChart({
+  snapshots,
+  currency,
+}: AllocationHistoryChartProps) {
+  const { t } = useI18n();
+  const { theme } = useChartTheme();
+  const assetColors = theme.assetColors;
+
+  if (snapshots.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+        <div className="text-center">
+          <p className="text-4xl mb-4">📊</p>
+          <p>{t.dashboard.noChartData}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Sort snapshots by date (oldest to newest for left-to-right display)
+  const sortedSnapshots = [...snapshots].sort((a, b) => {
+    // Parse dates safely - handle both ISO and YYYY/MM/DD formats
+    const dateA = a.date.includes('/')
+      ? new Date(a.date.replace(/\//g, '-'))
+      : new Date(a.date);
+    const dateB = b.date.includes('/')
+      ? new Date(b.date.replace(/\//g, '-'))
+      : new Date(b.date);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  // Calculate allocation for each snapshot
+  const calculateAllocation = (snapshot: Snapshot) => {
+    const allocation: Record<AssetType, number> = {
+      cash_twd: 0,
+      cash_usd: 0,
+      stock_tw: 0,
+      stock_us: 0,
+      liability: 0,
+      us_tbills: 0,
+    };
+
+    for (const asset of snapshot.assets) {
+      let value = asset.value;
+
+      // Convert to display currency
+      if (currency === 'TWD') {
+        if (asset.currency === 'USD') {
+          value = value * snapshot.exchangeRate;
+        }
+      } else {
+        if (asset.currency === 'TWD') {
+          value = value / snapshot.exchangeRate;
+        }
+      }
+
+      allocation[asset.type] = (allocation[asset.type] || 0) + value;
+    }
+
+    return allocation;
+  };
+
+  // Create labels from snapshot dates
+  const labels = sortedSnapshots.map((snapshot) => {
+    const date = snapshot.date.includes('/')
+      ? new Date(snapshot.date.replace(/\//g, '-'))
+      : new Date(snapshot.date);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+    });
+  });
+
+  // Create datasets for each asset type
+  const datasets = ASSET_TYPES.map((type) => ({
+    label: t.assetTypes[type],
+    data: sortedSnapshots.map((snapshot) => {
+      const allocation = calculateAllocation(snapshot);
+      return allocation[type] || 0;
+    }),
+    backgroundColor: assetColors[type],
+    borderWidth: 1,
+    borderColor: 'white',
+  })).filter((dataset) => dataset.data.some((v) => v !== 0)); // Only show types with data
+
+  const data = {
+    labels,
+    datasets,
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          usePointStyle: true,
+          padding: 15,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: any) {
+            const value = context.raw as number;
+            // Calculate total for this snapshot (column)
+            const dataIndex = context.dataIndex;
+            const total = context.chart.data.datasets.reduce(
+              (sum: number, dataset: any) => sum + (dataset.data[dataIndex] || 0),
+              0
+            );
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+            return `${context.dataset.label}: ${formatCurrency(value, currency)} (${percentage}%)`;
+          },
+          footer: function (tooltipItems: any[]) {
+            // Calculate the total of ALL asset types for this snapshot (dataIndex)
+            if (tooltipItems.length === 0) return '';
+            const dataIndex = tooltipItems[0].dataIndex;
+            const total = tooltipItems[0].chart.data.datasets.reduce(
+              (sum: number, dataset: any) => sum + (dataset.data[dataIndex] || 0),
+              0
+            );
+            return `Total: ${formatCurrency(total, currency)}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        stacked: true,
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: {
+          callback: function (value: any) {
+            return formatCurrency(value, currency);
+          },
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+        },
+      },
+    },
+  };
+
+  return (
+    <div className="h-80">
+      <Bar data={data} options={options} />
+    </div>
+  );
+}

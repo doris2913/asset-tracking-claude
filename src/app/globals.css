@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 249, 250, 251;
+  --background-end-rgb: 243, 244, 246;
+}
+
+/* Dark mode - triggered by .dark class on html element */
+.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 17, 24, 39;
+  --background-end-rgb: 31, 41, 55;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for iOS Safari */
+  /* Safe area padding for iPhone notch/Dynamic Island */
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Prevent rubber banding on iOS */
+  html {
+    height: -webkit-fill-available;
+  }
+  body {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Mobile bottom navigation spacing */
+@media (max-width: 767px) {
+  main {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+           focus:ring-2 focus:ring-blue-500 focus:border-transparent
+           placeholder-gray-400 dark:placeholder-gray-500;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+
+  .select {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+           focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+}
