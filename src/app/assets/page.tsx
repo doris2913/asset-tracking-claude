@@ -35,6 +35,21 @@ export default function AssetsPage() {
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
+  const [hideAssets, setHideAssets] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideAssets') === 'true';
+    }
+    return false;
+  });
+
+  const toggleHideAssets = () => {
+    setHideAssets(prev => {
+      const newValue = !prev;
+      localStorage.setItem('hideAssets', String(newValue));
+      return newValue;
+    });
+  };
 
   const handleAddAsset = () => {
     setEditingAsset(undefined);
@@ -242,15 +257,24 @@ export default function AssetsPage() {
         {/* Summary */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="card">
-            <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalTWD}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalTWD}</p>
+              <button
+                onClick={toggleHideAssets}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                title={hideAssets ? (language === 'zh-TW' ? '顯示金額' : 'Show amounts') : (language === 'zh-TW' ? '隱藏金額' : 'Hide amounts')}
+              >
+                {hideAssets ? '👁️' : '🙈'}
+              </button>
+            </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalTWD, 'TWD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalTWD, 'TWD')}
             </p>
           </div>
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalUSD}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalUSD, 'USD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalUSD, 'USD')}
             </p>
           </div>
         </div>
