@@ -229,7 +229,7 @@ export default function PurchasedItemsPage() {
                         className={`px-2 py-0.5 text-xs font-medium rounded ${
                           item.type === 'daily_necessity'
                             ? 'bg-blue-100 text-blue-700'
-                            : 'bg-purple-100 text-purple-700'
+                            : 'bg-blue-100 text-blue-700'
                         }`}
                       >
                         {item.type === 'daily_necessity' ? '日常用品' : '一次性購買'}

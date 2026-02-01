@@ -56,7 +56,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                     <th
                       key={index}
                       className={`px-4 py-3 text-left text-sm font-semibold border-b-2 border-gray-200 ${
-                        index === 0 ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
+                        index === 0 ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                       }`}
                     >
                       {option.name}
@@ -74,10 +74,10 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                     <td
                       key={index}
                       className={`px-4 py-3 text-sm border-b border-gray-200 ${
-                        index === 0 ? 'bg-purple-50' : ''
+                        index === 0 ? 'bg-blue-50' : ''
                       }`}
                     >
-                      <span className="font-bold text-purple-600">
+                      <span className="font-bold text-blue-600">
                         {formatCurrency(option.price, 'TWD')}
                       </span>
                     </td>
@@ -93,7 +93,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                     <td
                       key={index}
                       className={`px-4 py-3 text-sm text-gray-900 border-b border-gray-200 ${
-                        index === 0 ? 'bg-purple-50' : ''
+                        index === 0 ? 'bg-blue-50' : ''
                       }`}
                     >
                       {option.brand || '-'}
@@ -110,7 +110,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                     <td
                       key={index}
                       className={`px-4 py-3 text-sm border-b border-gray-200 ${
-                        index === 0 ? 'bg-purple-50' : ''
+                        index === 0 ? 'bg-blue-50' : ''
                       }`}
                     >
                       {option.webLink ? (
@@ -138,7 +138,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                     <td
                       key={index}
                       className={`px-4 py-3 text-sm text-gray-700 border-b border-gray-200 ${
-                        index === 0 ? 'bg-purple-50' : ''
+                        index === 0 ? 'bg-blue-50' : ''
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{option.pros || '-'}</div>
@@ -155,7 +155,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                     <td
                       key={index}
                       className={`px-4 py-3 text-sm text-gray-700 border-b border-gray-200 ${
-                        index === 0 ? 'bg-purple-50' : ''
+                        index === 0 ? 'bg-blue-50' : ''
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{option.cons || '-'}</div>
@@ -175,7 +175,7 @@ export default function ProductComparisonModal({ item, onClose }: ProductCompari
                         <td
                           key={index}
                           className={`px-4 py-3 text-sm text-gray-700 border-b border-gray-200 ${
-                            index === 0 ? 'bg-purple-50' : ''
+                            index === 0 ? 'bg-blue-50' : ''
                           }`}
                         >
                           {customFieldValue || '-'}

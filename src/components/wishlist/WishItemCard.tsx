@@ -179,7 +179,7 @@ export default function WishItemCard({
         {onAddWant && (
           <button
             onClick={() => onAddWant(item.id)}
-            className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 active:bg-purple-200 transition-colors min-h-[44px] sm:min-h-0"
+            className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0"
           >
             ❤️ 我想要
           </button>

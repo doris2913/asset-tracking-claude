@@ -248,7 +248,7 @@ export default function WishListPage() {
       <div className="flex gap-1 sm:gap-4 mb-6 border-b overflow-x-auto">
         <Link
           href="/wishlist"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-purple-600 border-b-2 border-purple-600 whitespace-nowrap min-h-[44px] flex items-center"
+          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-blue-600 border-b-2 border-blue-600 whitespace-nowrap min-h-[44px] flex items-center"
         >
           願望清單
         </Link>
@@ -276,7 +276,7 @@ export default function WishListPage() {
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <div className="text-sm text-gray-600 mb-1">總價值</div>
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-blue-600">
             {formatCurrency(wishListData.analytics.totalValue, 'TWD')}
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function WishListPage() {
             剩餘預算
             <Link
               href="/wishlist/settings"
-              className="ml-1 text-xs text-purple-600 hover:text-purple-700"
+              className="ml-1 text-xs text-blue-600 hover:text-blue-700"
             >
               ⚙️
             </Link>
@@ -330,7 +330,7 @@ export default function WishListPage() {
               setEditingItem(undefined);
               setShowForm(true);
             }}
-            className="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors shadow-md min-h-[48px]"
+            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-md min-h-[48px]"
           >
             ➕ 新增願望
           </button>
@@ -347,7 +347,7 @@ export default function WishListPage() {
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                 }`}
               >
@@ -357,7 +357,7 @@ export default function WishListPage() {
                 onClick={() => setViewMode('group')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'group'
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                 }`}
               >
@@ -367,7 +367,7 @@ export default function WishListPage() {
           </div>
           <button
             onClick={() => setShowGroupManager(true)}
-            className="px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
           >
             ⚙️ 管理群組 ({wishListData.groups.length})
           </button>
@@ -382,7 +382,7 @@ export default function WishListPage() {
             <select
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">全部</option>
               <option value="high">高優先</option>
@@ -396,7 +396,7 @@ export default function WishListPage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">全部</option>
               <option value="need">需要</option>
@@ -409,7 +409,7 @@ export default function WishListPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px] sm:min-h-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="dateAdded">新增時間</option>
               <option value="price">價格</option>
@@ -438,7 +438,7 @@ export default function WishListPage() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">開始記錄你想要的物品吧！</p>
           <button
             onClick={() => setShowForm(true)}
-            className="px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
             新增第一個願望
           </button>
@@ -586,7 +586,7 @@ export default function WishListPage() {
                   onClick={() => setWantIntensity(intensity)}
                   className={`w-full px-4 py-3 rounded-lg font-medium transition-colors ${
                     wantIntensity === intensity
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -603,7 +603,7 @@ export default function WishListPage() {
             <div className="flex gap-3">
               <button
                 onClick={submitWant}
-                className="flex-1 px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
                 確認記錄
               </button>
@@ -693,13 +693,13 @@ export default function WishListPage() {
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
                   placeholder="https://..."
-                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-base min-h-[44px]"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
                   disabled={isLoadingUrl}
                 />
                 <button
                   onClick={handleLoadFromUrl}
                   disabled={isLoadingUrl || !urlInput.trim()}
-                  className="px-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] whitespace-nowrap"
+                  className="px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] whitespace-nowrap"
                 >
                   {isLoadingUrl ? '載入中...' : '載入'}
                 </button>

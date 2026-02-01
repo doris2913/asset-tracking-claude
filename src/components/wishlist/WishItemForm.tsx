@@ -172,7 +172,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
           type="text"
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
       </div>
@@ -185,7 +185,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
           <select
             value={formData.category}
             onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
             <option value="">選擇類別</option>
@@ -205,7 +205,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
             type="number"
             value={formData.estimatedPrice}
             onChange={(e) => setFormData(prev => ({ ...prev, estimatedPrice: Number(e.target.value) }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             min="0"
             required
           />
@@ -219,7 +219,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
         <textarea
           value={formData.specifications}
           onChange={(e) => setFormData(prev => ({ ...prev, specifications: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
         />
       </div>
@@ -412,7 +412,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
         />
       </div>
@@ -425,7 +425,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
         <textarea
           value={formData.links}
           onChange={(e) => setFormData(prev => ({ ...prev, links: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={3}
           placeholder="https://example.com/product"
         />
@@ -701,7 +701,7 @@ export default function WishItemForm({ item, groups = [], onSubmit, onCancel }: 
       <div className="flex gap-3 pt-4 border-t">
         <button
           type="submit"
-          className="flex-1 px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 transition-colors"
+          className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
         >
           {item ? '更新' : '新增'} 願望清單
         </button>
