@@ -14,13 +14,40 @@
 
 export default {
   async fetch(request) {
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      });
+    }
+
     const url = new URL(request.url);
 
     // 從查詢參數獲取目標 URL
-    const targetUrl = url.searchParams.get('url');
+    let targetUrl = url.searchParams.get('url');
 
     if (!targetUrl) {
-      return new Response('Missing url parameter', { status: 400 });
+      return new Response(JSON.stringify({ error: 'Missing url parameter' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+
+    // 嘗試解碼 URL（處理可能的雙重編碼）
+    try {
+      // 如果 URL 看起來是編碼過的，嘗試解碼
+      if (targetUrl.includes('%3A') || targetUrl.includes('%2F')) {
+        targetUrl = decodeURIComponent(targetUrl);
+      }
+    } catch (e) {
+      // 忽略解碼錯誤，使用原始值
     }
 
     // 只允許特定的 API 網域（安全性）
@@ -32,9 +59,35 @@ export default {
       'financialmodelingprep.com',
     ];
 
-    const targetHost = new URL(targetUrl).hostname;
+    let targetHost;
+    try {
+      targetHost = new URL(targetUrl).hostname;
+    } catch (e) {
+      return new Response(JSON.stringify({
+        error: 'Invalid URL',
+        received: targetUrl,
+        hint: 'URL should be like: ?url=https://query1.finance.yahoo.com/v8/finance/chart/AAPL'
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+
     if (!allowedDomains.some(domain => targetHost.includes(domain))) {
-      return new Response('Domain not allowed', { status: 403 });
+      return new Response(JSON.stringify({
+        error: 'Domain not allowed',
+        domain: targetHost,
+        allowed: allowedDomains
+      }), {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
     }
 
     try {
@@ -54,7 +107,17 @@ export default {
 
       return newResponse;
     } catch (error) {
-      return new Response(`Proxy error: ${error.message}`, { status: 500 });
+      return new Response(JSON.stringify({
+        error: 'Proxy fetch failed',
+        message: error.message,
+        targetUrl: targetUrl
+      }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
     }
   },
 };
