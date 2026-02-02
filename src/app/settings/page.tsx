@@ -39,6 +39,7 @@ export default function SettingsPage() {
   const [alphaVantageApiKey, setAlphaVantageApiKey] = useState(settings.alphaVantageApiKey || '');
   const [finnhubApiKey, setFinnhubApiKey] = useState(settings.finnhubApiKey || '');
   const [fmpApiKey, setFmpApiKey] = useState(settings.fmpApiKey || '');
+  const [customCorsProxy, setCustomCorsProxy] = useState(settings.customCorsProxy || '');
   const [cacheStats, setCacheStats] = useState(getCacheStats());
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -52,6 +53,7 @@ export default function SettingsPage() {
       alphaVantageApiKey: alphaVantageApiKey || undefined,
       finnhubApiKey: finnhubApiKey || undefined,
       fmpApiKey: fmpApiKey || undefined,
+      customCorsProxy: customCorsProxy || undefined,
     });
     updateExchangeRate(exchangeRate);
     setThemeId(selectedChartTheme);
@@ -379,6 +381,22 @@ export default function SettingsPage() {
                     >
                       {t.settings.getApiKey}
                     </a>
+                  </p>
+                </div>
+              )}
+
+              {stockDataSource === 'yahoo' && (
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <label className="label">{t.settings.customCorsProxy}</label>
+                  <input
+                    type="text"
+                    value={customCorsProxy}
+                    onChange={(e) => setCustomCorsProxy(e.target.value)}
+                    placeholder={t.settings.customCorsProxyPlaceholder}
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t.settings.customCorsProxyHint}
                   </p>
                 </div>
               )}

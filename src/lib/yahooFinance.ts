@@ -8,7 +8,7 @@ const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart';
 
 // Free CORS proxy services (fallback chain) - Updated 2024
 // These proxies help bypass CORS restrictions for client-side requests
-const CORS_PROXIES = [
+const DEFAULT_CORS_PROXIES = [
   '', // Try direct first (works in some environments like localhost)
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -16,11 +16,38 @@ const CORS_PROXIES = [
   'https://thingproxy.freeboard.io/fetch/',
 ];
 
+// Store custom proxy URL (can be set from settings)
+let customCorsProxy: string | null = null;
+
+// Set custom CORS proxy (e.g., from Cloudflare Worker)
+export function setCustomCorsProxy(proxyUrl: string | undefined) {
+  if (proxyUrl && proxyUrl.trim()) {
+    // Ensure proxy URL ends with proper format
+    let url = proxyUrl.trim();
+    if (!url.endsWith('?url=') && !url.endsWith('?')) {
+      url = url.endsWith('/') ? `${url}?url=` : `${url}/?url=`;
+    }
+    customCorsProxy = url;
+  } else {
+    customCorsProxy = null;
+  }
+}
+
+// Get current CORS proxies (custom first if set)
+function getCorsProxies(): string[] {
+  if (customCorsProxy) {
+    // If custom proxy is set, try it first, then fall back to defaults
+    return [customCorsProxy, ...DEFAULT_CORS_PROXIES];
+  }
+  return DEFAULT_CORS_PROXIES;
+}
+
 // Try fetching with different methods until one works
 async function fetchWithProxy(targetUrl: string): Promise<Response> {
   let lastError: Error | null = null;
+  const proxies = getCorsProxies();
 
-  for (const proxy of CORS_PROXIES) {
+  for (const proxy of proxies) {
     try {
       const url = proxy ? `${proxy}${encodeURIComponent(targetUrl)}` : targetUrl;
       const controller = new AbortController();
