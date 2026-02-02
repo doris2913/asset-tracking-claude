@@ -22,15 +22,30 @@ let customCorsProxy: string | null = null;
 // Set custom CORS proxy (e.g., from Cloudflare Worker)
 export function setCustomCorsProxy(proxyUrl: string | undefined) {
   if (proxyUrl && proxyUrl.trim()) {
-    // Ensure proxy URL ends with proper format
+    // Normalize proxy URL - ensure it ends with ?url= for query parameter style
     let url = proxyUrl.trim();
-    if (!url.endsWith('?url=') && !url.endsWith('?')) {
-      url = url.endsWith('/') ? `${url}?url=` : `${url}/?url=`;
+    // Remove trailing slash if present
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1);
+    }
+    // Add ?url= if not present
+    if (!url.endsWith('?url=') && !url.includes('?')) {
+      url = `${url}/?url=`;
+    } else if (url.endsWith('?')) {
+      url = `${url}url=`;
+    } else if (!url.endsWith('?url=')) {
+      url = `${url}&url=`;
     }
     customCorsProxy = url;
+    console.log('[Yahoo Finance] Custom CORS proxy set:', customCorsProxy);
   } else {
     customCorsProxy = null;
   }
+}
+
+// Get current custom proxy (for debugging)
+export function getCustomCorsProxy(): string | null {
+  return customCorsProxy;
 }
 
 // Get current CORS proxies (custom first if set)
@@ -42,16 +57,32 @@ function getCorsProxies(): string[] {
   return DEFAULT_CORS_PROXIES;
 }
 
+// Track which proxy was used for the last successful request
+let lastUsedProxy: string | null = null;
+
+// Get the last used proxy (for debugging/display)
+export function getLastUsedProxy(): string {
+  if (lastUsedProxy === null) return 'None';
+  if (lastUsedProxy === '') return 'Direct';
+  if (lastUsedProxy === customCorsProxy) return 'Custom Proxy';
+  return 'Public Proxy';
+}
+
 // Try fetching with different methods until one works
 async function fetchWithProxy(targetUrl: string): Promise<Response> {
   let lastError: Error | null = null;
   const proxies = getCorsProxies();
 
-  for (const proxy of proxies) {
+  for (let i = 0; i < proxies.length; i++) {
+    const proxy = proxies[i];
+    const proxyName = proxy === '' ? 'direct' : (proxy === customCorsProxy ? 'custom proxy' : `public proxy ${i}`);
+
     try {
       const url = proxy ? `${proxy}${encodeURIComponent(targetUrl)}` : targetUrl;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+      console.log(`[Yahoo Finance] Trying ${proxyName}...`);
 
       const response = await fetch(url, {
         signal: controller.signal,
@@ -63,9 +94,14 @@ async function fetchWithProxy(targetUrl: string): Promise<Response> {
       clearTimeout(timeoutId);
 
       if (response.ok) {
+        lastUsedProxy = proxy;
+        console.log(`[Yahoo Finance] Success with ${proxyName}`);
         return response;
+      } else {
+        console.log(`[Yahoo Finance] ${proxyName} returned status ${response.status}`);
       }
     } catch (error) {
+      console.log(`[Yahoo Finance] ${proxyName} failed:`, (error as Error).message);
       lastError = error as Error;
       continue;
     }

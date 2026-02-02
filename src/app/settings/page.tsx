@@ -89,7 +89,7 @@ export default function SettingsPage() {
     const apiKey = stockDataSource === 'alphavantage' ? alphaVantageApiKey :
                    stockDataSource === 'finnhub' ? finnhubApiKey :
                    stockDataSource === 'fmp' ? fmpApiKey : undefined;
-    const result = await testApiConnection(stockDataSource, apiKey);
+    const result = await testApiConnection(stockDataSource, apiKey, customCorsProxy || undefined);
     setTestResult(result);
     setIsTesting(false);
   };
