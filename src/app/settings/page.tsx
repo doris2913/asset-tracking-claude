@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import ImportExport from '@/components/ImportExport';
@@ -43,6 +43,26 @@ export default function SettingsPage() {
   const [cacheStats, setCacheStats] = useState(getCacheStats());
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+
+  // Sync local state with settings from localStorage when they change
+  useEffect(() => {
+    if (isLoaded) {
+      setSnapshotInterval(settings.snapshotIntervalDays);
+      setDefaultCurrency(settings.defaultCurrency);
+      setStockDataSource(settings.stockDataSource || 'yahoo');
+      setAlphaVantageApiKey(settings.alphaVantageApiKey || '');
+      setFinnhubApiKey(settings.finnhubApiKey || '');
+      setFmpApiKey(settings.fmpApiKey || '');
+      setCustomCorsProxy(settings.customCorsProxy || '');
+    }
+  }, [isLoaded, settings]);
+
+  // Sync exchange rate from currentAssets
+  useEffect(() => {
+    if (isLoaded) {
+      setExchangeRate(currentAssets.exchangeRate);
+    }
+  }, [isLoaded, currentAssets.exchangeRate]);
 
   const handleSaveSettings = () => {
     updateSettings({
