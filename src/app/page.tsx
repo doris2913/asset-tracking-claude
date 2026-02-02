@@ -10,7 +10,7 @@ import AllocationAdjustmentRecommendation from '@/components/AllocationAdjustmen
 import AssetGrowthAnalysis from '@/components/AssetGrowthAnalysis';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
-import { useStockPrices } from '@/lib/yahooFinance';
+import { fetchMultipleStockPrices, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
 import { useI18n } from '@/i18n';
 import { Currency, StockPrice, Asset } from '@/types';
 import {
@@ -79,7 +79,6 @@ export default function DashboardPage() {
   } = useAssetData();
 
   const { t, language } = useI18n();
-  const { fetchPricesWithMA } = useStockPrices();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
@@ -87,7 +86,15 @@ export default function DashboardPage() {
   // Handle stock price update
   const handleUpdateStockPrices = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價與移動平均...' : 'Fetching stock prices with moving averages...');
+
+    const dataSource = settings.stockDataSource || 'yahoo';
+    const sourceConfig = API_SOURCE_CONFIG[dataSource];
+
+    setPriceUpdateStatus(
+      language === 'zh-TW'
+        ? `正在透過 ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()} 取得股價...`
+        : `Fetching stock prices via ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()}...`
+    );
 
     try {
       const stockAssets = currentAssets.assets.filter(
@@ -100,17 +107,53 @@ export default function DashboardPage() {
       }
 
       const symbols = stockAssets.map((a) => a.symbol!);
-      const prices = await fetchPricesWithMA(symbols);
+
+      // Progress callback for real-time updates
+      const onProgress: ProgressCallback = (current, total, symbol, status) => {
+        const statusText = status === 'cached'
+          ? (language === 'zh-TW' ? '快取' : 'cached')
+          : status === 'fetching'
+          ? (language === 'zh-TW' ? '取得中' : 'fetching')
+          : status === 'success'
+          ? (language === 'zh-TW' ? '成功' : 'success')
+          : (language === 'zh-TW' ? '失敗' : 'failed');
+
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? `${symbol} ${statusText}... (${current}/${total})`
+            : `${symbol} ${statusText}... (${current}/${total})`
+        );
+      };
+
+      // Use unified stock price manager with settings (includes custom CORS proxy)
+      const prices = await fetchMultipleStockPrices(symbols, settings, onProgress);
 
       if (Object.keys(prices).length > 0) {
         updateStockPricesWithMA(prices);
+        const successCount = Object.keys(prices).length;
+        const failedCount = symbols.length - successCount;
+
+        let statusMessage = language === 'zh-TW'
+          ? `已更新 ${successCount} 檔股票`
+          : `Updated ${successCount} stock(s)`;
+
+        if (failedCount > 0) {
+          statusMessage += language === 'zh-TW'
+            ? `（${failedCount} 檔失敗）`
+            : ` (${failedCount} failed)`;
+        }
+
+        if (sourceConfig.supportsMA) {
+          statusMessage += language === 'zh-TW' ? '（含移動平均）' : ' with moving averages';
+        }
+
+        setPriceUpdateStatus(statusMessage);
+      } else {
         setPriceUpdateStatus(
           language === 'zh-TW'
-            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
-            : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
+            ? '無法取得股價。請檢查 API 設定。'
+            : 'Could not fetch any stock prices. Please check API settings.'
         );
-      } else {
-        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
       }
     } catch (error) {
       setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
