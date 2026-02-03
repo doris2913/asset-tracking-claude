@@ -82,6 +82,21 @@ export default function DashboardPage() {
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
+  const [hideAssets, setHideAssets] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideAssets') === 'true';
+    }
+    return false;
+  });
+
+  const toggleHideAssets = () => {
+    setHideAssets(prev => {
+      const newValue = !prev;
+      localStorage.setItem('hideAssets', String(newValue));
+      return newValue;
+    });
+  };
 
   // Handle stock price update
   const handleUpdateStockPrices = async () => {
@@ -393,6 +408,13 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button
+              onClick={toggleHideAssets}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title={hideAssets ? (language === 'zh-TW' ? '顯示金額' : 'Show amounts') : (language === 'zh-TW' ? '隱藏金額' : 'Hide amounts')}
+            >
+              {hideAssets ? '👁️' : '🙈'}
+            </button>
+            <button
               onClick={handleUpdateStockPrices}
               disabled={isUpdatingPrices}
               className="btn btn-secondary text-xs sm:text-sm"
@@ -425,16 +447,16 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <SummaryCard
             title={t.dashboard.totalAssets}
-            value={formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
+            value={hideAssets ? '＊＊＊＊＊＊' : formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
             subtitle={`${currentAssets.assets.length} ${t.nav.assets.toLowerCase()}`}
             icon="💰"
             trend={
-              growthStats.monthlyGrowth !== null
+              hideAssets ? undefined : (growthStats.monthlyGrowth !== null
                 ? {
                     value: growthStats.monthlyGrowth,
                     isPositive: growthStats.monthlyGrowth >= 0,
                   }
-                : undefined
+                : undefined)
             }
             trendLabel={t.dashboard.vsLastMonth}
             color="blue"
@@ -456,7 +478,9 @@ export default function DashboardPage() {
           <SummaryCard
             title={t.dashboard.yoyGrowth}
             value={
-              growthStats.yearlyGrowth !== null
+              hideAssets
+                ? '＊＊＊＊'
+                : growthStats.yearlyGrowth !== null
                 ? `${growthStats.yearlyGrowth >= 0 ? '+' : ''}${growthStats.yearlyGrowth.toFixed(1)}%`
                 : 'N/A'
             }
@@ -575,7 +599,7 @@ export default function DashboardPage() {
                         {summary.count}
                       </td>
                       <td className="py-3 px-4 text-right font-medium text-gray-900 dark:text-white">
-                        {formatCurrency(
+                        {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(
                           displayCurrency === 'TWD' ? summary.totalTWD : summary.totalUSD,
                           displayCurrency
                         )}
