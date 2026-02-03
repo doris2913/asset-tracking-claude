@@ -40,6 +40,7 @@ export default function SettingsPage() {
   const [finnhubApiKey, setFinnhubApiKey] = useState(settings.finnhubApiKey || '');
   const [fmpApiKey, setFmpApiKey] = useState(settings.fmpApiKey || '');
   const [customCorsProxy, setCustomCorsProxy] = useState(settings.customCorsProxy || '');
+  const [dropboxAppKey, setDropboxAppKey] = useState(settings.dropboxAppKey || '');
   const [cacheStats, setCacheStats] = useState(getCacheStats());
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -54,6 +55,7 @@ export default function SettingsPage() {
       setFinnhubApiKey(settings.finnhubApiKey || '');
       setFmpApiKey(settings.fmpApiKey || '');
       setCustomCorsProxy(settings.customCorsProxy || '');
+      setDropboxAppKey(settings.dropboxAppKey || '');
     }
   }, [isLoaded, settings]);
 
@@ -74,6 +76,7 @@ export default function SettingsPage() {
       finnhubApiKey: finnhubApiKey || undefined,
       fmpApiKey: fmpApiKey || undefined,
       customCorsProxy: customCorsProxy || undefined,
+      dropboxAppKey: dropboxAppKey || undefined,
     });
     updateExchangeRate(exchangeRate);
     setThemeId(selectedChartTheme);
@@ -456,6 +459,43 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {/* Dropbox Integration */}
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+              <label className="label">{t.settings.dropboxIntegration}</label>
+              <div className="mt-2">
+                <label className="label text-sm">{t.settings.dropboxAppKey}</label>
+                <input
+                  type="text"
+                  value={dropboxAppKey}
+                  onChange={(e) => setDropboxAppKey(e.target.value)}
+                  placeholder={t.settings.dropboxAppKeyPlaceholder}
+                  className="input"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {t.settings.dropboxAppKeyHint}{' '}
+                  <a
+                    href="https://www.dropbox.com/developers/apps"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    {t.settings.dropboxAppKeySetup}
+                  </a>
+                </p>
+                <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-600 dark:text-gray-400">
+                  <p className="font-medium mb-1">Setup steps:</p>
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>Go to Dropbox App Console</li>
+                    <li>Create a new app (Choose: Scoped access → Full Dropbox)</li>
+                    <li>In Settings, add your domains to "Chooser/Saver domains"</li>
+                    <li>For localhost: add <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">localhost</code></li>
+                    <li>For production: add your GitHub Pages domain</li>
+                    <li>Copy the App Key and paste it above</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
             <div className="pt-4">
               <button onClick={handleSaveSettings} className="btn btn-primary">
                 {t.settings.saveSettings}
@@ -493,6 +533,7 @@ export default function SettingsPage() {
             onExport={exportData}
             onImport={importData}
             onClear={clearAllData}
+            dropboxAppKey={settings.dropboxAppKey}
           />
         </div>
 

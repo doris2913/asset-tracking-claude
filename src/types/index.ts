@@ -79,6 +79,7 @@ export interface AppSettings {
   finnhubApiKey?: string;  // Finnhub API key (optional)
   fmpApiKey?: string;  // Financial Modeling Prep API key (optional)
   customCorsProxy?: string;  // Custom CORS proxy URL (e.g., Cloudflare Worker)
+  dropboxAppKey?: string;  // Dropbox App Key for Saver integration (optional)
 }
 
 // Stock quote from Yahoo Finance

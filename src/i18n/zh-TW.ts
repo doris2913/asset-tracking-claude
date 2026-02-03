@@ -205,6 +205,19 @@ export const zhTW: Translations = {
     priceCache: '股價快取',
     priceCacheDesc: '已快取 {count} 個股價（最舊：{age} 分鐘前）',
     clearCache: '清除',
+    // Dropbox integration
+    dropboxIntegration: 'Dropbox 整合',
+    dropboxAppKey: 'Dropbox App Key',
+    dropboxAppKeyPlaceholder: '輸入您的 Dropbox App Key',
+    dropboxAppKeyHint: '創建 Dropbox App 以獲取 App Key。這將啟用「儲存到 Dropbox」功能。',
+    dropboxAppKeySetup: '如何取得 App Key',
+    saveToDropbox: '儲存到 Dropbox',
+    savingToDropbox: '儲存中...',
+    dropboxSaveSuccess: '已成功儲存到 Dropbox！',
+    dropboxSaveCancelled: '已取消儲存到 Dropbox。',
+    dropboxSaveFailed: '儲存到 Dropbox 失敗。',
+    dropboxNotConfigured: '請先在設定中配置 Dropbox App Key。',
+    dropboxBrowserNotSupported: '您的瀏覽器不支援 Dropbox Saver。',
   },
 
   // Chart

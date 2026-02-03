@@ -203,6 +203,19 @@ export const en = {
     priceCache: 'Stock Price Cache',
     priceCacheDesc: '{count} prices cached (oldest: {age} min)',
     clearCache: 'Clear',
+    // Dropbox integration
+    dropboxIntegration: 'Dropbox Integration',
+    dropboxAppKey: 'Dropbox App Key',
+    dropboxAppKeyPlaceholder: 'Enter your Dropbox App Key',
+    dropboxAppKeyHint: 'Create a Dropbox App to get your App Key. This enables "Save to Dropbox" functionality.',
+    dropboxAppKeySetup: 'How to get App Key',
+    saveToDropbox: 'Save to Dropbox',
+    savingToDropbox: 'Saving...',
+    dropboxSaveSuccess: 'Successfully saved to Dropbox!',
+    dropboxSaveCancelled: 'Save to Dropbox cancelled.',
+    dropboxSaveFailed: 'Failed to save to Dropbox.',
+    dropboxNotConfigured: 'Please configure Dropbox App Key in Settings first.',
+    dropboxBrowserNotSupported: 'Your browser does not support Dropbox Saver.',
   },
 
   // Chart
