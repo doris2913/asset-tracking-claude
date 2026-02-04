@@ -85,6 +85,11 @@ export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) 
                     <div className="font-semibold text-lg text-gray-900 dark:text-gray-100">
                       {formatCurrency(asset.value, asset.currency)}
                     </div>
+                    {asset.expectedReturn !== undefined && asset.expectedReturn !== 0 && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        🎯 {asset.expectedReturn >= 0 ? '+' : ''}{asset.expectedReturn}%
+                      </div>
+                    )}
                     <div className="flex space-x-2 mt-2">
                       <button
                         onClick={() => onEdit(asset)}
