@@ -26,6 +26,21 @@ export default function DetailsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [hideAssets, setHideAssets] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideAssets') === 'true';
+    }
+    return false;
+  });
+
+  const toggleHideAssets = () => {
+    setHideAssets(prev => {
+      const newValue = !prev;
+      localStorage.setItem('hideAssets', String(newValue));
+      return newValue;
+    });
+  };
 
   const labels = {
     title: language === 'zh-TW' ? '資產明細' : 'Asset Details',
@@ -167,6 +182,13 @@ export default function DetailsPage() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">{labels.subtitle}</p>
           </div>
           <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleHideAssets}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title={hideAssets ? (language === 'zh-TW' ? '顯示金額' : 'Show amounts') : (language === 'zh-TW' ? '隱藏金額' : 'Hide amounts')}
+            >
+              {hideAssets ? '👁️' : '🙈'}
+            </button>
             <select
               value={displayCurrency}
               onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
@@ -235,13 +257,13 @@ export default function DetailsPage() {
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{labels.total} (TWD)</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalTWD, 'TWD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalTWD, 'TWD')}
             </p>
           </div>
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{labels.total} (USD)</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalUSD, 'USD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalUSD, 'USD')}
             </p>
           </div>
           <div className="card">
@@ -340,12 +362,14 @@ export default function DetailsPage() {
                           {asset.shares ? asset.shares.toLocaleString() : '-'}
                         </td>
                         <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
-                          {unitPrice
+                          {hideAssets
+                            ? '＊＊＊＊'
+                            : unitPrice
                             ? formatCurrency(unitPrice, asset.currency)
                             : '-'}
                         </td>
                         <td className="py-3 px-4 text-right font-medium text-gray-900 dark:text-white">
-                          {formatCurrency(displayValue, displayCurrency)}
+                          {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(displayValue, displayCurrency)}
                         </td>
                         <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
                           {percentage.toFixed(1)}%
@@ -363,7 +387,7 @@ export default function DetailsPage() {
                       {labels.total} {hasActiveFilters && `(${filteredAndSortedAssets.length} ${labels.items})`}
                     </td>
                     <td className="py-3 px-4 text-right font-bold text-lg text-gray-900 dark:text-white">
-                      {formatCurrency(
+                      {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(
                         hasActiveFilters
                           ? (displayCurrency === 'TWD' ? filteredTotals.filteredTWD : filteredTotals.filteredUSD)
                           : (displayCurrency === 'TWD' ? totalTWD : totalUSD),

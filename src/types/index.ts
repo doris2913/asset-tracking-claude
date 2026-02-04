@@ -19,6 +19,7 @@ export interface Asset {
   currency: Currency;
   symbol?: string;           // Stock symbol for automatic price fetching (e.g., "AAPL", "0050.TW")
   shares?: number;           // Number of shares (for stocks)
+  expectedReturn?: number;   // Expected annual return rate in percentage (e.g., 7 for 7%)
   notes?: string;            // Optional notes
   lastUpdated: string;       // ISO date string
 }
@@ -79,6 +80,7 @@ export interface AppSettings {
   finnhubApiKey?: string;  // Finnhub API key (optional)
   fmpApiKey?: string;  // Financial Modeling Prep API key (optional)
   customCorsProxy?: string;  // Custom CORS proxy URL (e.g., Cloudflare Worker)
+  dropboxAppKey?: string;  // Dropbox App Key for Saver integration (optional)
 }
 
 // Stock quote from Yahoo Finance

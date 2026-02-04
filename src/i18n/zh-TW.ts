@@ -52,6 +52,8 @@ export const zhTW: Translations = {
     value: '價值',
     noChartData: '尚無快照資料。建立快照以查看資產成長圖表。',
     noBreakdownData: '尚無資產可顯示配置。',
+    expectedReturn: '預期報酬',
+    weightedAnnualReturn: '依資產價值加權',
   },
 
   // Assets
@@ -85,6 +87,9 @@ export const zhTW: Translations = {
     stockSymbolPlaceholder: '例如：AAPL、0050.TW、2330.TW',
     stockSymbolHint: '台股：使用 .TW 後綴（例如 2330.TW）。美股：直接使用代號（例如 AAPL）',
     numberOfShares: '持有股數',
+    expectedReturn: '預期年化報酬率 (%)',
+    expectedReturnPlaceholder: '例如：7 代表 7%',
+    expectedReturnHint: '預期年化報酬率。留空則以 0% 計算。',
     notesPlaceholder: '其他備註...',
   },
 
@@ -205,6 +210,19 @@ export const zhTW: Translations = {
     priceCache: '股價快取',
     priceCacheDesc: '已快取 {count} 個股價（最舊：{age} 分鐘前）',
     clearCache: '清除',
+    // Dropbox integration
+    dropboxIntegration: 'Dropbox 整合',
+    dropboxAppKey: 'Dropbox App Key',
+    dropboxAppKeyPlaceholder: '輸入您的 Dropbox App Key',
+    dropboxAppKeyHint: '創建 Dropbox App 以獲取 App Key。這將啟用「儲存到 Dropbox」功能。',
+    dropboxAppKeySetup: '如何取得 App Key',
+    saveToDropbox: '儲存到 Dropbox',
+    savingToDropbox: '儲存中...',
+    dropboxSaveSuccess: '已成功儲存到 Dropbox！',
+    dropboxSaveCancelled: '已取消儲存到 Dropbox。',
+    dropboxSaveFailed: '儲存到 Dropbox 失敗。',
+    dropboxNotConfigured: '請先在設定中配置 Dropbox App Key。',
+    dropboxBrowserNotSupported: '您的瀏覽器不支援 Dropbox Saver。',
   },
 
   // Chart

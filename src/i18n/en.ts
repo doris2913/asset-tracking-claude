@@ -50,6 +50,8 @@ export const en = {
     value: 'Value',
     noChartData: 'No snapshot data yet. Create snapshots to see your asset growth chart.',
     noBreakdownData: 'No assets to display breakdown.',
+    expectedReturn: 'Expected Return',
+    weightedAnnualReturn: 'Weighted by asset value',
   },
 
   // Assets
@@ -83,6 +85,9 @@ export const en = {
     stockSymbolPlaceholder: 'e.g., AAPL, 0050.TW, 2330.TW',
     stockSymbolHint: 'TW stocks: use .TW suffix (e.g., 2330.TW). US stocks: use symbol directly (e.g., AAPL)',
     numberOfShares: 'Number of Shares',
+    expectedReturn: 'Expected Annual Return (%)',
+    expectedReturnPlaceholder: 'e.g., 7 for 7%',
+    expectedReturnHint: 'Expected annual return rate. Leave empty for 0%.',
     notesPlaceholder: 'Additional notes...',
   },
 
@@ -203,6 +208,19 @@ export const en = {
     priceCache: 'Stock Price Cache',
     priceCacheDesc: '{count} prices cached (oldest: {age} min)',
     clearCache: 'Clear',
+    // Dropbox integration
+    dropboxIntegration: 'Dropbox Integration',
+    dropboxAppKey: 'Dropbox App Key',
+    dropboxAppKeyPlaceholder: 'Enter your Dropbox App Key',
+    dropboxAppKeyHint: 'Create a Dropbox App to get your App Key. This enables "Save to Dropbox" functionality.',
+    dropboxAppKeySetup: 'How to get App Key',
+    saveToDropbox: 'Save to Dropbox',
+    savingToDropbox: 'Saving...',
+    dropboxSaveSuccess: 'Successfully saved to Dropbox!',
+    dropboxSaveCancelled: 'Save to Dropbox cancelled.',
+    dropboxSaveFailed: 'Failed to save to Dropbox.',
+    dropboxNotConfigured: 'Please configure Dropbox App Key in Settings first.',
+    dropboxBrowserNotSupported: 'Your browser does not support Dropbox Saver.',
   },
 
   // Chart
