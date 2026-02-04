@@ -52,6 +52,8 @@ export const zhTW: Translations = {
     value: '價值',
     noChartData: '尚無快照資料。建立快照以查看資產成長圖表。',
     noBreakdownData: '尚無資產可顯示配置。',
+    expectedReturn: '預期報酬',
+    weightedAnnualReturn: '依資產價值加權',
   },
 
   // Assets
@@ -85,6 +87,9 @@ export const zhTW: Translations = {
     stockSymbolPlaceholder: '例如：AAPL、0050.TW、2330.TW',
     stockSymbolHint: '台股：使用 .TW 後綴（例如 2330.TW）。美股：直接使用代號（例如 AAPL）',
     numberOfShares: '持有股數',
+    expectedReturn: '預期年化報酬率 (%)',
+    expectedReturnPlaceholder: '例如：7 代表 7%',
+    expectedReturnHint: '預期年化報酬率。留空則以 0% 計算。',
     notesPlaceholder: '其他備註...',
   },
 

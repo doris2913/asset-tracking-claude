@@ -28,6 +28,7 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
   const [currency, setCurrency] = useState<Currency>(asset?.currency || 'TWD');
   const [symbol, setSymbol] = useState(asset?.symbol || '');
   const [shares, setShares] = useState(asset?.shares?.toString() || '');
+  const [expectedReturn, setExpectedReturn] = useState(asset?.expectedReturn?.toString() || '');
   const [notes, setNotes] = useState(asset?.notes || '');
   const [isFetchingPrice, setIsFetchingPrice] = useState(false);
   const [priceStatus, setPriceStatus] = useState<string>('');
@@ -105,6 +106,7 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
       currency,
       ...(isStockType && symbol ? { symbol } : {}),
       ...(isStockType && shares ? { shares: parseFloat(shares) } : {}),
+      ...(expectedReturn ? { expectedReturn: parseFloat(expectedReturn) } : {}),
       ...(notes ? { notes } : {}),
     };
 
@@ -220,6 +222,21 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
           </div>
         </>
       )}
+
+      <div>
+        <label className="label">{t.assetForm.expectedReturn} ({t.common.optional})</label>
+        <input
+          type="number"
+          value={expectedReturn}
+          onChange={(e) => setExpectedReturn(e.target.value)}
+          className="input"
+          placeholder={t.assetForm.expectedReturnPlaceholder}
+          step="0.1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          {t.assetForm.expectedReturnHint}
+        </p>
+      </div>
 
       <div>
         <label className="label">{t.common.notes} ({t.common.optional})</label>

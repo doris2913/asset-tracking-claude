@@ -50,6 +50,8 @@ export const en = {
     value: 'Value',
     noChartData: 'No snapshot data yet. Create snapshots to see your asset growth chart.',
     noBreakdownData: 'No assets to display breakdown.',
+    expectedReturn: 'Expected Return',
+    weightedAnnualReturn: 'Weighted by asset value',
   },
 
   // Assets
@@ -83,6 +85,9 @@ export const en = {
     stockSymbolPlaceholder: 'e.g., AAPL, 0050.TW, 2330.TW',
     stockSymbolHint: 'TW stocks: use .TW suffix (e.g., 2330.TW). US stocks: use symbol directly (e.g., AAPL)',
     numberOfShares: 'Number of Shares',
+    expectedReturn: 'Expected Annual Return (%)',
+    expectedReturnPlaceholder: 'e.g., 7 for 7%',
+    expectedReturnHint: 'Expected annual return rate. Leave empty for 0%.',
     notesPlaceholder: 'Additional notes...',
   },
 

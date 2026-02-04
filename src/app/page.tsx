@@ -382,6 +382,20 @@ export default function DashboardPage() {
   // Get latest snapshot info
   const latestSnapshotDate = getLatestSnapshotDate(snapshots);
 
+  // Calculate weighted expected annual return
+  const weightedExpectedReturn = useMemo(() => {
+    if (totalTWD === 0) return 0;
+
+    let weightedSum = 0;
+    for (const asset of currentAssets.assets) {
+      const assetValueTWD = toTWD(asset.value, asset.currency, currentAssets.exchangeRate);
+      const expectedReturn = asset.expectedReturn || 0;
+      weightedSum += assetValueTWD * expectedReturn;
+    }
+
+    return weightedSum / totalTWD;
+  }, [currentAssets.assets, currentAssets.exchangeRate, totalTWD]);
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -444,7 +458,7 @@ export default function DashboardPage() {
         )}
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <SummaryCard
             title={t.dashboard.totalAssets}
             value={hideAssets ? '＊＊＊＊＊＊' : formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
@@ -462,18 +476,29 @@ export default function DashboardPage() {
             color="blue"
           />
           <SummaryCard
+            title={t.dashboard.expectedReturn}
+            value={
+              hideAssets
+                ? '＊＊＊＊'
+                : `${weightedExpectedReturn >= 0 ? '+' : ''}${weightedExpectedReturn.toFixed(1)}%`
+            }
+            subtitle={t.dashboard.weightedAnnualReturn}
+            icon="🎯"
+            color="green"
+          />
+          <SummaryCard
             title={t.dashboard.exchangeRate}
             value={`${currentAssets.exchangeRate.toFixed(2)}`}
             subtitle="USD/TWD"
             icon="💱"
-            color="green"
+            color="yellow"
           />
           <SummaryCard
             title={t.dashboard.snapshots}
             value={snapshots.length.toString()}
             subtitle={latestSnapshotDate ? `${t.dashboard.latestSnapshot}: ${new Date(latestSnapshotDate).toLocaleDateString()}` : t.dashboard.noSnapshots}
             icon="📸"
-            color="yellow"
+            color="orange"
           />
           <SummaryCard
             title={t.dashboard.yoyGrowth}
