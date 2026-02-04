@@ -64,6 +64,7 @@ export default function DetailsPage() {
     showing: language === 'zh-TW' ? '顯示' : 'Showing',
     of: language === 'zh-TW' ? '筆，共' : ' of ',
     items: language === 'zh-TW' ? '筆資產' : ' assets',
+    expectedReturn: language === 'zh-TW' ? '預期報酬' : 'Expected',
   };
 
   const filteredAndSortedAssets = useMemo(() => {
@@ -328,6 +329,9 @@ export default function DetailsPage() {
                       {labels.percentage}
                     </th>
                     <th className="py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400 text-right">
+                      {labels.expectedReturn}
+                    </th>
+                    <th className="py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400 text-right">
                       {labels.lastUpdated}
                     </th>
                   </tr>
@@ -374,6 +378,11 @@ export default function DetailsPage() {
                         <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
                           {percentage.toFixed(1)}%
                         </td>
+                        <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
+                          {asset.expectedReturn !== undefined && asset.expectedReturn !== 0
+                            ? `${asset.expectedReturn >= 0 ? '+' : ''}${asset.expectedReturn}%`
+                            : '-'}
+                        </td>
                         <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-500 text-sm">
                           {new Date(asset.lastUpdated).toLocaleDateString(dateLocale)}
                         </td>
@@ -400,6 +409,7 @@ export default function DetailsPage() {
                         : '100%'
                       }
                     </td>
+                    <td></td>
                     <td></td>
                   </tr>
                 </tfoot>
