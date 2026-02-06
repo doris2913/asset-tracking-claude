@@ -15,23 +15,31 @@ export function toUSD(value: number, currency: Currency, exchangeRate: number): 
   return currency === 'USD' ? value : value / exchangeRate;
 }
 
-// Calculate total value of assets in TWD
+// Get the effective value of an asset (negative for liabilities)
+export function getEffectiveValue(asset: Asset): number {
+  return asset.type === 'liability' ? -Math.abs(asset.value) : asset.value;
+}
+
+// Calculate total value of assets in TWD (liabilities are subtracted)
 export function calculateTotalTWD(assets: Asset[], exchangeRate: number): number {
   return assets.reduce((total, asset) => {
-    return total + toTWD(asset.value, asset.currency, exchangeRate);
+    const effectiveValue = getEffectiveValue(asset);
+    return total + toTWD(effectiveValue, asset.currency, exchangeRate);
   }, 0);
 }
 
-// Calculate total value of assets in USD
+// Calculate total value of assets in USD (liabilities are subtracted)
 export function calculateTotalUSD(assets: Asset[], exchangeRate: number): number {
   return assets.reduce((total, asset) => {
-    return total + toUSD(asset.value, asset.currency, exchangeRate);
+    const effectiveValue = getEffectiveValue(asset);
+    return total + toUSD(effectiveValue, asset.currency, exchangeRate);
   }, 0);
 }
 
 // Get asset summary by type
 export function getAssetSummary(assets: Asset[], exchangeRate: number): AssetSummary[] {
   const totalTWD = calculateTotalTWD(assets, exchangeRate);
+  const absTotalTWD = Math.abs(totalTWD);
   const summaryMap: Map<AssetType, AssetSummary> = new Map();
 
   // Initialize all types
@@ -45,19 +53,24 @@ export function getAssetSummary(assets: Asset[], exchangeRate: number): AssetSum
     });
   });
 
-  // Calculate totals per type
+  // Calculate totals per type (liabilities as negative values)
   assets.forEach((asset) => {
     const summary = summaryMap.get(asset.type)!;
-    const valueTWD = toTWD(asset.value, asset.currency, exchangeRate);
-    const valueUSD = toUSD(asset.value, asset.currency, exchangeRate);
+    const effectiveValue = getEffectiveValue(asset);
+    const valueTWD = toTWD(effectiveValue, asset.currency, exchangeRate);
+    const valueUSD = toUSD(effectiveValue, asset.currency, exchangeRate);
     summary.totalTWD += valueTWD;
     summary.totalUSD += valueUSD;
     summary.count += 1;
   });
 
-  // Calculate percentages
+  // Calculate percentages (use absolute values for percentage calculation)
   summaryMap.forEach((summary) => {
-    summary.percentage = totalTWD > 0 ? (summary.totalTWD / totalTWD) * 100 : 0;
+    summary.percentage = absTotalTWD > 0 ? (Math.abs(summary.totalTWD) / absTotalTWD) * 100 : 0;
+    // Make percentage negative for liabilities
+    if (summary.type === 'liability' && summary.totalTWD < 0) {
+      summary.percentage = -summary.percentage;
+    }
   });
 
   return Array.from(summaryMap.values()).filter((s) => s.count > 0);

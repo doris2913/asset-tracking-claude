@@ -5,7 +5,7 @@ import Navigation from '@/components/Navigation';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
 import { Currency, AssetType } from '@/types';
-import { formatCurrency, toTWD, toUSD } from '@/utils/calculations';
+import { formatCurrency, toTWD, toUSD, getEffectiveValue } from '@/utils/calculations';
 
 const ASSET_TYPE_ICONS: Record<AssetType, string> = {
   cash_twd: '💵',
@@ -131,11 +131,12 @@ export default function DetailsPage() {
     setSearchQuery('');
   };
 
-  const getDisplayValue = (value: number, currency: Currency) => {
+  const getDisplayValue = (asset: { value: number; currency: Currency; type: string }) => {
+    const effectiveValue = asset.type === 'liability' ? -Math.abs(asset.value) : asset.value;
     if (displayCurrency === 'TWD') {
-      return toTWD(value, currency, currentAssets.exchangeRate);
+      return toTWD(effectiveValue, asset.currency, currentAssets.exchangeRate);
     }
-    return toUSD(value, currency, currentAssets.exchangeRate);
+    return toUSD(effectiveValue, asset.currency, currentAssets.exchangeRate);
   };
 
   const getUnitPrice = (asset: { value: number; shares?: number }) => {
@@ -143,8 +144,9 @@ export default function DetailsPage() {
     return asset.value / asset.shares;
   };
 
-  const getPercentage = (value: number, currency: Currency) => {
-    const valueTWD = toTWD(value, currency, currentAssets.exchangeRate);
+  const getPercentage = (asset: { value: number; currency: Currency; type: string }) => {
+    const effectiveValue = asset.type === 'liability' ? -Math.abs(asset.value) : asset.value;
+    const valueTWD = toTWD(effectiveValue, asset.currency, currentAssets.exchangeRate);
     if (totalTWD === 0) return 0;
     return (valueTWD / totalTWD) * 100;
   };
@@ -339,8 +341,8 @@ export default function DetailsPage() {
                 <tbody>
                   {filteredAndSortedAssets.map((asset) => {
                     const unitPrice = getUnitPrice(asset);
-                    const displayValue = getDisplayValue(asset.value, asset.currency);
-                    const percentage = getPercentage(asset.value, asset.currency);
+                    const displayValue = getDisplayValue(asset);
+                    const percentage = getPercentage(asset);
 
                     return (
                       <tr
@@ -372,7 +374,7 @@ export default function DetailsPage() {
                             ? formatCurrency(unitPrice, asset.currency)
                             : '-'}
                         </td>
-                        <td className="py-3 px-4 text-right font-medium text-gray-900 dark:text-white">
+                        <td className={`py-3 px-4 text-right font-medium ${asset.type === 'liability' ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
                           {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(displayValue, displayCurrency)}
                         </td>
                         <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">

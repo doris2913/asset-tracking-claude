@@ -21,9 +21,10 @@ import {
   getLatestSnapshotDate,
   toTWD,
   toUSD,
+  getEffectiveValue,
 } from '@/utils/calculations';
 
-// Calculate portfolio value with given price type
+// Calculate portfolio value with given price type (liabilities as negative)
 function calculatePortfolioValue(
   assets: Asset[],
   stockPrices: Record<string, StockPrice>,
@@ -53,6 +54,11 @@ function calculatePortfolioValue(
       }
 
       assetValue = asset.shares * price;
+    }
+
+    // Apply negative sign for liabilities
+    if (asset.type === 'liability') {
+      assetValue = -Math.abs(assetValue);
     }
 
     // Convert to display currency
@@ -382,13 +388,14 @@ export default function DashboardPage() {
   // Get latest snapshot info
   const latestSnapshotDate = getLatestSnapshotDate(snapshots);
 
-  // Calculate weighted expected annual return
+  // Calculate weighted expected annual return (liabilities as negative)
   const weightedExpectedReturn = useMemo(() => {
     if (totalTWD === 0) return 0;
 
     let weightedSum = 0;
     for (const asset of currentAssets.assets) {
-      const assetValueTWD = toTWD(asset.value, asset.currency, currentAssets.exchangeRate);
+      const effectiveValue = getEffectiveValue(asset);
+      const assetValueTWD = toTWD(effectiveValue, asset.currency, currentAssets.exchangeRate);
       const expectedReturn = asset.expectedReturn || 0;
       weightedSum += assetValueTWD * expectedReturn;
     }
