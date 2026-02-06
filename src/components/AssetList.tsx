@@ -1,7 +1,7 @@
 'use client';
 
 import { Asset, AssetType } from '@/types';
-import { formatCurrency } from '@/utils/calculations';
+import { formatCurrency, getEffectiveValue } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
 
 const ASSET_TYPE_ICONS: Record<AssetType, string> = {
@@ -82,8 +82,8 @@ export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) 
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-                      {formatCurrency(asset.value, asset.currency)}
+                    <div className={`font-semibold text-lg ${asset.type === 'liability' ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                      {formatCurrency(getEffectiveValue(asset), asset.currency)}
                     </div>
                     {asset.expectedReturn !== undefined && asset.expectedReturn !== 0 && (
                       <div className="text-sm text-gray-500 dark:text-gray-400">
