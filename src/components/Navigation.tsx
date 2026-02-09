@@ -287,17 +287,37 @@ export default function Navigation() {
           </div>
         )}
 
-        {/* Mobile Section Tabs - shown below the top bar */}
+        {/* Mobile Section Tabs - shown below the top bar, horizontally scrollable */}
         {!isUtilityPage && (
           <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-            <div className="flex items-center px-2 h-9">
+            <div className="flex items-center px-2 h-10 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {/* Section selector pills */}
+              {sections.map((section) => {
+                const isSectionActive = activeSection === section.key;
+                return (
+                  <Link
+                    key={section.key}
+                    href={section.key === 'assets' ? '/' : '/wishlist'}
+                    className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors mx-0.5 whitespace-nowrap ${
+                      isSectionActive
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                    }`}
+                  >
+                    <span className="mr-0.5">{section.icon}</span>
+                    {section.label}
+                  </Link>
+                );
+              })}
+              <div className="shrink-0 w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1.5" />
+              {/* Sub-page tabs */}
               {sectionNavItems[activeSection].map((item) => {
                 const isActive = isItemActive(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex-1 text-center px-1 py-1 rounded-md text-xs font-medium transition-colors mx-0.5 ${
+                    className={`shrink-0 px-2.5 py-1 rounded-md text-xs font-medium transition-colors mx-0.5 whitespace-nowrap ${
                       isActive
                         ? 'bg-white dark:bg-gray-700 text-blue-700 dark:text-blue-300 shadow-sm'
                         : 'text-gray-500 dark:text-gray-400'
