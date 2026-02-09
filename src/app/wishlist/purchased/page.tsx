@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useWishListData } from '@/hooks/useWishListData';
 import { useAssetData } from '@/hooks/useAssetData';
+import Navigation from '@/components/Navigation';
 import { PurchasedItem } from '@/types/wishlist';
 import { LIFE_ASPECT_CONFIG } from '@/types/wishlist';
 import { formatCurrency } from '@/utils/calculations';
@@ -93,50 +94,23 @@ export default function PurchasedItemsPage() {
 
   if (!wishListData.isLoaded) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center">載入中...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400">載入中...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
+      <main className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Link
-            href="/assets"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-            title="回到資產"
-          >
-            ← 回到資產
-          </Link>
-          <span className="text-gray-300">|</span>
-          <h1 className="text-3xl font-bold text-gray-900">已購買物品</h1>
-        </div>
-        <p className="text-gray-600">追蹤購買後的滿意度和使用心得</p>
-      </div>
-
-      {/* Navigation Tabs - Mobile optimized */}
-      <div className="flex gap-1 sm:gap-4 mb-6 border-b overflow-x-auto">
-        <Link
-          href="/wishlist"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
-        >
-          願望清單
-        </Link>
-        <Link
-          href="/wishlist/purchased"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-green-600 border-b-2 border-green-600 whitespace-nowrap min-h-[44px] flex items-center"
-        >
-          已購買
-        </Link>
-        <Link
-          href="/wishlist/analytics"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
-        >
-          分析報告
-        </Link>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">已購買物品</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">追蹤購買後的滿意度和使用心得</p>
       </div>
 
       {/* Summary and Add Button */}
@@ -441,6 +415,7 @@ export default function PurchasedItemsPage() {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }
