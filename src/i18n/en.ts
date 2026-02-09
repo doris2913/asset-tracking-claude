@@ -23,9 +23,15 @@ export const en = {
     details: 'Details',
     snapshots: 'Snapshots',
     wishlist: 'Wish List',
+    wishlistItems: 'Items',
+    wishlistAnalytics: 'Analytics',
+    wishlistPurchased: 'Purchased',
+    wishlistSettings: 'Settings',
     migrate: 'Migrate',
     settings: 'Settings',
-    appName: 'Asset Tracker',
+    appName: 'Life Management',
+    sectionAssets: 'Asset Management',
+    sectionWishlist: 'Wish List',
   },
 
   // Dashboard

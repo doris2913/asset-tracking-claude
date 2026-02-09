@@ -25,9 +25,15 @@ export const zhTW: Translations = {
     details: '明細',
     snapshots: '快照',
     wishlist: '願望清單',
+    wishlistItems: '清單',
+    wishlistAnalytics: '分析',
+    wishlistPurchased: '已購買',
+    wishlistSettings: '設定',
     migrate: '遷移',
     settings: '設定',
-    appName: '資產追蹤器',
+    appName: '生活管理',
+    sectionAssets: '資產管理',
+    sectionWishlist: '願望清單',
   },
 
   // Dashboard

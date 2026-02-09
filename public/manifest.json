@@ -1,7 +1,7 @@
 {
-  "name": "Asset Tracker",
-  "short_name": "Assets",
-  "description": "Track your asset growth over time",
+  "name": "Life Management",
+  "short_name": "Life Mgmt",
+  "description": "Manage your life - assets, wishlists, and more",
   "start_url": "/asset-tracking-claude/",
   "display": "standalone",
   "background_color": "#1f2937",
