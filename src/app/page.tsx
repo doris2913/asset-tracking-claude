@@ -10,7 +10,7 @@ import AllocationAdjustmentRecommendation from '@/components/AllocationAdjustmen
 import AssetGrowthAnalysis from '@/components/AssetGrowthAnalysis';
 import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
-import { useStockPrices } from '@/lib/yahooFinance';
+import { fetchMultipleStockPrices, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
 import { useI18n } from '@/i18n';
 import { Currency, StockPrice, Asset } from '@/types';
 import {
@@ -21,9 +21,10 @@ import {
   getLatestSnapshotDate,
   toTWD,
   toUSD,
+  getEffectiveValue,
 } from '@/utils/calculations';
 
-// Calculate portfolio value with given price type
+// Calculate portfolio value with given price type (liabilities as negative)
 function calculatePortfolioValue(
   assets: Asset[],
   stockPrices: Record<string, StockPrice>,
@@ -55,6 +56,11 @@ function calculatePortfolioValue(
       assetValue = asset.shares * price;
     }
 
+    // Apply negative sign for liabilities
+    if (asset.type === 'liability') {
+      assetValue = -Math.abs(assetValue);
+    }
+
     // Convert to display currency
     if (currency === 'TWD') {
       total += toTWD(assetValue, asset.currency, exchangeRate);
@@ -79,15 +85,37 @@ export default function DashboardPage() {
   } = useAssetData();
 
   const { t, language } = useI18n();
-  const { fetchPricesWithMA } = useStockPrices();
   const [displayCurrency, setDisplayCurrency] = useState<Currency>('TWD');
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
+  const [hideAssets, setHideAssets] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideAssets') === 'true';
+    }
+    return false;
+  });
+
+  const toggleHideAssets = () => {
+    setHideAssets(prev => {
+      const newValue = !prev;
+      localStorage.setItem('hideAssets', String(newValue));
+      return newValue;
+    });
+  };
 
   // Handle stock price update
   const handleUpdateStockPrices = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價與移動平均...' : 'Fetching stock prices with moving averages...');
+
+    const dataSource = settings.stockDataSource || 'yahoo';
+    const sourceConfig = API_SOURCE_CONFIG[dataSource];
+
+    setPriceUpdateStatus(
+      language === 'zh-TW'
+        ? `正在透過 ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()} 取得股價...`
+        : `Fetching stock prices via ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()}...`
+    );
 
     try {
       const stockAssets = currentAssets.assets.filter(
@@ -100,17 +128,53 @@ export default function DashboardPage() {
       }
 
       const symbols = stockAssets.map((a) => a.symbol!);
-      const prices = await fetchPricesWithMA(symbols);
+
+      // Progress callback for real-time updates
+      const onProgress: ProgressCallback = (current, total, symbol, status) => {
+        const statusText = status === 'cached'
+          ? (language === 'zh-TW' ? '快取' : 'cached')
+          : status === 'fetching'
+          ? (language === 'zh-TW' ? '取得中' : 'fetching')
+          : status === 'success'
+          ? (language === 'zh-TW' ? '成功' : 'success')
+          : (language === 'zh-TW' ? '失敗' : 'failed');
+
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? `${symbol} ${statusText}... (${current}/${total})`
+            : `${symbol} ${statusText}... (${current}/${total})`
+        );
+      };
+
+      // Use unified stock price manager with settings (includes custom CORS proxy)
+      const prices = await fetchMultipleStockPrices(symbols, settings, onProgress);
 
       if (Object.keys(prices).length > 0) {
         updateStockPricesWithMA(prices);
+        const successCount = Object.keys(prices).length;
+        const failedCount = symbols.length - successCount;
+
+        let statusMessage = language === 'zh-TW'
+          ? `已更新 ${successCount} 檔股票`
+          : `Updated ${successCount} stock(s)`;
+
+        if (failedCount > 0) {
+          statusMessage += language === 'zh-TW'
+            ? `（${failedCount} 檔失敗）`
+            : ` (${failedCount} failed)`;
+        }
+
+        if (sourceConfig.supportsMA) {
+          statusMessage += language === 'zh-TW' ? '（含移動平均）' : ' with moving averages';
+        }
+
+        setPriceUpdateStatus(statusMessage);
+      } else {
         setPriceUpdateStatus(
           language === 'zh-TW'
-            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
-            : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
+            ? '無法取得股價。請檢查 API 設定。'
+            : 'Could not fetch any stock prices. Please check API settings.'
         );
-      } else {
-        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
       }
     } catch (error) {
       setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
@@ -324,6 +388,21 @@ export default function DashboardPage() {
   // Get latest snapshot info
   const latestSnapshotDate = getLatestSnapshotDate(snapshots);
 
+  // Calculate weighted expected annual return (liabilities as negative)
+  const weightedExpectedReturn = useMemo(() => {
+    if (totalTWD === 0) return 0;
+
+    let weightedSum = 0;
+    for (const asset of currentAssets.assets) {
+      const effectiveValue = getEffectiveValue(asset);
+      const assetValueTWD = toTWD(effectiveValue, asset.currency, currentAssets.exchangeRate);
+      const expectedReturn = asset.expectedReturn || 0;
+      weightedSum += assetValueTWD * expectedReturn;
+    }
+
+    return weightedSum / totalTWD;
+  }, [currentAssets.assets, currentAssets.exchangeRate, totalTWD]);
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -349,6 +428,13 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <button
+              onClick={toggleHideAssets}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title={hideAssets ? (language === 'zh-TW' ? '顯示金額' : 'Show amounts') : (language === 'zh-TW' ? '隱藏金額' : 'Hide amounts')}
+            >
+              {hideAssets ? '👁️' : '🙈'}
+            </button>
             <button
               onClick={handleUpdateStockPrices}
               disabled={isUpdatingPrices}
@@ -379,41 +465,54 @@ export default function DashboardPage() {
         )}
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <SummaryCard
             title={t.dashboard.totalAssets}
-            value={formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
+            value={hideAssets ? '＊＊＊＊＊＊' : formatCurrency(displayCurrency === 'TWD' ? totalTWD : totalUSD, displayCurrency)}
             subtitle={`${currentAssets.assets.length} ${t.nav.assets.toLowerCase()}`}
             icon="💰"
             trend={
-              growthStats.monthlyGrowth !== null
+              hideAssets ? undefined : (growthStats.monthlyGrowth !== null
                 ? {
                     value: growthStats.monthlyGrowth,
                     isPositive: growthStats.monthlyGrowth >= 0,
                   }
-                : undefined
+                : undefined)
             }
             trendLabel={t.dashboard.vsLastMonth}
             color="blue"
+          />
+          <SummaryCard
+            title={t.dashboard.expectedReturn}
+            value={
+              hideAssets
+                ? '＊＊＊＊'
+                : `${weightedExpectedReturn >= 0 ? '+' : ''}${weightedExpectedReturn.toFixed(1)}%`
+            }
+            subtitle={t.dashboard.weightedAnnualReturn}
+            icon="🎯"
+            color="green"
           />
           <SummaryCard
             title={t.dashboard.exchangeRate}
             value={`${currentAssets.exchangeRate.toFixed(2)}`}
             subtitle="USD/TWD"
             icon="💱"
-            color="green"
+            color="yellow"
           />
           <SummaryCard
             title={t.dashboard.snapshots}
             value={snapshots.length.toString()}
             subtitle={latestSnapshotDate ? `${t.dashboard.latestSnapshot}: ${new Date(latestSnapshotDate).toLocaleDateString()}` : t.dashboard.noSnapshots}
             icon="📸"
-            color="yellow"
+            color="orange"
           />
           <SummaryCard
             title={t.dashboard.yoyGrowth}
             value={
-              growthStats.yearlyGrowth !== null
+              hideAssets
+                ? '＊＊＊＊'
+                : growthStats.yearlyGrowth !== null
                 ? `${growthStats.yearlyGrowth >= 0 ? '+' : ''}${growthStats.yearlyGrowth.toFixed(1)}%`
                 : 'N/A'
             }
@@ -532,7 +631,7 @@ export default function DashboardPage() {
                         {summary.count}
                       </td>
                       <td className="py-3 px-4 text-right font-medium text-gray-900 dark:text-white">
-                        {formatCurrency(
+                        {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(
                           displayCurrency === 'TWD' ? summary.totalTWD : summary.totalUSD,
                           displayCurrency
                         )}

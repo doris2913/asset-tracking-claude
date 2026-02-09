@@ -19,6 +19,7 @@ export interface Asset {
   currency: Currency;
   symbol?: string;           // Stock symbol for automatic price fetching (e.g., "AAPL", "0050.TW")
   shares?: number;           // Number of shares (for stocks)
+  expectedReturn?: number;   // Expected annual return rate in percentage (e.g., 7 for 7%)
   notes?: string;            // Optional notes
   lastUpdated: string;       // ISO date string
 }
@@ -65,7 +66,7 @@ export interface AppData {
 export type ChartColorTheme = 'default' | 'ocean' | 'forest' | 'sunset' | 'monochrome';
 
 // Stock price data source
-export type StockDataSource = 'yahoo' | 'alphavantage';
+export type StockDataSource = 'yahoo' | 'alphavantage' | 'finnhub' | 'fmp';
 
 // Application settings
 export interface AppSettings {
@@ -76,6 +77,10 @@ export interface AppSettings {
   chartColorTheme?: ChartColorTheme;  // Chart color theme (default: 'default')
   stockDataSource?: StockDataSource;  // Stock price data source (default: 'yahoo')
   alphaVantageApiKey?: string;  // Alpha Vantage API key (optional)
+  finnhubApiKey?: string;  // Finnhub API key (optional)
+  fmpApiKey?: string;  // Financial Modeling Prep API key (optional)
+  customCorsProxy?: string;  // Custom CORS proxy URL (e.g., Cloudflare Worker)
+  dropboxAppKey?: string;  // Dropbox App Key for Saver integration (optional)
 }
 
 // Stock quote from Yahoo Finance

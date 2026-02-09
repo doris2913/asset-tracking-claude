@@ -2,11 +2,13 @@
 
 import { useRef, useState } from 'react';
 import { useI18n } from '@/i18n';
+import { saveToDropbox, generateBackupFilename } from '@/lib/dropboxSaver';
 
 interface ImportExportProps {
   onExport: () => string;
   onImport: (data: string) => boolean;
   onClear: () => void;
+  dropboxAppKey?: string;
 }
 
 // Convert sharing URLs to direct download URLs for supported services
@@ -34,7 +36,7 @@ function convertToDirectUrl(url: string): string {
   return url;
 }
 
-export default function ImportExport({ onExport, onImport, onClear }: ImportExportProps) {
+export default function ImportExport({ onExport, onImport, onClear, dropboxAppKey }: ImportExportProps) {
   const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -42,6 +44,7 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
   const [urlInput, setUrlInput] = useState('');
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+  const [isSavingToDropbox, setIsSavingToDropbox] = useState(false);
 
   const handleExport = () => {
     const data = onExport();
@@ -152,6 +155,41 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
     }
   };
 
+  const handleSaveToDropbox = async () => {
+    if (!dropboxAppKey) {
+      setImportStatus('error');
+      setStatusMessage(t.settings.dropboxNotConfigured);
+      setTimeout(() => setImportStatus('idle'), 3000);
+      return;
+    }
+
+    setIsSavingToDropbox(true);
+
+    try {
+      const data = onExport();
+      const filename = generateBackupFilename();
+      await saveToDropbox(data, filename, dropboxAppKey);
+
+      setImportStatus('success');
+      setStatusMessage(t.settings.dropboxSaveSuccess);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'cancelled') {
+        setImportStatus('error');
+        setStatusMessage(t.settings.dropboxSaveCancelled);
+      } else if (error instanceof Error && error.message.includes('not supported')) {
+        setImportStatus('error');
+        setStatusMessage(t.settings.dropboxBrowserNotSupported);
+      } else {
+        console.error('Dropbox save error:', error);
+        setImportStatus('error');
+        setStatusMessage(t.settings.dropboxSaveFailed);
+      }
+    } finally {
+      setIsSavingToDropbox(false);
+      setTimeout(() => setImportStatus('idle'), 3000);
+    }
+  };
+
   const handleLoadDemoData = async () => {
     setIsLoadingDemo(true);
 
@@ -196,6 +234,21 @@ export default function ImportExport({ onExport, onImport, onClear }: ImportExpo
         <button onClick={handleImportClick} className="btn btn-secondary">
           {t.settings.importData}
         </button>
+        {dropboxAppKey && (
+          <button
+            onClick={handleSaveToDropbox}
+            disabled={isSavingToDropbox}
+            className="btn btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L6.5 6.5L12 11L17.5 6.5L12 2Z"/>
+              <path d="M6.5 6.5L1 11L6.5 15.5L12 11L6.5 6.5Z"/>
+              <path d="M17.5 6.5L12 11L17.5 15.5L23 11L17.5 6.5Z"/>
+              <path d="M6.5 15.5L12 20L17.5 15.5L12 11L6.5 15.5Z"/>
+            </svg>
+            {isSavingToDropbox ? t.settings.savingToDropbox : t.settings.saveToDropbox}
+          </button>
+        )}
         <button onClick={handleClear} className="btn btn-danger">
           {t.settings.clearAllData}
         </button>

@@ -6,30 +6,26 @@ import AssetList from '@/components/AssetList';
 import AssetForm from '@/components/AssetForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
-import { useStockPrices, fetchExchangeRate } from '@/lib/yahooFinance';
-import { fetchAlphaVantageQuote, getCachedPrice, fetchAlphaVantageExchangeRate } from '@/lib/stockApi';
+import { fetchMultipleStockPrices, fetchExchangeRate, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
 import { useI18n } from '@/i18n';
-import { Asset, StockPrice } from '@/types';
-import { formatCurrency, parseStockSymbol } from '@/utils/calculations';
+import { Asset } from '@/types';
+import { formatCurrency } from '@/utils/calculations';
 
 export default function AssetsPage() {
   const {
     currentAssets,
     totalTWD,
     totalUSD,
-    stockPrices,
     settings,
     addAsset,
     updateAsset,
     deleteAsset,
-    updateStockPrices,
     updateStockPricesWithMA,
     updateExchangeRate,
     isLoaded,
   } = useAssetData();
 
   const { t, language } = useI18n();
-  const { fetchPrices, fetchPricesWithMA } = useStockPrices();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
@@ -74,14 +70,12 @@ export default function AssetsPage() {
     setIsUpdatingPrices(true);
 
     const dataSource = settings.stockDataSource || 'yahoo';
-    const apiKey = settings.alphaVantageApiKey;
-
-    const isAlphaVantage = dataSource === 'alphavantage' && apiKey;
+    const sourceConfig = API_SOURCE_CONFIG[dataSource];
 
     setPriceUpdateStatus(
       language === 'zh-TW'
-        ? (isAlphaVantage ? '正在透過 Alpha Vantage 取得股價...' : '正在取得股價與移動平均...')
-        : (isAlphaVantage ? 'Fetching stock prices via Alpha Vantage...' : 'Fetching stock prices with moving averages...')
+        ? `正在透過 ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()} 取得股價...`
+        : `Fetching stock prices via ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()}...`
     );
 
     try {
@@ -96,83 +90,52 @@ export default function AssetsPage() {
 
       const symbols = stockAssets.map((a) => a.symbol!);
 
-      if (isAlphaVantage) {
-        // Use Alpha Vantage API with caching
-        const prices: Record<string, StockPrice> = {};
-        let fetchedCount = 0;
-        let cachedCount = 0;
+      // Progress callback for real-time updates
+      const onProgress: ProgressCallback = (current, total, symbol, status) => {
+        const statusText = status === 'cached'
+          ? (language === 'zh-TW' ? '快取' : 'cached')
+          : status === 'fetching'
+          ? (language === 'zh-TW' ? '取得中' : 'fetching')
+          : status === 'success'
+          ? (language === 'zh-TW' ? '成功' : 'success')
+          : (language === 'zh-TW' ? '失敗' : 'failed');
 
-        for (let i = 0; i < symbols.length; i++) {
-          const symbol = symbols[i];
-          const { cleanSymbol, isTW } = parseStockSymbol(symbol);
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? `${symbol} ${statusText}... (${current}/${total})`
+            : `${symbol} ${statusText}... (${current}/${total})`
+        );
+      };
 
-          // Check cache first
-          const cached = getCachedPrice(cleanSymbol);
-          if (cached) {
-            prices[symbol] = {
-              symbol: cleanSymbol,
-              currentPrice: cached.price,
-              movingAvg3M: cached.price,
-              movingAvg1Y: cached.price,
-              currency: cached.currency,
-              lastUpdated: new Date().toISOString(),
-              historicalPrices: {},
-            };
-            cachedCount++;
-            continue;
-          }
+      // Use unified stock price manager
+      const prices = await fetchMultipleStockPrices(symbols, settings, onProgress);
 
-          // Fetch from Alpha Vantage
-          setPriceUpdateStatus(
-            language === 'zh-TW'
-              ? `正在取得 ${cleanSymbol} 的股價... (${i + 1}/${symbols.length})`
-              : `Fetching ${cleanSymbol}... (${i + 1}/${symbols.length})`
-          );
+      if (Object.keys(prices).length > 0) {
+        updateStockPricesWithMA(prices);
+        const successCount = Object.keys(prices).length;
+        const failedCount = symbols.length - successCount;
 
-          const quote = await fetchAlphaVantageQuote(symbol, apiKey!);
-          if (quote) {
-            prices[symbol] = {
-              symbol: quote.symbol,
-              currentPrice: quote.price,
-              movingAvg3M: quote.price, // Alpha Vantage free tier doesn't provide MA
-              movingAvg1Y: quote.price,
-              currency: quote.currency,
-              lastUpdated: quote.lastUpdated,
-              historicalPrices: {},
-            };
-            fetchedCount++;
-          }
+        let statusMessage = language === 'zh-TW'
+          ? `已更新 ${successCount} 檔股票`
+          : `Updated ${successCount} stock(s)`;
 
-          // Wait between requests (Alpha Vantage rate limit: 5/min for free tier)
-          if (i < symbols.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 12000));
-          }
+        if (failedCount > 0) {
+          statusMessage += language === 'zh-TW'
+            ? `（${failedCount} 檔失敗）`
+            : ` (${failedCount} failed)`;
         }
 
-        if (Object.keys(prices).length > 0) {
-          updateStockPricesWithMA(prices);
-          setPriceUpdateStatus(
-            language === 'zh-TW'
-              ? `已更新 ${Object.keys(prices).length} 檔股票（${fetchedCount} 新取得，${cachedCount} 來自快取）`
-              : `Updated ${Object.keys(prices).length} stock(s) (${fetchedCount} fetched, ${cachedCount} from cache)`
-          );
-        } else {
-          setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。請檢查 API 金鑰是否正確。' : 'Could not fetch any stock prices. Please check your API key.');
+        if (sourceConfig.supportsMA) {
+          statusMessage += language === 'zh-TW' ? '（含移動平均）' : ' with moving averages';
         }
+
+        setPriceUpdateStatus(statusMessage);
       } else {
-        // Use Yahoo Finance (original behavior)
-        const prices = await fetchPricesWithMA(symbols);
-
-        if (Object.keys(prices).length > 0) {
-          updateStockPricesWithMA(prices);
-          setPriceUpdateStatus(
-            language === 'zh-TW'
-              ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
-              : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
-          );
-        } else {
-          setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
-        }
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? '無法取得股價。請檢查 API 設定。'
+            : 'Could not fetch any stock prices. Please check API settings.'
+        );
       }
     } catch (error) {
       setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
@@ -185,31 +148,18 @@ export default function AssetsPage() {
 
   const handleUpdateExchangeRate = async () => {
     setIsUpdatingPrices(true);
-
-    const dataSource = settings.stockDataSource || 'yahoo';
-    const apiKey = settings.alphaVantageApiKey;
-    const isAlphaVantage = dataSource === 'alphavantage' && apiKey;
-
     setPriceUpdateStatus(language === 'zh-TW' ? '正在取得匯率...' : 'Fetching exchange rate...');
 
     try {
-      let rate: number | null = null;
+      const result = await fetchExchangeRate(settings);
 
-      if (isAlphaVantage) {
-        rate = await fetchAlphaVantageExchangeRate(apiKey!);
-      }
-
-      // Fallback to Yahoo Finance if Alpha Vantage fails or not selected
-      if (!rate) {
-        rate = await fetchExchangeRate();
-      }
-
-      if (rate) {
-        updateExchangeRate(rate);
+      if (result.success && result.rate) {
+        updateExchangeRate(result.rate);
+        const sourceLabel = result.source === 'yahoo' ? 'Yahoo Finance' : result.source.toUpperCase();
         setPriceUpdateStatus(
           language === 'zh-TW'
-            ? `匯率已更新為 ${rate.toFixed(2)} TWD/USD`
-            : `Exchange rate updated to ${rate.toFixed(2)} TWD/USD`
+            ? `匯率已更新為 ${result.rate.toFixed(2)} TWD/USD（來源：${sourceLabel}）`
+            : `Exchange rate updated to ${result.rate.toFixed(2)} TWD/USD (via ${sourceLabel})`
         );
       } else {
         setPriceUpdateStatus(language === 'zh-TW' ? '無法取得匯率。' : 'Could not fetch exchange rate.');
