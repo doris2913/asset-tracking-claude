@@ -390,7 +390,7 @@ export function useTravelData() {
     activePlan.dailyItineraries.forEach(day => {
       day.items.forEach(item => {
         // Skip hotel items (already counted)
-        if (item.type !== 'hotel_checkin' && item.type !== 'hotel_checkout' && item.type !== 'flight_departure' && item.type !== 'flight_arrival') {
+        if (item.type !== 'hotel_start' && item.type !== 'hotel_end' && item.type !== 'flight_departure' && item.type !== 'flight_arrival') {
           itineraryItems += item.cost;
           addCost(item.cost, item.currency);
         }
@@ -481,50 +481,56 @@ export function useTravelData() {
 // ========== Helper Functions ==========
 
 function autoAddHotelToItineraries(plan: TravelPlan, hotel: Hotel): TravelPlan {
-  const updatedItineraries = plan.dailyItineraries.map(day => {
-    const items = [...day.items];
+  // For each day within hotel stay (check-in date inclusive, check-out date exclusive),
+  // add hotel as first item (start point) and last item (end point)
+  const checkIn = new Date(hotel.checkInDate);
+  const checkOut = new Date(hotel.checkOutDate);
 
-    // Add check-in on check-in date
-    if (day.date === hotel.checkInDate) {
-      const hasCheckin = items.some(i => i.type === 'hotel_checkin' && i.referenceId === hotel.id);
-      if (!hasCheckin) {
+  const updatedItineraries = plan.dailyItineraries.map(day => {
+    const dayDate = new Date(day.date);
+    // Day is within hotel stay: from check-in (inclusive) to check-out (exclusive)
+    if (dayDate >= checkIn && dayDate < checkOut) {
+      const items = [...day.items];
+      const hasStart = items.some(i => i.type === 'hotel_start' && i.referenceId === hotel.id);
+      const hasEnd = items.some(i => i.type === 'hotel_end' && i.referenceId === hotel.id);
+
+      if (!hasStart) {
+        // Add hotel as first item (start point of the day)
+        items.unshift({
+          id: generateId(),
+          type: 'hotel_start',
+          referenceId: hotel.id,
+          name: `${hotel.name}`,
+          estimatedDuration: 0,
+          travelTimeToNext: 0,
+          cost: 0,
+          currency: hotel.currency,
+          order: 0,
+        });
+      }
+
+      if (!hasEnd) {
+        // Add hotel as last item (end point of the day)
         items.push({
           id: generateId(),
-          type: 'hotel_checkin',
+          type: 'hotel_end',
           referenceId: hotel.id,
-          name: `${hotel.name} (Check-in)`,
-          estimatedDuration: 30,
+          name: `${hotel.name}`,
+          estimatedDuration: 0,
           travelTimeToNext: 0,
           cost: 0,
           currency: hotel.currency,
           order: items.length,
         });
       }
-    }
 
-    // Add check-out on check-out date
-    if (day.date === hotel.checkOutDate) {
-      const hasCheckout = items.some(i => i.type === 'hotel_checkout' && i.referenceId === hotel.id);
-      if (!hasCheckout) {
-        items.unshift({
-          id: generateId(),
-          type: 'hotel_checkout',
-          referenceId: hotel.id,
-          name: `${hotel.name} (Check-out)`,
-          estimatedDuration: 30,
-          travelTimeToNext: 0,
-          cost: 0,
-          currency: hotel.currency,
-          order: 0,
-        });
-        // Re-order remaining items
-        for (let i = 1; i < items.length; i++) {
-          items[i] = { ...items[i], order: i };
-        }
-      }
+      // Re-order all items
+      return {
+        ...day,
+        items: items.map((item, index) => ({ ...item, order: index })),
+      };
     }
-
-    return { ...day, items };
+    return day;
   });
 
   return { ...plan, dailyItineraries: updatedItineraries };
@@ -536,7 +542,7 @@ function removeHotelFromItineraries(plan: TravelPlan, hotelId: string): TravelPl
     dailyItineraries: plan.dailyItineraries.map(day => ({
       ...day,
       items: day.items
-        .filter(item => item.referenceId !== hotelId || (item.type !== 'hotel_checkin' && item.type !== 'hotel_checkout'))
+        .filter(item => item.referenceId !== hotelId || (item.type !== 'hotel_start' && item.type !== 'hotel_end'))
         .map((item, index) => ({ ...item, order: index })),
     })),
   };

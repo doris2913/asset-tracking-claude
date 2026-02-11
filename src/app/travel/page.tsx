@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useTravelData } from '@/hooks/useTravelData';
+import Navigation from '@/components/Navigation';
 import Modal from '@/components/Modal';
 import {
   TravelPlan,
@@ -308,19 +309,28 @@ export default function TravelPage() {
   };
 
   if (!travel.isLoaded) {
-    return <div className="p-4">{t.common.loading}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">{t.common.loading}</div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 md:pb-8">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <Navigation />
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t.travel.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{t.travel.subtitle}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t.travel.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base mt-1">{t.travel.subtitle}</p>
           </div>
-          <button onClick={openNewPlan} className="btn-primary mt-3 sm:mt-0">
+          <button onClick={openNewPlan} className="btn btn-primary mt-3 sm:mt-0 w-full sm:w-auto">
             {t.travel.newPlan}
           </button>
         </div>
@@ -348,7 +358,7 @@ export default function TravelPage() {
 
         {!plan && travel.plans.length === 0 && (
           <div className="card p-12 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-lg">{t.travel.noPlans}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">{t.travel.noPlans}</p>
           </div>
         )}
 
@@ -441,7 +451,7 @@ export default function TravelPage() {
                       </div>
                       <div className="flex items-center gap-2 mt-2 sm:mt-0">
                         <a
-                          href={getFlightTrackingUrl(f.flightNumber, f.date)}
+                          href={getFlightTrackingUrl(f.flightNumber)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn text-xs"
@@ -551,7 +561,7 @@ export default function TravelPage() {
                     0
                   );
                   const dayCost = day.items.reduce((sum, item) => {
-                    if (item.type === 'hotel_checkin' || item.type === 'hotel_checkout' || item.type === 'flight_departure' || item.type === 'flight_arrival') return sum;
+                    if (item.type === 'hotel_start' || item.type === 'hotel_end' || item.type === 'flight_departure' || item.type === 'flight_arrival') return sum;
                     return sum + item.cost;
                   }, 0);
 
@@ -709,7 +719,7 @@ export default function TravelPage() {
             </div>
           </>
         )}
-      </div>
+      </main>
 
       {/* Plan Modal */}
       <Modal
