@@ -88,7 +88,7 @@ export const ATTRACTION_CATEGORIES: { value: AttractionCategory; label: string; 
 // Itinerary item in daily schedule
 export interface ItineraryItem {
   id: string;
-  type: 'attraction' | 'hotel_checkin' | 'hotel_checkout' | 'flight_departure' | 'flight_arrival' | 'custom';
+  type: 'attraction' | 'hotel_start' | 'hotel_end' | 'flight_departure' | 'flight_arrival' | 'custom';
   referenceId?: string; // ID of linked attraction/hotel/flight
   name: string;
   startTime?: string; // HH:mm
@@ -141,10 +141,10 @@ export const DEFAULT_TRAVEL_DATA: TravelData = {
 };
 
 // Helper: get flight tracking URL
-export function getFlightTrackingUrl(flightNumber: string, date: string): string {
+export function getFlightTrackingUrl(flightNumber: string): string {
   // Use Flightera for tracking - works without API key
   const cleanNumber = flightNumber.replace(/\s/g, '').toUpperCase();
-  return `https://www.flightera.net/flight/${cleanNumber}/${date}`;
+  return `https://www.flightera.net/flight/${cleanNumber}`;
 }
 
 // Helper: calculate number of nights

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useI18n } from '@/i18n';
 import { useTravelData } from '@/hooks/useTravelData';
+import Navigation from '@/components/Navigation';
 import Modal from '@/components/Modal';
 import Link from 'next/link';
 import {
@@ -208,8 +209,8 @@ function ItineraryContent() {
 
   const getItemTypeIcon = (type: ItineraryItem['type']) => {
     switch (type) {
-      case 'hotel_checkin': return '🏨';
-      case 'hotel_checkout': return '🏨';
+      case 'hotel_start': return '🏨';
+      case 'hotel_end': return '🏨';
       case 'flight_departure': return '✈️';
       case 'flight_arrival': return '✈️';
       case 'custom': return '📌';
@@ -218,27 +219,37 @@ function ItineraryContent() {
   };
 
   if (!travel.isLoaded) {
-    return <div className="p-4">{t.common.loading}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">{t.common.loading}</div>
+        </div>
+      </div>
+    );
   }
 
   if (!plan) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 md:pb-8">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <Navigation />
+        <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="card p-12 text-center">
             <p className="text-gray-500 dark:text-gray-400 text-lg">{t.travel.selectPlan}</p>
-            <Link href="/travel" className="btn-primary mt-4 inline-block">
+            <Link href="/travel" className="btn btn-primary mt-4 inline-block">
               {t.travel.backToOverview}
             </Link>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24 md:pb-8">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <Navigation />
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
@@ -247,7 +258,7 @@ function ItineraryContent() {
                 {t.travel.backToOverview}
               </Link>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               {t.travel.itineraryDetail}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{plan.name}</p>
@@ -499,7 +510,7 @@ function ItineraryContent() {
                   </span>
                   <span className="font-bold text-orange-600 dark:text-orange-400">
                     {sortedItems
-                      .filter(i => i.type !== 'hotel_checkin' && i.type !== 'hotel_checkout' && i.type !== 'flight_departure' && i.type !== 'flight_arrival')
+                      .filter(i => i.type !== 'hotel_start' && i.type !== 'hotel_end' && i.type !== 'flight_departure' && i.type !== 'flight_arrival')
                       .reduce((sum, item) => sum + item.cost, 0)
                       .toLocaleString()}
                   </span>
@@ -508,7 +519,7 @@ function ItineraryContent() {
             )}
           </>
         )}
-      </div>
+      </main>
 
       {/* Item Modal */}
       <Modal
@@ -535,8 +546,8 @@ function ItineraryContent() {
             >
               <option value="attraction">{language === 'zh-TW' ? '景點' : 'Attraction'}</option>
               <option value="custom">{t.travel.custom}</option>
-              <option value="hotel_checkin">{language === 'zh-TW' ? '飯店入住' : 'Hotel Check-in'}</option>
-              <option value="hotel_checkout">{language === 'zh-TW' ? '飯店退房' : 'Hotel Check-out'}</option>
+              <option value="hotel_start">{language === 'zh-TW' ? '飯店（起點）' : 'Hotel (Start)'}</option>
+              <option value="hotel_end">{language === 'zh-TW' ? '飯店（終點）' : 'Hotel (End)'}</option>
               <option value="flight_departure">{language === 'zh-TW' ? '航班出發' : 'Flight Departure'}</option>
               <option value="flight_arrival">{language === 'zh-TW' ? '航班抵達' : 'Flight Arrival'}</option>
             </select>
