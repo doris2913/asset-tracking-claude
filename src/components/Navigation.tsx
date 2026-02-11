@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useI18n, Language, languageNames } from '@/i18n';
 
-type Section = 'assets' | 'wishlist';
+type Section = 'assets' | 'wishlist' | 'travel';
 
 interface NavItem {
   href: string;
@@ -21,6 +21,7 @@ export default function Navigation() {
   // Determine which section is active based on the current path
   const getActiveSection = (): Section => {
     if (pathname.startsWith('/wishlist')) return 'wishlist';
+    if (pathname.startsWith('/travel')) return 'travel';
     return 'assets';
   };
 
@@ -30,6 +31,7 @@ export default function Navigation() {
   const sections: { key: Section; label: string; icon: string }[] = [
     { key: 'assets', label: t.nav.sectionAssets, icon: '💰' },
     { key: 'wishlist', label: t.nav.sectionWishlist, icon: '❤️' },
+    { key: 'travel', label: t.nav.sectionTravel, icon: '✈️' },
   ];
 
   // Sub-navigation items per section
@@ -45,6 +47,10 @@ export default function Navigation() {
       { href: '/wishlist/analytics', label: t.nav.wishlistAnalytics, icon: '📊' },
       { href: '/wishlist/purchased', label: t.nav.wishlistPurchased, icon: '🛒' },
       { href: '/wishlist/settings', label: t.nav.wishlistSettings, icon: '⚙️' },
+    ],
+    travel: [
+      { href: '/travel', label: t.nav.travelPlans, icon: '🗺️' },
+      { href: '/travel/itinerary', label: t.nav.travelItinerary, icon: '📅' },
     ],
   };
 
@@ -68,7 +74,7 @@ export default function Navigation() {
     { href: '/', label: t.nav.dashboard, icon: '📊' },
     { href: '/assets', label: t.nav.assets, icon: '💼' },
     { href: '/wishlist', label: t.nav.wishlist, icon: '❤️' },
-    { href: '/snapshots', label: t.nav.snapshots, icon: '📸' },
+    { href: '/travel', label: t.nav.sectionTravel, icon: '✈️' },
     { href: '/settings', label: t.nav.settings, icon: '⚙️' },
   ];
 
@@ -94,7 +100,7 @@ export default function Navigation() {
                 return (
                   <Link
                     key={section.key}
-                    href={section.key === 'assets' ? '/' : '/wishlist'}
+                    href={section.key === 'assets' ? '/' : section.key === 'wishlist' ? '/wishlist' : '/travel'}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-1.5 ${
                       isActive
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
@@ -263,6 +269,32 @@ export default function Navigation() {
               })}
             </div>
 
+            {/* Travel Section */}
+            <div className="mb-3">
+              <div className="flex items-center space-x-2 px-2 py-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                <span>✈️</span>
+                <span>{t.nav.sectionTravel}</span>
+              </div>
+              {sectionNavItems.travel.map((item) => {
+                const isActive = isItemActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                      isActive
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <span className="mr-2">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+
             {/* Utility Items */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
               {utilityItems.map((item) => {
@@ -297,7 +329,7 @@ export default function Navigation() {
                 return (
                   <Link
                     key={section.key}
-                    href={section.key === 'assets' ? '/' : '/wishlist'}
+                    href={section.key === 'assets' ? '/' : section.key === 'wishlist' ? '/wishlist' : '/travel'}
                     className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors mx-0.5 whitespace-nowrap ${
                       isSectionActive
                         ? 'bg-blue-600 text-white'
@@ -341,6 +373,8 @@ export default function Navigation() {
               ? pathname === '/'
               : item.href === '/wishlist'
               ? pathname.startsWith('/wishlist')
+              : item.href === '/travel'
+              ? pathname.startsWith('/travel')
               : isItemActive(item.href);
             return (
               <Link
