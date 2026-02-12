@@ -304,8 +304,8 @@ function ItineraryContent() {
                         }}
                         autoFocus
                       />
-                      <button onClick={saveTitle} className="btn-primary text-sm">{t.common.save}</button>
-                      <button onClick={() => setEditingTitle(null)} className="btn text-sm">{t.common.cancel}</button>
+                      <button onClick={saveTitle} className="btn btn-primary text-sm">{t.common.save}</button>
+                      <button onClick={() => setEditingTitle(null)} className="btn btn-secondary text-sm">{t.common.cancel}</button>
                     </div>
                   ) : (
                     <>
@@ -314,7 +314,7 @@ function ItineraryContent() {
                       </h2>
                       <button
                         onClick={() => startEditTitle(currentDay.date, currentDay.title)}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm"
+                        className="px-2 py-1 text-xs rounded-md font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0"
                       >
                         {t.common.edit}
                       </button>
@@ -346,7 +346,7 @@ function ItineraryContent() {
 
             {/* Add item button */}
             <div className="mb-4">
-              <button onClick={openNewItem} className="btn-primary text-sm">
+              <button onClick={openNewItem} className="btn btn-primary text-sm whitespace-nowrap">
                 {t.travel.addItem}
               </button>
             </div>
@@ -453,19 +453,15 @@ function ItineraryContent() {
                           <div className="flex flex-col gap-1 shrink-0">
                             <button
                               onClick={() => openEditItem(item)}
-                              className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1"
+                              className="px-2 py-1 text-xs rounded-md font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0"
                             >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
+                              {t.common.edit}
                             </button>
                             <button
                               onClick={() => deleteItem(item.id)}
-                              className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 p-1"
+                              className="px-2 py-1 text-xs rounded-md font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/50 hover:bg-red-100 dark:hover:bg-red-900 active:bg-red-200 transition-colors min-h-[44px] sm:min-h-0"
                             >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                              {t.common.delete}
                             </button>
                           </div>
                         </div>
@@ -613,9 +609,9 @@ function ItineraryContent() {
               onChange={e => setItemForm(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setShowItemModal(false)} className="btn">{t.common.cancel}</button>
-            <button onClick={saveItem} className="btn-primary">{t.common.save}</button>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setShowItemModal(false)} className="btn btn-secondary">{t.common.cancel}</button>
+            <button onClick={saveItem} className="btn btn-primary">{t.common.save}</button>
           </div>
         </div>
       </Modal>
