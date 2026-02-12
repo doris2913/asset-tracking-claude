@@ -378,9 +378,9 @@ export default function TravelPage() {
                     {plan.startDate} ~ {plan.endDate}
                   </p>
                 </div>
-                <div className="flex gap-2 mt-2 sm:mt-0">
-                  <button onClick={() => openEditPlan(plan)} className="btn text-sm">
-                    {t.common.edit}
+                <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+                  <button onClick={() => openEditPlan(plan)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0">
+                    ✏️ {t.common.edit}
                   </button>
                   <button
                     onClick={() => {
@@ -388,9 +388,9 @@ export default function TravelPage() {
                         travel.deletePlan(plan.id);
                       }
                     }}
-                    className="btn-danger text-sm"
+                    className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors min-h-[44px] sm:min-h-0"
                   >
-                    {t.common.delete}
+                    🗑️ {t.common.delete}
                   </button>
                 </div>
               </div>
@@ -402,7 +402,7 @@ export default function TravelPage() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t.travel.flights}
                 </h3>
-                <button onClick={openNewFlight} className="btn-primary text-sm">
+                <button onClick={openNewFlight} className="btn btn-primary text-sm whitespace-nowrap">
                   {t.travel.addFlight}
                 </button>
               </div>
@@ -449,20 +449,20 @@ export default function TravelPage() {
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                      <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                         <a
                           href={getFlightTrackingUrl(f.flightNumber)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn text-xs"
+                          className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 active:bg-purple-200 transition-colors min-h-[44px] sm:min-h-0"
                         >
-                          {t.travel.viewFlightInfo}
+                          🔗 {t.travel.viewFlightInfo}
                         </a>
-                        <button onClick={() => openEditFlight(f)} className="btn text-xs">
-                          {t.common.edit}
+                        <button onClick={() => openEditFlight(f)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0">
+                          ✏️ {t.common.edit}
                         </button>
-                        <button onClick={() => travel.deleteFlight(f.id)} className="btn-danger text-xs">
-                          {t.common.delete}
+                        <button onClick={() => travel.deleteFlight(f.id)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors min-h-[44px] sm:min-h-0">
+                          🗑️ {t.common.delete}
                         </button>
                       </div>
                     </div>
@@ -477,7 +477,7 @@ export default function TravelPage() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t.travel.hotels}
                 </h3>
-                <button onClick={openNewHotel} className="btn-primary text-sm">
+                <button onClick={openNewHotel} className="btn btn-primary text-sm whitespace-nowrap">
                   {t.travel.addHotel}
                 </button>
               </div>
@@ -523,17 +523,17 @@ export default function TravelPage() {
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                           {h.link && (
-                            <a href={h.link} target="_blank" rel="noopener noreferrer" className="btn text-xs">
-                              {t.travel.link}
+                            <a href={h.link} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 active:bg-purple-200 transition-colors min-h-[44px] sm:min-h-0">
+                              🔗 {t.travel.link}
                             </a>
                           )}
-                          <button onClick={() => openEditHotel(h)} className="btn text-xs">
-                            {t.common.edit}
+                          <button onClick={() => openEditHotel(h)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0">
+                            ✏️ {t.common.edit}
                           </button>
-                          <button onClick={() => travel.deleteHotel(h.id)} className="btn-danger text-xs">
-                            {t.common.delete}
+                          <button onClick={() => travel.deleteHotel(h.id)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors min-h-[44px] sm:min-h-0">
+                            🗑️ {t.common.delete}
                           </button>
                         </div>
                       </div>
@@ -549,7 +549,7 @@ export default function TravelPage() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {t.travel.dailyItinerary}
                 </h3>
-                <Link href="/travel/itinerary" className="btn-primary text-sm">
+                <Link href="/travel/itinerary" className="btn btn-primary text-sm whitespace-nowrap">
                   {t.travel.viewDetails}
                 </Link>
               </div>
@@ -612,7 +612,7 @@ export default function TravelPage() {
                     </span>
                   )}
                 </h3>
-                <button onClick={openNewAttraction} className="btn-primary text-sm">
+                <button onClick={openNewAttraction} className="btn btn-primary text-sm whitespace-nowrap">
                   {t.travel.addAttraction}
                 </button>
               </div>
@@ -646,18 +646,18 @@ export default function TravelPage() {
                           <div className="text-xs text-gray-400 mt-0.5">{a.address}</div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                      <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                         <button
                           onClick={() => openConfirmAttraction(a.id)}
-                          className="btn-success text-xs"
+                          className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 active:bg-green-200 transition-colors min-h-[44px] sm:min-h-0"
                         >
-                          {t.travel.confirmToDay}
+                          ✅ {t.travel.confirmToDay}
                         </button>
-                        <button onClick={() => openEditAttraction(a)} className="btn text-xs">
-                          {t.common.edit}
+                        <button onClick={() => openEditAttraction(a)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition-colors min-h-[44px] sm:min-h-0">
+                          ✏️ {t.common.edit}
                         </button>
-                        <button onClick={() => travel.deleteUnconfirmedAttraction(a.id)} className="btn-danger text-xs">
-                          {t.common.delete}
+                        <button onClick={() => travel.deleteUnconfirmedAttraction(a.id)} className="px-3 py-2.5 sm:py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors min-h-[44px] sm:min-h-0">
+                          🗑️ {t.common.delete}
                         </button>
                       </div>
                     </div>
@@ -791,9 +791,9 @@ export default function TravelPage() {
               onChange={e => setPlanForm(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setShowPlanModal(false)} className="btn">{t.common.cancel}</button>
-            <button onClick={savePlan} className="btn-primary">{t.common.save}</button>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setShowPlanModal(false)} className="btn btn-secondary">{t.common.cancel}</button>
+            <button onClick={savePlan} className="btn btn-primary">{t.common.save}</button>
           </div>
         </div>
       </Modal>
@@ -920,9 +920,9 @@ export default function TravelPage() {
               onChange={e => setFlightForm(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setShowFlightModal(false)} className="btn">{t.common.cancel}</button>
-            <button onClick={saveFlight} className="btn-primary">{t.common.save}</button>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setShowFlightModal(false)} className="btn btn-secondary">{t.common.cancel}</button>
+            <button onClick={saveFlight} className="btn btn-primary">{t.common.save}</button>
           </div>
         </div>
       </Modal>
@@ -1072,9 +1072,9 @@ export default function TravelPage() {
               onChange={e => setHotelForm(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setShowHotelModal(false)} className="btn">{t.common.cancel}</button>
-            <button onClick={saveHotel} className="btn-primary">{t.common.save}</button>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setShowHotelModal(false)} className="btn btn-secondary">{t.common.cancel}</button>
+            <button onClick={saveHotel} className="btn btn-primary">{t.common.save}</button>
           </div>
         </div>
       </Modal>
@@ -1180,9 +1180,9 @@ export default function TravelPage() {
               onChange={e => setAttractionForm(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setShowAttractionModal(false)} className="btn">{t.common.cancel}</button>
-            <button onClick={saveAttraction} className="btn-primary">{t.common.save}</button>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setShowAttractionModal(false)} className="btn btn-secondary">{t.common.cancel}</button>
+            <button onClick={saveAttraction} className="btn btn-primary">{t.common.save}</button>
           </div>
         </div>
       </Modal>
@@ -1208,9 +1208,9 @@ export default function TravelPage() {
               ))}
             </select>
           </div>
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setShowConfirmModal(false)} className="btn">{t.common.cancel}</button>
-            <button onClick={handleConfirmAttraction} className="btn-primary">{t.common.confirm}</button>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setShowConfirmModal(false)} className="btn btn-secondary">{t.common.cancel}</button>
+            <button onClick={handleConfirmAttraction} className="btn btn-primary">{t.common.confirm}</button>
           </div>
         </div>
       </Modal>
