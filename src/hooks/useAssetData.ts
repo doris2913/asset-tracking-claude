@@ -76,10 +76,10 @@ export function useAssetData() {
         );
 
         let newSnapshots = prev.snapshots;
-        if (needsSnapshot && prev.currentAssets.assets.length > 0) {
-          // Create snapshot from PREVIOUS state (before update)
+        if (needsSnapshot && updatedAssets.length > 0) {
+          // Create snapshot from the updated assets (after adjustment)
           const snapshot = createSnapshot(
-            prev.currentAssets.assets,
+            updatedAssets,
             prev.currentAssets.exchangeRate,
             'Auto-created snapshot'
           );
