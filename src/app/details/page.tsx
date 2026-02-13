@@ -5,7 +5,7 @@ import Navigation from '@/components/Navigation';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
 import { Currency, AssetType } from '@/types';
-import { formatCurrency, toTWD, toUSD } from '@/utils/calculations';
+import { formatCurrency, toTWD, toUSD, getEffectiveValue } from '@/utils/calculations';
 
 const ASSET_TYPE_ICONS: Record<AssetType, string> = {
   cash_twd: '💵',
@@ -26,6 +26,21 @@ export default function DetailsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [hideAssets, setHideAssets] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideAssets') === 'true';
+    }
+    return false;
+  });
+
+  const toggleHideAssets = () => {
+    setHideAssets(prev => {
+      const newValue = !prev;
+      localStorage.setItem('hideAssets', String(newValue));
+      return newValue;
+    });
+  };
 
   const labels = {
     title: language === 'zh-TW' ? '資產明細' : 'Asset Details',
@@ -49,6 +64,7 @@ export default function DetailsPage() {
     showing: language === 'zh-TW' ? '顯示' : 'Showing',
     of: language === 'zh-TW' ? '筆，共' : ' of ',
     items: language === 'zh-TW' ? '筆資產' : ' assets',
+    expectedReturn: language === 'zh-TW' ? '預期報酬' : 'Expected',
   };
 
   const filteredAndSortedAssets = useMemo(() => {
@@ -115,11 +131,12 @@ export default function DetailsPage() {
     setSearchQuery('');
   };
 
-  const getDisplayValue = (value: number, currency: Currency) => {
+  const getDisplayValue = (asset: { value: number; currency: Currency; type: string }) => {
+    const effectiveValue = asset.type === 'liability' ? -Math.abs(asset.value) : asset.value;
     if (displayCurrency === 'TWD') {
-      return toTWD(value, currency, currentAssets.exchangeRate);
+      return toTWD(effectiveValue, asset.currency, currentAssets.exchangeRate);
     }
-    return toUSD(value, currency, currentAssets.exchangeRate);
+    return toUSD(effectiveValue, asset.currency, currentAssets.exchangeRate);
   };
 
   const getUnitPrice = (asset: { value: number; shares?: number }) => {
@@ -127,8 +144,9 @@ export default function DetailsPage() {
     return asset.value / asset.shares;
   };
 
-  const getPercentage = (value: number, currency: Currency) => {
-    const valueTWD = toTWD(value, currency, currentAssets.exchangeRate);
+  const getPercentage = (asset: { value: number; currency: Currency; type: string }) => {
+    const effectiveValue = asset.type === 'liability' ? -Math.abs(asset.value) : asset.value;
+    const valueTWD = toTWD(effectiveValue, asset.currency, currentAssets.exchangeRate);
     if (totalTWD === 0) return 0;
     return (valueTWD / totalTWD) * 100;
   };
@@ -167,6 +185,13 @@ export default function DetailsPage() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">{labels.subtitle}</p>
           </div>
           <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleHideAssets}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              title={hideAssets ? (language === 'zh-TW' ? '顯示金額' : 'Show amounts') : (language === 'zh-TW' ? '隱藏金額' : 'Hide amounts')}
+            >
+              {hideAssets ? '👁️' : '🙈'}
+            </button>
             <select
               value={displayCurrency}
               onChange={(e) => setDisplayCurrency(e.target.value as Currency)}
@@ -235,13 +260,13 @@ export default function DetailsPage() {
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{labels.total} (TWD)</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalTWD, 'TWD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalTWD, 'TWD')}
             </p>
           </div>
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{labels.total} (USD)</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalUSD, 'USD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalUSD, 'USD')}
             </p>
           </div>
           <div className="card">
@@ -306,6 +331,9 @@ export default function DetailsPage() {
                       {labels.percentage}
                     </th>
                     <th className="py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400 text-right">
+                      {labels.expectedReturn}
+                    </th>
+                    <th className="py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400 text-right">
                       {labels.lastUpdated}
                     </th>
                   </tr>
@@ -313,8 +341,8 @@ export default function DetailsPage() {
                 <tbody>
                   {filteredAndSortedAssets.map((asset) => {
                     const unitPrice = getUnitPrice(asset);
-                    const displayValue = getDisplayValue(asset.value, asset.currency);
-                    const percentage = getPercentage(asset.value, asset.currency);
+                    const displayValue = getDisplayValue(asset);
+                    const percentage = getPercentage(asset);
 
                     return (
                       <tr
@@ -340,15 +368,22 @@ export default function DetailsPage() {
                           {asset.shares ? asset.shares.toLocaleString() : '-'}
                         </td>
                         <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
-                          {unitPrice
+                          {hideAssets
+                            ? '＊＊＊＊'
+                            : unitPrice
                             ? formatCurrency(unitPrice, asset.currency)
                             : '-'}
                         </td>
-                        <td className="py-3 px-4 text-right font-medium text-gray-900 dark:text-white">
-                          {formatCurrency(displayValue, displayCurrency)}
+                        <td className={`py-3 px-4 text-right font-medium ${asset.type === 'liability' ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                          {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(displayValue, displayCurrency)}
                         </td>
                         <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
                           {percentage.toFixed(1)}%
+                        </td>
+                        <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
+                          {asset.expectedReturn !== undefined && asset.expectedReturn !== 0
+                            ? `${asset.expectedReturn >= 0 ? '+' : ''}${asset.expectedReturn}%`
+                            : '-'}
                         </td>
                         <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-500 text-sm">
                           {new Date(asset.lastUpdated).toLocaleDateString(dateLocale)}
@@ -363,7 +398,7 @@ export default function DetailsPage() {
                       {labels.total} {hasActiveFilters && `(${filteredAndSortedAssets.length} ${labels.items})`}
                     </td>
                     <td className="py-3 px-4 text-right font-bold text-lg text-gray-900 dark:text-white">
-                      {formatCurrency(
+                      {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(
                         hasActiveFilters
                           ? (displayCurrency === 'TWD' ? filteredTotals.filteredTWD : filteredTotals.filteredUSD)
                           : (displayCurrency === 'TWD' ? totalTWD : totalUSD),
@@ -376,6 +411,7 @@ export default function DetailsPage() {
                         : '100%'
                       }
                     </td>
+                    <td></td>
                     <td></td>
                   </tr>
                 </tfoot>

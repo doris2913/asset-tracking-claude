@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useWishListData } from '@/hooks/useWishListData';
 import { useAssetData } from '@/hooks/useAssetData';
+import Navigation from '@/components/Navigation';
 import { formatCurrency } from '@/utils/calculations';
-import Link from 'next/link';
 
 export default function WishListSettingsPage() {
   const assetData = useAssetData();
@@ -35,53 +35,38 @@ export default function WishListSettingsPage() {
 
   if (!wishListData.isLoaded || !assetData.isLoaded) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center">載入中...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400">載入中...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
+      <main className="max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Link
-            href="/assets"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-            title="回到資產"
-          >
-            ← 回到資產
-          </Link>
-          <span className="text-gray-300">|</span>
-          <h1 className="text-3xl font-bold text-gray-900">願望清單設定</h1>
-        </div>
-        <p className="text-gray-600">設定預算、自動歸檔和其他偏好</p>
-      </div>
-
-      {/* Back Link */}
-      <div className="mb-6">
-        <Link
-          href="/wishlist"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          ← 返回願望清單
-        </Link>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">願望清單設定</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">設定預算、自動歸檔和其他偏好</p>
       </div>
 
       {/* Settings Sections */}
       <div className="space-y-6">
         {/* Budget Settings */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">預算設定</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">預算設定</h2>
 
           {/* Budget Type */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               預算類型
             </label>
             <div className="space-y-3">
-              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50">
+              <label className="flex items-start p-4 border-2 dark:border-gray-600 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
                 <input
                   type="radio"
                   value="fixed"
@@ -90,20 +75,20 @@ export default function WishListSettingsPage() {
                   className="mt-1 mr-3"
                 />
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">固定金額</div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="font-medium text-gray-900 dark:text-white">固定金額</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     每月固定的預算金額，不隨資產變動
                   </div>
                   {budgetType === 'fixed' && (
                     <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         每月預算 (TWD)
                       </label>
                       <input
                         type="number"
                         value={monthlyBudget}
                         onChange={(e) => setMonthlyBudget(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         min="0"
                       />
                     </div>
@@ -111,7 +96,7 @@ export default function WishListSettingsPage() {
                 </div>
               </label>
 
-              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50">
+              <label className="flex items-start p-4 border-2 dark:border-gray-600 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
                 <input
                   type="radio"
                   value="percentage"
@@ -120,25 +105,25 @@ export default function WishListSettingsPage() {
                   className="mt-1 mr-3"
                 />
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">總資產百分比</div>
-                  <div className="text-sm text-gray-600 mt-1">
+                  <div className="font-medium text-gray-900 dark:text-white">總資產百分比</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     預算隨著總資產變動，更靈活的管理方式
                   </div>
                   {budgetType === 'percentage' && (
                     <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         預算百分比 (%)
                       </label>
                       <input
                         type="number"
                         value={budgetPercentage}
                         onChange={(e) => setBudgetPercentage(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         min="0"
                         max="100"
                         step="0.1"
                       />
-                      <div className="mt-2 text-sm text-gray-600">
+                      <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         目前總資產: {formatCurrency(assetData.totalTWD, 'TWD')}
                       </div>
                     </div>
@@ -149,12 +134,12 @@ export default function WishListSettingsPage() {
           </div>
 
           {/* Calculated Budget Display */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <div className="text-sm text-blue-700 mb-1">實際每月預算</div>
-            <div className="text-2xl font-bold text-blue-900">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <div className="text-sm text-blue-700 dark:text-blue-300 mb-1">實際每月預算</div>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
               {formatCurrency(actualBudget, 'TWD')}
             </div>
-            <div className="text-xs text-blue-600 mt-1">
+            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
               {budgetType === 'percentage'
                 ? `${budgetPercentage}% × ${formatCurrency(assetData.totalTWD, 'TWD')}`
                 : '固定金額'}
@@ -163,21 +148,21 @@ export default function WishListSettingsPage() {
         </div>
 
         {/* Archive Settings */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">自動歸檔設定</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">自動歸檔設定</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               自動歸檔年限
             </label>
             <input
               type="number"
               value={autoArchiveAfterYears}
               onChange={(e) => setAutoArchiveAfterYears(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               min="1"
               max="20"
             />
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
               「已拒絕」狀態的項目會在 {autoArchiveAfterYears} 年後自動刪除
             </p>
           </div>
@@ -191,14 +176,9 @@ export default function WishListSettingsPage() {
           >
             儲存設定
           </button>
-          <Link
-            href="/wishlist"
-            className="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors text-center"
-          >
-            取消
-          </Link>
         </div>
       </div>
+      </main>
     </div>
   );
 }

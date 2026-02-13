@@ -2,7 +2,7 @@
 
 import { StockQuote, StockPrice, Currency, StockDataSource, AppSettings } from '@/types';
 import { parseStockSymbol } from '@/utils/calculations';
-import { fetchStockQuote, fetchStockQuoteWithMA, fetchExchangeRate as fetchYahooExchangeRate } from './yahooFinance';
+import { fetchStockQuote, fetchStockQuoteWithMA, fetchExchangeRate as fetchYahooExchangeRate, setCustomCorsProxy, getLastUsedProxy } from './yahooFinance';
 import { fetchAlphaVantageQuote, fetchAlphaVantageExchangeRate, getCachedPrice, clearStockCache as clearAVCache, getCacheStats } from './stockApi';
 import { fetchFinnhubQuote, fetchFinnhubExchangeRate } from './finnhubApi';
 import { fetchFMPQuote, fetchFMPExchangeRate, fetchFMPQuoteWithMA } from './fmpApi';
@@ -107,6 +107,8 @@ export async function fetchStockPrice(
 
     switch (source) {
       case 'yahoo':
+        // Set custom CORS proxy if configured
+        setCustomCorsProxy(settings.customCorsProxy);
         quote = await fetchStockQuote(symbol);
         break;
       case 'alphavantage':
@@ -164,6 +166,8 @@ export async function fetchStockPriceWithMA(
 
     switch (source) {
       case 'yahoo':
+        // Set custom CORS proxy if configured
+        setCustomCorsProxy(settings.customCorsProxy);
         const yahooResult = await fetchStockQuoteWithMA(symbol);
         if (yahooResult) {
           priceWithMA = {
@@ -329,6 +333,8 @@ export async function fetchExchangeRate(settings: AppSettings): Promise<Exchange
 
     switch (source) {
       case 'yahoo':
+        // Set custom CORS proxy if configured
+        setCustomCorsProxy(settings.customCorsProxy);
         rate = await fetchYahooExchangeRate();
         break;
       case 'alphavantage':
@@ -362,6 +368,8 @@ export async function fetchExchangeRate(settings: AppSettings): Promise<Exchange
   // Fallback to Yahoo Finance if primary source fails
   if (source !== 'yahoo') {
     try {
+      // Set custom CORS proxy if configured
+      setCustomCorsProxy(settings.customCorsProxy);
       const rate = await fetchYahooExchangeRate();
       if (rate) {
         return {
@@ -388,15 +396,20 @@ export { clearAVCache as clearStockCache, getCacheStats };
 // Test API connection
 export async function testApiConnection(
   source: StockDataSource,
-  apiKey?: string
+  apiKey?: string,
+  customProxy?: string
 ): Promise<{ success: boolean; message: string }> {
   try {
     switch (source) {
       case 'yahoo':
+        // Set custom CORS proxy if provided
+        setCustomCorsProxy(customProxy);
         const yahooQuote = await fetchStockQuote('AAPL');
-        return yahooQuote
-          ? { success: true, message: `Yahoo Finance working. AAPL: $${yahooQuote.price.toFixed(2)}` }
-          : { success: false, message: 'Yahoo Finance returned no data' };
+        if (yahooQuote) {
+          const proxyUsed = getLastUsedProxy();
+          return { success: true, message: `Yahoo Finance working (${proxyUsed}). AAPL: $${yahooQuote.price.toFixed(2)}` };
+        }
+        return { success: false, message: 'Yahoo Finance returned no data' };
 
       case 'alphavantage':
         if (!apiKey) return { success: false, message: 'API key required' };

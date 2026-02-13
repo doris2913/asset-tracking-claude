@@ -11,8 +11,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Asset Tracker',
-  description: 'Track your asset growth over time',
+  title: 'Life Management',
+  description: 'Manage your life - assets, wishlists, and more',
   manifest: '/asset-tracking-claude/manifest.json',
   icons: {
     icon: '/asset-tracking-claude/icon.svg',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Asset Tracker',
+    title: 'Life Management',
   },
   formatDetection: {
     telephone: false,

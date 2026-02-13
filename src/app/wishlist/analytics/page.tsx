@@ -2,6 +2,7 @@
 
 import { useWishListData } from '@/hooks/useWishListData';
 import { useAssetData } from '@/hooks/useAssetData';
+import Navigation from '@/components/Navigation';
 import { LIFE_ASPECT_CONFIG } from '@/types/wishlist';
 import { formatCurrency } from '@/utils/calculations';
 import { calculatePriorityScore, calculateMonthlySpending, calculateYearlySpending } from '@/utils/wishlistCalculations';
@@ -13,8 +14,11 @@ export default function AnalyticsPage() {
 
   if (!wishListData.isLoaded) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center">載入中...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400">載入中...</div>
+        </div>
       </div>
     );
   }
@@ -24,43 +28,13 @@ export default function AnalyticsPage() {
   const yearlySpending = calculateYearlySpending(wishListData.purchasedItems);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
+      <main className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Link
-            href="/assets"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-            title="回到資產"
-          >
-            ← 回到資產
-          </Link>
-          <span className="text-gray-300">|</span>
-          <h1 className="text-3xl font-bold text-gray-900">分析報告</h1>
-        </div>
-        <p className="text-gray-600">願望清單的深入分析和購買建議</p>
-      </div>
-
-      {/* Navigation Tabs - Mobile optimized */}
-      <div className="flex gap-1 sm:gap-4 mb-6 border-b overflow-x-auto">
-        <Link
-          href="/wishlist"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
-        >
-          願望清單
-        </Link>
-        <Link
-          href="/wishlist/purchased"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-gray-600 hover:text-gray-900 active:bg-gray-100 whitespace-nowrap min-h-[44px] flex items-center"
-        >
-          已購買
-        </Link>
-        <Link
-          href="/wishlist/analytics"
-          className="px-3 sm:px-4 py-3 sm:py-2 font-medium text-blue-600 border-b-2 border-blue-600 whitespace-nowrap min-h-[44px] flex items-center"
-        >
-          分析報告
-        </Link>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">分析報告</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">願望清單的深入分析和購買建議</p>
       </div>
 
       {/* Key Metrics */}
@@ -550,6 +524,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }
