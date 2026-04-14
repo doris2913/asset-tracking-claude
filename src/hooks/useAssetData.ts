@@ -223,6 +223,27 @@ export function useAssetData() {
           };
         });
 
+        // Adjust cached stock prices so chart lines stay consistent
+        // (shares × ratio) × (price / ratio) = same value
+        // Next price refresh from Yahoo will bring properly split-adjusted prices
+        const updatedStockPrices = { ...prev.stockPrices };
+        if (updatedStockPrices[asset.symbol]) {
+          const oldPrice = updatedStockPrices[asset.symbol];
+          const adjustedHistoricalPrices: Record<string, number> = {};
+          if (oldPrice.historicalPrices) {
+            for (const [date, price] of Object.entries(oldPrice.historicalPrices)) {
+              adjustedHistoricalPrices[date] = price / ratio;
+            }
+          }
+          updatedStockPrices[asset.symbol] = {
+            ...oldPrice,
+            currentPrice: oldPrice.currentPrice / ratio,
+            movingAvg3M: oldPrice.movingAvg3M / ratio,
+            movingAvg1Y: oldPrice.movingAvg1Y / ratio,
+            historicalPrices: adjustedHistoricalPrices,
+          };
+        }
+
         // Record the split event
         const splitEvent: StockSplitEvent = {
           id: generateId(),
@@ -242,6 +263,7 @@ export function useAssetData() {
             lastModified: new Date().toISOString(),
           },
           snapshots: updatedSnapshots,
+          stockPrices: updatedStockPrices,
           stockSplitEvents: [...(prev.stockSplitEvents || []), splitEvent],
         };
       });
