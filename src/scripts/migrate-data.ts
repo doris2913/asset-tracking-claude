@@ -303,6 +303,7 @@ export function migrateDatabase(oldData: OldDatabase): AppData {
       exchangeRate: oldData.exchangeRate.usdToTwd,
     },
     stockPrices: {},
+    stockSplitEvents: [],
     version: '1.0.0',
   };
 

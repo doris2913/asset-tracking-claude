@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import AssetList from '@/components/AssetList';
 import AssetForm from '@/components/AssetForm';
+import StockSplitForm from '@/components/StockSplitForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
 import { fetchMultipleStockPrices, fetchExchangeRate, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
@@ -20,6 +21,7 @@ export default function AssetsPage() {
     addAsset,
     updateAsset,
     deleteAsset,
+    applyStockSplit,
     updateStockPricesWithMA,
     updateExchangeRate,
     isLoaded,
@@ -29,6 +31,8 @@ export default function AssetsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
+  const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+  const [splittingAsset, setSplittingAsset] = useState<Asset | undefined>(undefined);
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
   const [hideAssets, setHideAssets] = useState(() => {
@@ -64,6 +68,17 @@ export default function AssetsPage() {
       addAsset(assetData);
     }
     setIsModalOpen(false);
+  };
+
+  const handleStockSplit = (asset: Asset) => {
+    setSplittingAsset(asset);
+    setIsSplitModalOpen(true);
+  };
+
+  const handleSubmitStockSplit = (assetId: string, ratio: number) => {
+    applyStockSplit(assetId, ratio);
+    setIsSplitModalOpen(false);
+    setSplittingAsset(undefined);
   };
 
   const handleUpdateStockPrices = async () => {
@@ -274,11 +289,12 @@ export default function AssetsPage() {
             assets={currentAssets.assets}
             onEdit={handleEditAsset}
             onDelete={deleteAsset}
+            onStockSplit={handleStockSplit}
           />
         </div>
       </main>
 
-      {/* Modal */}
+      {/* Asset Form Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -289,6 +305,21 @@ export default function AssetsPage() {
           onSubmit={handleSubmitAsset}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      {/* Stock Split Modal */}
+      <Modal
+        isOpen={isSplitModalOpen}
+        onClose={() => setIsSplitModalOpen(false)}
+        title={t.stockSplit.title}
+      >
+        {splittingAsset && (
+          <StockSplitForm
+            asset={splittingAsset}
+            onSubmit={handleSubmitStockSplit}
+            onCancel={() => setIsSplitModalOpen(false)}
+          />
+        )}
       </Modal>
     </div>
   );

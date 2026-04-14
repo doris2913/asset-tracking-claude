@@ -10,6 +10,7 @@ import {
   CurrentAssets,
   AppSettings,
   StockPrice,
+  StockSplitEvent,
 } from '@/types';
 import {
   generateId,
@@ -182,6 +183,72 @@ export function useAssetData() {
     [setData]
   );
 
+  // Apply a stock split to an asset and all historical snapshots
+  const applyStockSplit = useCallback(
+    (assetId: string, ratio: number) => {
+      setData((prev) => {
+        const asset = prev.currentAssets.assets.find((a) => a.id === assetId);
+        if (!asset || !asset.shares || !asset.symbol) return prev;
+
+        const sharesBefore = asset.shares;
+        const sharesAfter = sharesBefore * ratio;
+
+        // Update current asset shares (value stays the same since price adjusts inversely)
+        const updatedAssets = prev.currentAssets.assets.map((a) => {
+          if (a.id === assetId) {
+            return {
+              ...a,
+              shares: sharesAfter,
+              lastUpdated: new Date().toISOString(),
+            };
+          }
+          return a;
+        });
+
+        // Update all historical snapshots that contain this symbol
+        const updatedSnapshots = prev.snapshots.map((snapshot) => {
+          const updatedSnapshotAssets = snapshot.assets.map((a) => {
+            if (a.symbol === asset.symbol && a.shares) {
+              return {
+                ...a,
+                shares: a.shares * ratio,
+              };
+            }
+            return a;
+          });
+
+          return {
+            ...snapshot,
+            assets: updatedSnapshotAssets,
+          };
+        });
+
+        // Record the split event
+        const splitEvent: StockSplitEvent = {
+          id: generateId(),
+          symbol: asset.symbol,
+          assetName: asset.name,
+          date: new Date().toISOString().split('T')[0],
+          ratio,
+          sharesBefore,
+          sharesAfter,
+        };
+
+        return {
+          ...prev,
+          currentAssets: {
+            ...prev.currentAssets,
+            assets: updatedAssets,
+            lastModified: new Date().toISOString(),
+          },
+          snapshots: updatedSnapshots,
+          stockSplitEvents: [...(prev.stockSplitEvents || []), splitEvent],
+        };
+      });
+    },
+    [setData]
+  );
+
   // Create a manual snapshot
   const createManualSnapshot = useCallback(
     (notes?: string) => {
@@ -290,6 +357,10 @@ export function useAssetData() {
     // Calculated values
     totalTWD,
     totalUSD,
+
+    // Stock split
+    stockSplitEvents: data.stockSplitEvents || [],
+    applyStockSplit,
 
     // Asset operations
     addAsset,

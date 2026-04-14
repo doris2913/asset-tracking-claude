@@ -254,6 +254,18 @@ export const zhTW: Translations = {
     info: '這些目標配置將用於與您當前的投資組合配置進行比較，並幫助您重新平衡資產。',
   },
 
+  // Stock Split
+  stockSplit: {
+    title: '股票分拆',
+    split: '分拆',
+    currentShares: '目前股數',
+    splitRatio: '分拆比例（新 : 舊）',
+    ratioHint: '例如：4:1 表示每股變為 4 股。反向分拆請使用 1:2。',
+    preview: '預覽',
+    snapshotNote: '所有歷史快照的股數也會一併調整，以配合分拆後的調整價格。',
+    apply: '套用分拆',
+  },
+
   // Allocation Comparison
   allocationComparison: {
     current: '目前',
