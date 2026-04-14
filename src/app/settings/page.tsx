@@ -487,7 +487,7 @@ export default function SettingsPage() {
                   <ol className="list-decimal list-inside space-y-1">
                     <li>Go to Dropbox App Console</li>
                     <li>Create a new app (Choose: Scoped access → Full Dropbox)</li>
-                    <li>In Settings, add your domains to "Chooser/Saver domains"</li>
+                    <li>In Settings, add your domains to &ldquo;Chooser/Saver domains&rdquo;</li>
                     <li>For localhost: add <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">localhost</code></li>
                     <li>For production: add your GitHub Pages domain</li>
                     <li>Copy the App Key and paste it above</li>
