@@ -346,7 +346,7 @@ export default function DashboardPage() {
 
   // Calculate asset breakdown (exclude liabilities)
   const assetBreakdown = useMemo(() => {
-    return getAssetSummary(currentAssets.assets, currentAssets.exchangeRate, true);
+    return getAssetSummary(currentAssets.assets, currentAssets.exchangeRate);
   }, [currentAssets]);
 
   // Calculate growth rates
