@@ -58,6 +58,7 @@ export interface AppData {
   snapshots: Snapshot[];
   settings: AppSettings;
   stockPrices: Record<string, StockPrice>;  // Stock prices with MAs
+  stockSplitHistory: StockSplitRecord[];    // Stock split history
   version: string;           // Data schema version for migrations
 }
 
@@ -106,6 +107,19 @@ export interface AssetSummary {
   percentage: number;
 }
 
+// Stock split record
+export interface StockSplitRecord {
+  id: string;
+  assetId: string;           // ID of the asset that was split
+  symbol: string;            // Stock symbol at time of split
+  date: string;              // ISO date string (YYYY-MM-DD)
+  ratioFrom: number;         // e.g., 1 (original shares)
+  ratioTo: number;           // e.g., 4 (new shares per original)
+  sharesBefore: number;      // Shares before split
+  sharesAfter: number;       // Shares after split
+  notes?: string;
+}
+
 // Moving average types
 export type MovingAverageType = '3M' | '1Y';
 
@@ -148,5 +162,6 @@ export const DEFAULT_APP_DATA: AppData = {
     exchangeRate: DEFAULT_EXCHANGE_RATE,
   },
   stockPrices: {},
+  stockSplitHistory: [],
   version: '1.0.0',
 };

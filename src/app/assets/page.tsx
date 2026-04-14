@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import AssetList from '@/components/AssetList';
 import AssetForm from '@/components/AssetForm';
+import StockSplitModal from '@/components/StockSplitModal';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
 import { fetchMultipleStockPrices, fetchExchangeRate, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
@@ -22,6 +23,7 @@ export default function AssetsPage() {
     deleteAsset,
     updateStockPricesWithMA,
     updateExchangeRate,
+    applyStockSplit,
     isLoaded,
   } = useAssetData();
 
@@ -29,6 +31,9 @@ export default function AssetsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
+  const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+  const [splittingAsset, setSplittingAsset] = useState<Asset | undefined>(undefined);
+  const [splitStatus, setSplitStatus] = useState('');
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
   const [hideAssets, setHideAssets] = useState(() => {
@@ -64,6 +69,19 @@ export default function AssetsPage() {
       addAsset(assetData);
     }
     setIsModalOpen(false);
+  };
+
+  const handleStockSplit = (asset: Asset) => {
+    setSplittingAsset(asset);
+    setIsSplitModalOpen(true);
+  };
+
+  const handleApplyStockSplit = (assetId: string, ratioFrom: number, ratioTo: number, notes?: string) => {
+    applyStockSplit(assetId, ratioFrom, ratioTo, notes);
+    setIsSplitModalOpen(false);
+    setSplittingAsset(undefined);
+    setSplitStatus(t.stockSplit.success);
+    setTimeout(() => setSplitStatus(''), 3000);
   };
 
   const handleUpdateStockPrices = async () => {
@@ -270,15 +288,19 @@ export default function AssetsPage() {
               {t.assets.lastUpdated}: {new Date(currentAssets.lastModified).toLocaleString(dateLocale)}
             </span>
           </div>
+          {splitStatus && (
+            <p className="mb-3 text-sm text-green-600 dark:text-green-400">{splitStatus}</p>
+          )}
           <AssetList
             assets={currentAssets.assets}
             onEdit={handleEditAsset}
             onDelete={deleteAsset}
+            onStockSplit={handleStockSplit}
           />
         </div>
       </main>
 
-      {/* Modal */}
+      {/* Asset Form Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -289,6 +311,21 @@ export default function AssetsPage() {
           onSubmit={handleSubmitAsset}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      {/* Stock Split Modal */}
+      <Modal
+        isOpen={isSplitModalOpen}
+        onClose={() => setIsSplitModalOpen(false)}
+        title={t.stockSplit.title}
+      >
+        {splittingAsset && (
+          <StockSplitModal
+            asset={splittingAsset}
+            onApply={handleApplyStockSplit}
+            onCancel={() => setIsSplitModalOpen(false)}
+          />
+        )}
       </Modal>
     </div>
   );

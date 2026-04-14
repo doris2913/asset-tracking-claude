@@ -10,6 +10,7 @@ import {
   CurrentAssets,
   AppSettings,
   StockPrice,
+  StockSplitRecord,
 } from '@/types';
 import {
   generateId,
@@ -182,6 +183,56 @@ export function useAssetData() {
     [setData]
   );
 
+  // Apply stock split to an asset
+  const applyStockSplit = useCallback(
+    (assetId: string, ratioFrom: number, ratioTo: number, notes?: string) => {
+      setData((prev) => {
+        const asset = prev.currentAssets.assets.find((a) => a.id === assetId);
+        if (!asset || !asset.shares) return prev;
+
+        const splitRatio = ratioTo / ratioFrom;
+        const sharesBefore = asset.shares;
+        const sharesAfter = sharesBefore * splitRatio;
+
+        // Update the asset's shares (value stays the same since price adjusts proportionally)
+        const updatedAssets = prev.currentAssets.assets.map((a) => {
+          if (a.id === assetId) {
+            return {
+              ...a,
+              shares: sharesAfter,
+              lastUpdated: new Date().toISOString(),
+            };
+          }
+          return a;
+        });
+
+        // Record the split event
+        const splitRecord: StockSplitRecord = {
+          id: generateId(),
+          assetId,
+          symbol: asset.symbol || asset.name,
+          date: new Date().toISOString().split('T')[0],
+          ratioFrom,
+          ratioTo,
+          sharesBefore,
+          sharesAfter,
+          notes,
+        };
+
+        return {
+          ...prev,
+          currentAssets: {
+            ...prev.currentAssets,
+            assets: updatedAssets,
+            lastModified: new Date().toISOString(),
+          },
+          stockSplitHistory: [...(prev.stockSplitHistory || []), splitRecord],
+        };
+      });
+    },
+    [setData]
+  );
+
   // Create a manual snapshot
   const createManualSnapshot = useCallback(
     (notes?: string) => {
@@ -285,6 +336,7 @@ export function useAssetData() {
     snapshots: data.snapshots,
     settings: data.settings,
     stockPrices: data.stockPrices || {},
+    stockSplitHistory: data.stockSplitHistory || [],
     isLoaded,
 
     // Calculated values
@@ -297,6 +349,7 @@ export function useAssetData() {
     deleteAsset,
     updateStockPrices,
     updateStockPricesWithMA,
+    applyStockSplit,
 
     // Snapshot operations
     createManualSnapshot,

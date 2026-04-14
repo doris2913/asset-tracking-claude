@@ -17,9 +17,10 @@ interface AssetListProps {
   assets: Asset[];
   onEdit: (asset: Asset) => void;
   onDelete: (id: string) => void;
+  onStockSplit?: (asset: Asset) => void;
 }
 
-export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) {
+export default function AssetList({ assets, onEdit, onDelete, onStockSplit }: AssetListProps) {
   const { t } = useI18n();
 
   if (assets.length === 0) {
@@ -92,6 +93,14 @@ export default function AssetList({ assets, onEdit, onDelete }: AssetListProps) 
                       >
                         {t.common.edit}
                       </button>
+                      {onStockSplit && (asset.type === 'stock_tw' || asset.type === 'stock_us') && asset.shares && (
+                        <button
+                          onClick={() => onStockSplit(asset)}
+                          className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400"
+                        >
+                          {t.stockSplit.title}
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           if (confirm(t.assets.confirmDelete)) {
