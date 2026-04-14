@@ -10,7 +10,7 @@ interface SummaryCardProps {
     isPositive: boolean;
   };
   trendLabel?: string;
-  color?: 'blue' | 'green' | 'yellow' | 'purple';
+  color?: 'blue' | 'green' | 'yellow' | 'purple' | 'orange';
 }
 
 const colorClasses = {
@@ -18,6 +18,7 @@ const colorClasses = {
   green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
   yellow: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
   purple: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
+  orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
 };
 
 export default function SummaryCard({

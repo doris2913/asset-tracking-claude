@@ -120,7 +120,7 @@ export default function AllocationAdjustmentRecommendation({
     }
   };
 
-  const hasSignificantDifference = differences.some((d) => Math.abs(d.diffPercent) > 0.5);
+  const hasSignificantDifference = differences.some((d) => Math.abs(d.diffPercent) > 3.0);
 
   if (!hasSignificantDifference) {
     return (
@@ -163,8 +163,8 @@ export default function AllocationAdjustmentRecommendation({
           </thead>
           <tbody>
             {differences.map((diff) => {
-              const isOverweight = diff.diffPercent > 0.5;
-              const isUnderweight = diff.diffPercent < -0.5;
+              const isOverweight = diff.diffPercent > 3.0;
+              const isUnderweight = diff.diffPercent < -3.0;
               const isBalanced = !isOverweight && !isUnderweight;
 
               return (

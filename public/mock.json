@@ -1,0 +1,610 @@
+{
+  "currentAssets": {
+    "assets": [
+      {
+        "id": "asset-1",
+        "name": "Cathay Bank Savings",
+        "type": "cash_twd",
+        "value": 500000,
+        "currency": "TWD",
+        "notes": "Emergency fund",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-2",
+        "name": "CTBC Bank USD Account",
+        "type": "cash_usd",
+        "value": 15000,
+        "currency": "USD",
+        "notes": "USD savings",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-3",
+        "name": "TSMC Stock",
+        "type": "stock_tw",
+        "value": 1890000,
+        "currency": "TWD",
+        "symbol": "2330.TW",
+        "shares": 300,
+        "notes": "Taiwan semiconductor leader",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-4",
+        "name": "0050 ETF",
+        "type": "stock_tw",
+        "value": 560000,
+        "currency": "TWD",
+        "symbol": "0050.TW",
+        "shares": 400,
+        "notes": "Taiwan 50 Index ETF",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-5",
+        "name": "Apple Inc",
+        "type": "stock_us",
+        "value": 23850,
+        "currency": "USD",
+        "symbol": "AAPL",
+        "shares": 100,
+        "notes": "Tech giant",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-6",
+        "name": "Microsoft Corp",
+        "type": "stock_us",
+        "value": 43200,
+        "currency": "USD",
+        "symbol": "MSFT",
+        "shares": 100,
+        "notes": "Cloud and AI leader",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-7",
+        "name": "US Treasury Bills 3M",
+        "type": "us_tbills",
+        "value": 50000,
+        "currency": "USD",
+        "notes": "Safe fixed income",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      },
+      {
+        "id": "asset-8",
+        "name": "Mortgage",
+        "type": "liability",
+        "value": -800000,
+        "currency": "TWD",
+        "notes": "Home loan",
+        "lastUpdated": "2025-01-15T00:00:00.000Z"
+      }
+    ],
+    "totalValueTWD": 7023500,
+    "totalValueUSD": 220425,
+    "exchangeRate": 31.85,
+    "lastUpdated": "2025-01-15T00:00:00.000Z"
+  },
+  "snapshots": [
+    {
+      "id": "snapshot-1",
+      "date": "2024-01-15",
+      "assets": [
+        {
+          "id": "asset-1-snap",
+          "name": "Cathay Bank Savings",
+          "type": "cash_twd",
+          "value": 450000,
+          "currency": "TWD",
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-2-snap",
+          "name": "CTBC Bank USD Account",
+          "type": "cash_usd",
+          "value": 12000,
+          "currency": "USD",
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-3-snap",
+          "name": "TSMC Stock",
+          "type": "stock_tw",
+          "value": 1470000,
+          "currency": "TWD",
+          "symbol": "2330.TW",
+          "shares": 300,
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-4-snap",
+          "name": "0050 ETF",
+          "type": "stock_tw",
+          "value": 480000,
+          "currency": "TWD",
+          "symbol": "0050.TW",
+          "shares": 400,
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-5-snap",
+          "name": "Apple Inc",
+          "type": "stock_us",
+          "value": 19000,
+          "currency": "USD",
+          "symbol": "AAPL",
+          "shares": 100,
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-6-snap",
+          "name": "Microsoft Corp",
+          "type": "stock_us",
+          "value": 37500,
+          "currency": "USD",
+          "symbol": "MSFT",
+          "shares": 100,
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-7-snap",
+          "name": "US Treasury Bills 3M",
+          "type": "us_tbills",
+          "value": 45000,
+          "currency": "USD",
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-8-snap",
+          "name": "Mortgage",
+          "type": "liability",
+          "value": -850000,
+          "currency": "TWD",
+          "lastUpdated": "2024-01-15T00:00:00.000Z"
+        }
+      ],
+      "totalValueTWD": 5483250,
+      "totalValueUSD": 171913,
+      "exchangeRate": 31.90,
+      "notes": "January 2024 snapshot"
+    },
+    {
+      "id": "snapshot-2",
+      "date": "2024-04-15",
+      "assets": [
+        {
+          "id": "asset-1-snap",
+          "name": "Cathay Bank Savings",
+          "type": "cash_twd",
+          "value": 460000,
+          "currency": "TWD",
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-2-snap",
+          "name": "CTBC Bank USD Account",
+          "type": "cash_usd",
+          "value": 13000,
+          "currency": "USD",
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-3-snap",
+          "name": "TSMC Stock",
+          "type": "stock_tw",
+          "value": 1650000,
+          "currency": "TWD",
+          "symbol": "2330.TW",
+          "shares": 300,
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-4-snap",
+          "name": "0050 ETF",
+          "type": "stock_tw",
+          "value": 500000,
+          "currency": "TWD",
+          "symbol": "0050.TW",
+          "shares": 400,
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-5-snap",
+          "name": "Apple Inc",
+          "type": "stock_us",
+          "value": 17000,
+          "currency": "USD",
+          "symbol": "AAPL",
+          "shares": 100,
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-6-snap",
+          "name": "Microsoft Corp",
+          "type": "stock_us",
+          "value": 40000,
+          "currency": "USD",
+          "symbol": "MSFT",
+          "shares": 100,
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-7-snap",
+          "name": "US Treasury Bills 3M",
+          "type": "us_tbills",
+          "value": 46000,
+          "currency": "USD",
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-8-snap",
+          "name": "Mortgage",
+          "type": "liability",
+          "value": -840000,
+          "currency": "TWD",
+          "lastUpdated": "2024-04-15T00:00:00.000Z"
+        }
+      ],
+      "totalValueTWD": 6150000,
+      "totalValueUSD": 192000,
+      "exchangeRate": 32.03,
+      "notes": "Q1 2024 snapshot"
+    },
+    {
+      "id": "snapshot-3",
+      "date": "2024-07-15",
+      "assets": [
+        {
+          "id": "asset-1-snap",
+          "name": "Cathay Bank Savings",
+          "type": "cash_twd",
+          "value": 470000,
+          "currency": "TWD",
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-2-snap",
+          "name": "CTBC Bank USD Account",
+          "type": "cash_usd",
+          "value": 14000,
+          "currency": "USD",
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-3-snap",
+          "name": "TSMC Stock",
+          "type": "stock_tw",
+          "value": 1710000,
+          "currency": "TWD",
+          "symbol": "2330.TW",
+          "shares": 300,
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-4-snap",
+          "name": "0050 ETF",
+          "type": "stock_tw",
+          "value": 520000,
+          "currency": "TWD",
+          "symbol": "0050.TW",
+          "shares": 400,
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-5-snap",
+          "name": "Apple Inc",
+          "type": "stock_us",
+          "value": 22000,
+          "currency": "USD",
+          "symbol": "AAPL",
+          "shares": 100,
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-6-snap",
+          "name": "Microsoft Corp",
+          "type": "stock_us",
+          "value": 42500,
+          "currency": "USD",
+          "symbol": "MSFT",
+          "shares": 100,
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-7-snap",
+          "name": "US Treasury Bills 3M",
+          "type": "us_tbills",
+          "value": 47000,
+          "currency": "USD",
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-8-snap",
+          "name": "Mortgage",
+          "type": "liability",
+          "value": -830000,
+          "currency": "TWD",
+          "lastUpdated": "2024-07-15T00:00:00.000Z"
+        }
+      ],
+      "totalValueTWD": 6502750,
+      "totalValueUSD": 204613,
+      "exchangeRate": 31.78,
+      "notes": "Mid-year snapshot"
+    },
+    {
+      "id": "snapshot-4",
+      "date": "2024-10-15",
+      "assets": [
+        {
+          "id": "asset-1-snap",
+          "name": "Cathay Bank Savings",
+          "type": "cash_twd",
+          "value": 480000,
+          "currency": "TWD",
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-2-snap",
+          "name": "CTBC Bank USD Account",
+          "type": "cash_usd",
+          "value": 14500,
+          "currency": "USD",
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-3-snap",
+          "name": "TSMC Stock",
+          "type": "stock_tw",
+          "value": 1830000,
+          "currency": "TWD",
+          "symbol": "2330.TW",
+          "shares": 300,
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-4-snap",
+          "name": "0050 ETF",
+          "type": "stock_tw",
+          "value": 540000,
+          "currency": "TWD",
+          "symbol": "0050.TW",
+          "shares": 400,
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-5-snap",
+          "name": "Apple Inc",
+          "type": "stock_us",
+          "value": 22500,
+          "currency": "USD",
+          "symbol": "AAPL",
+          "shares": 100,
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-6-snap",
+          "name": "Microsoft Corp",
+          "type": "stock_us",
+          "value": 41800,
+          "currency": "USD",
+          "symbol": "MSFT",
+          "shares": 100,
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-7-snap",
+          "name": "US Treasury Bills 3M",
+          "type": "us_tbills",
+          "value": 48000,
+          "currency": "USD",
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-8-snap",
+          "name": "Mortgage",
+          "type": "liability",
+          "value": -820000,
+          "currency": "TWD",
+          "lastUpdated": "2024-10-15T00:00:00.000Z"
+        }
+      ],
+      "totalValueTWD": 6862500,
+      "totalValueUSD": 215800,
+      "exchangeRate": 31.80,
+      "notes": "Q3 2024 snapshot"
+    },
+    {
+      "id": "snapshot-5",
+      "date": "2025-01-15",
+      "assets": [
+        {
+          "id": "asset-1-snap",
+          "name": "Cathay Bank Savings",
+          "type": "cash_twd",
+          "value": 500000,
+          "currency": "TWD",
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-2-snap",
+          "name": "CTBC Bank USD Account",
+          "type": "cash_usd",
+          "value": 15000,
+          "currency": "USD",
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-3-snap",
+          "name": "TSMC Stock",
+          "type": "stock_tw",
+          "value": 1890000,
+          "currency": "TWD",
+          "symbol": "2330.TW",
+          "shares": 300,
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-4-snap",
+          "name": "0050 ETF",
+          "type": "stock_tw",
+          "value": 560000,
+          "currency": "TWD",
+          "symbol": "0050.TW",
+          "shares": 400,
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-5-snap",
+          "name": "Apple Inc",
+          "type": "stock_us",
+          "value": 23850,
+          "currency": "USD",
+          "symbol": "AAPL",
+          "shares": 100,
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-6-snap",
+          "name": "Microsoft Corp",
+          "type": "stock_us",
+          "value": 43200,
+          "currency": "USD",
+          "symbol": "MSFT",
+          "shares": 100,
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-7-snap",
+          "name": "US Treasury Bills 3M",
+          "type": "us_tbills",
+          "value": 50000,
+          "currency": "USD",
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        },
+        {
+          "id": "asset-8-snap",
+          "name": "Mortgage",
+          "type": "liability",
+          "value": -800000,
+          "currency": "TWD",
+          "lastUpdated": "2025-01-15T00:00:00.000Z"
+        }
+      ],
+      "totalValueTWD": 7023500,
+      "totalValueUSD": 220425,
+      "exchangeRate": 31.85,
+      "notes": "Latest snapshot January 2025"
+    }
+  ],
+  "settings": {
+    "snapshotIntervalDays": 90,
+    "defaultCurrency": "TWD",
+    "exchangeRate": 31.85,
+    "targetAllocation": {
+      "cash_twd": 10,
+      "cash_usd": 15,
+      "stock_tw": 35,
+      "stock_us": 30,
+      "liability": 0,
+      "us_tbills": 10
+    }
+  },
+  "stockPrices": {
+    "2330.TW": {
+      "symbol": "2330.TW",
+      "currentPrice": 630,
+      "movingAvg3M": 610,
+      "movingAvg1Y": 580,
+      "currency": "TWD",
+      "lastUpdated": "2025-01-15T00:00:00.000Z",
+      "historicalPrices": {
+        "2024-01-15": 490,
+        "2024-02-15": 510,
+        "2024-03-15": 530,
+        "2024-04-15": 550,
+        "2024-05-15": 560,
+        "2024-06-15": 570,
+        "2024-07-15": 570,
+        "2024-08-15": 580,
+        "2024-09-15": 590,
+        "2024-10-15": 610,
+        "2024-11-15": 620,
+        "2024-12-15": 625,
+        "2025-01-15": 630
+      }
+    },
+    "0050.TW": {
+      "symbol": "0050.TW",
+      "currentPrice": 140,
+      "movingAvg3M": 135,
+      "movingAvg1Y": 128,
+      "currency": "TWD",
+      "lastUpdated": "2025-01-15T00:00:00.000Z",
+      "historicalPrices": {
+        "2024-01-15": 120,
+        "2024-02-15": 122,
+        "2024-03-15": 124,
+        "2024-04-15": 125,
+        "2024-05-15": 127,
+        "2024-06-15": 128,
+        "2024-07-15": 130,
+        "2024-08-15": 131,
+        "2024-09-15": 133,
+        "2024-10-15": 135,
+        "2024-11-15": 137,
+        "2024-12-15": 138,
+        "2025-01-15": 140
+      }
+    },
+    "AAPL": {
+      "symbol": "AAPL",
+      "currentPrice": 238.5,
+      "movingAvg3M": 230.2,
+      "movingAvg1Y": 205.8,
+      "currency": "USD",
+      "lastUpdated": "2025-01-15T00:00:00.000Z",
+      "historicalPrices": {
+        "2024-01-15": 190,
+        "2024-02-15": 185,
+        "2024-03-15": 175,
+        "2024-04-15": 170,
+        "2024-05-15": 192,
+        "2024-06-15": 210,
+        "2024-07-15": 220,
+        "2024-08-15": 225,
+        "2024-09-15": 221,
+        "2024-10-15": 225,
+        "2024-11-15": 230,
+        "2024-12-15": 235,
+        "2025-01-15": 238.5
+      }
+    },
+    "MSFT": {
+      "symbol": "MSFT",
+      "currentPrice": 432,
+      "movingAvg3M": 425,
+      "movingAvg1Y": 395,
+      "currency": "USD",
+      "lastUpdated": "2025-01-15T00:00:00.000Z",
+      "historicalPrices": {
+        "2024-01-15": 375,
+        "2024-02-15": 380,
+        "2024-03-15": 385,
+        "2024-04-15": 400,
+        "2024-05-15": 410,
+        "2024-06-15": 415,
+        "2024-07-15": 425,
+        "2024-08-15": 420,
+        "2024-09-15": 422,
+        "2024-10-15": 418,
+        "2024-11-15": 425,
+        "2024-12-15": 428,
+        "2025-01-15": 432
+      }
+    }
+  },
+  "version": "1.0"
+}

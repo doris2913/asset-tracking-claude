@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,6 +16,7 @@ import { Line } from 'react-chartjs-2';
 import { ChartDataPoint, Currency } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
 
 ChartJS.register(
   CategoryScale,
@@ -45,13 +46,8 @@ export default function DashboardChart({
 }: DashboardChartProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
   const { t } = useI18n();
-
-  // Force chart update when data changes
-  useEffect(() => {
-    if (chartRef.current) {
-      chartRef.current.update();
-    }
-  }, [snapshotValues, currentValues, movingAverage3M, movingAverage1Y, currency]);
+  const { theme } = useChartTheme();
+  const lineColors = theme.lineColors;
 
   if (snapshotValues.length === 0) {
     return (
@@ -65,6 +61,8 @@ export default function DashboardChart({
   }
 
   const labels = snapshotValues.map((point) => point.label || point.date);
+  // Store full dates for tooltip display
+  const fullDates = snapshotValues.map((point) => point.date);
 
   const data = {
     labels,
@@ -72,8 +70,8 @@ export default function DashboardChart({
       {
         label: t.chart.snapshotValue,
         data: snapshotValues.map((point) => point.value),
-        borderColor: 'rgb(156, 163, 175)',
-        backgroundColor: 'rgba(156, 163, 175, 0.1)',
+        borderColor: lineColors.snapshotValue,
+        backgroundColor: lineColors.snapshotValueBg,
         fill: true,
         tension: 0.4,
         pointRadius: 4,
@@ -82,7 +80,7 @@ export default function DashboardChart({
       {
         label: t.chart.currentValue,
         data: currentValues.map((point) => point.value),
-        borderColor: 'rgb(59, 130, 246)',
+        borderColor: lineColors.currentValue,
         backgroundColor: 'transparent',
         tension: 0.4,
         pointRadius: 3,
@@ -92,7 +90,7 @@ export default function DashboardChart({
       {
         label: t.chart.movingAverage3M,
         data: movingAverage3M.map((point) => point.value),
-        borderColor: 'rgb(34, 197, 94)',
+        borderColor: lineColors.movingAverage3M,
         backgroundColor: 'transparent',
         borderDash: [5, 5],
         tension: 0.4,
@@ -102,7 +100,7 @@ export default function DashboardChart({
       {
         label: t.chart.movingAverage1Y,
         data: movingAverage1Y.map((point) => point.value),
-        borderColor: 'rgb(249, 115, 22)',
+        borderColor: lineColors.movingAverage1Y,
         backgroundColor: 'transparent',
         borderDash: [10, 5],
         tension: 0.4,
@@ -130,16 +128,13 @@ export default function DashboardChart({
       tooltip: {
         callbacks: {
           title: function (context: any) {
-            if (!context || context.length === 0) return '';
-            
             const index = context[0].dataIndex;
-            const dataPoint = snapshotValues[index];
-            if (dataPoint && dataPoint.date) {
-              // Format the date to show full date instead of just month
-              const date = new Date(dataPoint.date);
-              return date.toLocaleDateString('en-US', {
+            const date = fullDates[index];
+            if (date) {
+              const d = new Date(date);
+              return d.toLocaleDateString('zh-TW', {
                 year: 'numeric',
-                month: 'short',
+                month: 'long',
                 day: 'numeric',
               });
             }

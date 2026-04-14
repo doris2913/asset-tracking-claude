@@ -1,0 +1,511 @@
+{
+  "wishItems": [
+    {
+      "id": "wish-1",
+      "name": "Sony WH-1000XM5 降噪耳機",
+      "category": "3C產品",
+      "estimatedPrice": 10990,
+      "specifications": "主動降噪、藍牙5.2、30小時續航",
+      "alternativeOptions": [
+        {
+          "name": "Bose QuietComfort 45",
+          "price": 11000,
+          "pros": "舒適度佳、降噪強",
+          "cons": "音質較平淡"
+        },
+        {
+          "name": "AirPods Max",
+          "price": 18990,
+          "pros": "Apple生態整合",
+          "cons": "價格過高、較重"
+        }
+      ],
+      "isNeed": false,
+      "lifeAspects": ["work_efficiency", "entertainment", "comfort"],
+      "aspectImportance": {
+        "work_efficiency": 4,
+        "entertainment": 5,
+        "comfort": 3
+      },
+      "currentSatisfaction": {
+        "work_efficiency": 2,
+        "entertainment": 2,
+        "comfort": 3
+      },
+      "expectedImprovement": {
+        "work_efficiency": 4,
+        "entertainment": 5,
+        "comfort": 5
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-10",
+          "intensity": 4,
+          "context": "看到同事用覺得音質很好"
+        },
+        {
+          "date": "2024-01-15",
+          "intensity": 5,
+          "context": "辦公室太吵需要專注"
+        },
+        {
+          "date": "2024-01-20",
+          "intensity": 3,
+          "context": "通勤時想聽音樂"
+        }
+      ],
+      "dateAdded": "2024-01-10",
+      "priority": "high",
+      "status": "wishlist",
+      "notes": "等農曆年終獎金發下來再買",
+      "links": [
+        "https://www.sony.com.tw/zh/electronics/headband-headphones/wh-1000xm5"
+      ]
+    },
+    {
+      "id": "wish-2",
+      "name": "Dyson V15 無線吸塵器",
+      "category": "家電",
+      "estimatedPrice": 24900,
+      "specifications": "雷射偵測、60分鐘續航、LCD螢幕",
+      "alternativeOptions": [
+        {
+          "name": "小米吸塵器",
+          "price": 8990,
+          "pros": "CP值高",
+          "cons": "吸力較弱"
+        }
+      ],
+      "isNeed": true,
+      "lifeAspects": ["home_appliances", "health", "comfort"],
+      "aspectImportance": {
+        "home_appliances": 5,
+        "health": 4,
+        "comfort": 3
+      },
+      "currentSatisfaction": {
+        "home_appliances": 2,
+        "health": 2,
+        "comfort": 2
+      },
+      "expectedImprovement": {
+        "home_appliances": 5,
+        "health": 5,
+        "comfort": 4
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-05",
+          "intensity": 5,
+          "context": "舊吸塵器壞了急需"
+        },
+        {
+          "date": "2024-01-12",
+          "intensity": 5,
+          "context": "家裡灰塵太多過敏嚴重"
+        }
+      ],
+      "dateAdded": "2024-01-05",
+      "priority": "high",
+      "status": "wishlist",
+      "notes": "舊吸塵器已壞，急需替換",
+      "links": [
+        "https://www.dyson.tw/vacuum-cleaners/cordless/v15"
+      ]
+    },
+    {
+      "id": "wish-3",
+      "name": "MacBook Pro 14吋 M3",
+      "category": "3C產品",
+      "estimatedPrice": 62900,
+      "specifications": "M3晶片、16GB RAM、512GB SSD",
+      "alternativeOptions": [
+        {
+          "name": "MacBook Air M2",
+          "price": 37900,
+          "pros": "輕薄、省電",
+          "cons": "效能較弱、無風扇散熱"
+        },
+        {
+          "name": "ThinkPad X1 Carbon",
+          "price": 55000,
+          "pros": "鍵盤手感好",
+          "cons": "非Mac生態系"
+        }
+      ],
+      "isNeed": false,
+      "lifeAspects": ["work_efficiency", "education"],
+      "aspectImportance": {
+        "work_efficiency": 5,
+        "education": 4
+      },
+      "currentSatisfaction": {
+        "work_efficiency": 3,
+        "education": 3
+      },
+      "expectedImprovement": {
+        "work_efficiency": 5,
+        "education": 5
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-08",
+          "intensity": 3,
+          "context": "看到新M3發表很心動"
+        }
+      ],
+      "dateAdded": "2024-01-08",
+      "priority": "medium",
+      "status": "wishlist",
+      "notes": "現在筆電還能用，不急著買",
+      "links": [
+        "https://www.apple.com/tw/macbook-pro-14-and-16/"
+      ]
+    },
+    {
+      "id": "wish-4",
+      "name": "Lululemon 瑜珈墊",
+      "category": "運動用品",
+      "estimatedPrice": 3200,
+      "specifications": "5mm厚度、防滑、可攜帶款",
+      "isNeed": false,
+      "lifeAspects": ["exercise", "health"],
+      "aspectImportance": {
+        "exercise": 4,
+        "health": 4
+      },
+      "currentSatisfaction": {
+        "exercise": 3,
+        "health": 3
+      },
+      "expectedImprovement": {
+        "exercise": 5,
+        "health": 4
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-18",
+          "intensity": 2,
+          "context": "開始上瑜珈課"
+        }
+      ],
+      "dateAdded": "2024-01-18",
+      "priority": "low",
+      "status": "wishlist",
+      "notes": "健身房有提供，不急著買自己的",
+      "links": []
+    },
+    {
+      "id": "wish-5",
+      "name": "Herman Miller Aeron 人體工學椅",
+      "category": "家具",
+      "estimatedPrice": 42000,
+      "specifications": "全網椅、12年保固、Size B",
+      "alternativeOptions": [
+        {
+          "name": "Steelcase Gesture",
+          "price": 38000,
+          "pros": "扶手調整更靈活",
+          "cons": "網布較少透氣性稍差"
+        },
+        {
+          "name": "IKEA Markus",
+          "price": 5999,
+          "pros": "便宜",
+          "cons": "支撐性不足、無法久坐"
+        }
+      ],
+      "isNeed": true,
+      "lifeAspects": ["work_efficiency", "health", "comfort"],
+      "aspectImportance": {
+        "work_efficiency": 5,
+        "health": 5,
+        "comfort": 4
+      },
+      "currentSatisfaction": {
+        "work_efficiency": 2,
+        "health": 1,
+        "comfort": 2
+      },
+      "expectedImprovement": {
+        "work_efficiency": 5,
+        "health": 5,
+        "comfort": 5
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-03",
+          "intensity": 5,
+          "context": "腰痛看醫生建議換椅子"
+        },
+        {
+          "date": "2024-01-14",
+          "intensity": 5,
+          "context": "WFH久坐腰痛加劇"
+        },
+        {
+          "date": "2024-01-21",
+          "intensity": 5,
+          "context": "試坐展示品覺得很舒服"
+        }
+      ],
+      "dateAdded": "2024-01-03",
+      "priority": "high",
+      "status": "wishlist",
+      "notes": "健康投資，價格雖高但值得",
+      "links": [
+        "https://www.hermanmiller.com/products/seating/office-chairs/aeron-chairs/"
+      ]
+    },
+    {
+      "id": "wish-6",
+      "name": "Kindle Paperwhite",
+      "category": "3C產品",
+      "estimatedPrice": 4490,
+      "specifications": "6.8吋、防水、8GB",
+      "isNeed": false,
+      "lifeAspects": ["education", "entertainment"],
+      "aspectImportance": {
+        "education": 3,
+        "entertainment": 4
+      },
+      "currentSatisfaction": {
+        "education": 3,
+        "entertainment": 3
+      },
+      "expectedImprovement": {
+        "education": 4,
+        "entertainment": 5
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-16",
+          "intensity": 2,
+          "context": "想養成睡前閱讀習慣"
+        }
+      ],
+      "dateAdded": "2024-01-16",
+      "priority": "low",
+      "status": "wishlist",
+      "notes": "用手機也可以看書，不急",
+      "links": []
+    },
+    {
+      "id": "wish-7",
+      "name": "Switch OLED 主機",
+      "category": "遊戲",
+      "estimatedPrice": 10480,
+      "specifications": "7吋OLED、64GB、白色",
+      "isNeed": false,
+      "lifeAspects": ["entertainment", "social"],
+      "aspectImportance": {
+        "entertainment": 5,
+        "social": 3
+      },
+      "currentSatisfaction": {
+        "entertainment": 3,
+        "social": 4
+      },
+      "expectedImprovement": {
+        "entertainment": 5,
+        "social": 4
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-11",
+          "intensity": 4,
+          "context": "朋友一起玩瑪利歐派對很開心"
+        },
+        {
+          "date": "2024-01-19",
+          "intensity": 3,
+          "context": "看到薩爾達新作預告"
+        }
+      ],
+      "dateAdded": "2024-01-11",
+      "priority": "medium",
+      "status": "wishlist",
+      "notes": "等有好遊戲再一起買",
+      "links": []
+    },
+    {
+      "id": "wish-8",
+      "name": "Uniqlo 羽絨外套",
+      "category": "服飾",
+      "estimatedPrice": 1990,
+      "specifications": "黑色、L號、輕量款",
+      "isNeed": true,
+      "lifeAspects": ["comfort", "appearance"],
+      "aspectImportance": {
+        "comfort": 5,
+        "appearance": 3
+      },
+      "currentSatisfaction": {
+        "comfort": 2,
+        "appearance": 3
+      },
+      "expectedImprovement": {
+        "comfort": 5,
+        "appearance": 4
+      },
+      "wantHistory": [
+        {
+          "date": "2024-01-22",
+          "intensity": 4,
+          "context": "寒流來襲需要保暖"
+        }
+      ],
+      "dateAdded": "2024-01-22",
+      "priority": "high",
+      "status": "wishlist",
+      "notes": "等打折時買",
+      "links": []
+    }
+  ],
+  "purchasedItems": [
+    {
+      "id": "purchased-1",
+      "name": "AirPods Pro 2",
+      "category": "3C產品",
+      "estimatedPrice": 7490,
+      "actualPrice": 7490,
+      "lifeAspects": ["entertainment", "work_efficiency", "comfort"],
+      "isNeed": false,
+      "priority": "medium",
+      "purchaseDate": "2023-12-15",
+      "store": "Apple Store",
+      "type": "one_time_purchase",
+      "satisfactionRatings": [
+        {
+          "date": "2023-12-20",
+          "rating": 5,
+          "notes": "降噪效果很好，通勤必備"
+        },
+        {
+          "date": "2024-01-10",
+          "rating": 5,
+          "notes": "一個月後依然很滿意，電池續航力足夠"
+        }
+      ],
+      "notes": "年終購入，很值得",
+      "dateAdded": "2023-12-10"
+    },
+    {
+      "id": "purchased-2",
+      "name": "無印良品收納盒組",
+      "category": "生活用品",
+      "estimatedPrice": 1200,
+      "actualPrice": 999,
+      "lifeAspects": ["comfort", "home_appliances"],
+      "isNeed": true,
+      "priority": "low",
+      "purchaseDate": "2024-01-05",
+      "store": "無印良品",
+      "type": "one_time_purchase",
+      "satisfactionRatings": [
+        {
+          "date": "2024-01-06",
+          "rating": 4,
+          "notes": "整理後桌面整齊多了"
+        }
+      ],
+      "notes": "打折時買的，划算",
+      "dateAdded": "2023-12-20"
+    },
+    {
+      "id": "purchased-3",
+      "name": "Nike 慢跑鞋",
+      "category": "運動用品",
+      "estimatedPrice": 3500,
+      "actualPrice": 2800,
+      "lifeAspects": ["exercise", "health"],
+      "isNeed": true,
+      "priority": "high",
+      "purchaseDate": "2023-11-20",
+      "store": "Nike官網",
+      "type": "one_time_purchase",
+      "satisfactionRatings": [
+        {
+          "date": "2023-11-25",
+          "rating": 5,
+          "notes": "很舒適，跑步不會腳痛"
+        },
+        {
+          "date": "2023-12-20",
+          "rating": 4,
+          "notes": "一個月後鞋底有點磨損但整體不錯"
+        },
+        {
+          "date": "2024-01-20",
+          "rating": 4,
+          "notes": "兩個月持續使用，支撐性依然良好"
+        }
+      ],
+      "wouldRepurchase": true,
+      "repurchaseNotes": "下次會再買同款",
+      "notes": "週年慶特價入手",
+      "dateAdded": "2023-11-10"
+    },
+    {
+      "id": "purchased-4",
+      "name": "星巴克隨行杯",
+      "category": "生活用品",
+      "estimatedPrice": 500,
+      "actualPrice": 450,
+      "lifeAspects": ["comfort", "health"],
+      "isNeed": false,
+      "priority": "low",
+      "purchaseDate": "2024-01-08",
+      "store": "星巴克",
+      "type": "daily_necessity",
+      "satisfactionRatings": [
+        {
+          "date": "2024-01-09",
+          "rating": 3,
+          "notes": "保溫效果普通，但外觀好看"
+        }
+      ],
+      "wouldRepurchase": false,
+      "repurchaseNotes": "下次會買保溫效果更好的品牌",
+      "notes": "買咖啡時衝動購買",
+      "dateAdded": "2024-01-07"
+    },
+    {
+      "id": "purchased-5",
+      "name": "Costco 床墊",
+      "category": "家具",
+      "estimatedPrice": 15000,
+      "actualPrice": 13999,
+      "lifeAspects": ["comfort", "health"],
+      "isNeed": true,
+      "priority": "high",
+      "purchaseDate": "2023-10-01",
+      "store": "Costco",
+      "type": "one_time_purchase",
+      "satisfactionRatings": [
+        {
+          "date": "2023-10-15",
+          "rating": 5,
+          "notes": "睡眠品質改善很多，腰痛減輕"
+        },
+        {
+          "date": "2023-11-15",
+          "rating": 5,
+          "notes": "一個月後依然舒適，很值得投資"
+        },
+        {
+          "date": "2024-01-01",
+          "rating": 5,
+          "notes": "三個月使用下來非常滿意"
+        }
+      ],
+      "notes": "健康投資，超值",
+      "dateAdded": "2023-09-15"
+    }
+  ],
+  "settings": {
+    "monthlyBudget": 15000,
+    "autoArchiveYears": 6,
+    "currency": "TWD"
+  }
+}

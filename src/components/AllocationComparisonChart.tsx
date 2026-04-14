@@ -12,6 +12,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { Asset, AssetType, Currency } from '@/types';
 import { useI18n } from '@/i18n';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
 
 ChartJS.register(
   CategoryScale,
@@ -29,15 +30,6 @@ interface AllocationComparisonChartProps {
   targetAllocation?: Record<AssetType, number>;
 }
 
-const ASSET_TYPE_COLORS: Record<AssetType, string> = {
-  cash_twd: '#22c55e',
-  cash_usd: '#16a34a',
-  stock_tw: '#3b82f6',
-  stock_us: '#6366f1',
-  liability: '#ef4444',
-  us_tbills: '#8b5cf6',
-};
-
 const ASSET_TYPES: AssetType[] = [
   'cash_twd',
   'cash_usd',
@@ -54,6 +46,8 @@ export default function AllocationComparisonChart({
   targetAllocation,
 }: AllocationComparisonChartProps) {
   const { t } = useI18n();
+  const { theme } = useChartTheme();
+  const assetColors = theme.assetColors;
 
   // Calculate current allocation
   const calculateCurrentAllocation = (): Record<AssetType, number> => {
@@ -118,7 +112,7 @@ export default function AllocationComparisonChart({
       {
         label: t.allocationComparison.current,
         data: relevantTypes.map((type) => currentAllocation[type]),
-        backgroundColor: relevantTypes.map((type) => ASSET_TYPE_COLORS[type]),
+        backgroundColor: relevantTypes.map((type) => assetColors[type]),
         borderWidth: 1,
         borderColor: '#fff',
       },
@@ -127,9 +121,9 @@ export default function AllocationComparisonChart({
             {
               label: t.allocationComparison.target,
               data: relevantTypes.map((type) => targetAllocation[type] || 0),
-              backgroundColor: relevantTypes.map((type) => ASSET_TYPE_COLORS[type] + '80'), // 50% opacity
+              backgroundColor: relevantTypes.map((type) => assetColors[type] + '80'), // 50% opacity
               borderWidth: 2,
-              borderColor: relevantTypes.map((type) => ASSET_TYPE_COLORS[type]),
+              borderColor: relevantTypes.map((type) => assetColors[type]),
               borderDash: [5, 5],
             },
           ]

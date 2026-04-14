@@ -13,6 +13,7 @@ import { Bar } from 'react-chartjs-2';
 import { Snapshot, Currency, AssetType } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
+import { useChartTheme } from '@/contexts/ChartThemeContext';
 
 ChartJS.register(
   CategoryScale,
@@ -28,15 +29,6 @@ interface AllocationHistoryChartProps {
   currency: Currency;
 }
 
-const ASSET_TYPE_COLORS: Record<AssetType, string> = {
-  cash_twd: '#22c55e',
-  cash_usd: '#16a34a',
-  stock_tw: '#3b82f6',
-  stock_us: '#6366f1',
-  liability: '#ef4444',
-  us_tbills: '#8b5cf6',
-};
-
 const ASSET_TYPES: AssetType[] = [
   'cash_twd',
   'cash_usd',
@@ -51,6 +43,8 @@ export default function AllocationHistoryChart({
   currency,
 }: AllocationHistoryChartProps) {
   const { t } = useI18n();
+  const { theme } = useChartTheme();
+  const assetColors = theme.assetColors;
 
   if (snapshots.length === 0) {
     return (
@@ -124,7 +118,7 @@ export default function AllocationHistoryChart({
       const allocation = calculateAllocation(snapshot);
       return allocation[type] || 0;
     }),
-    backgroundColor: ASSET_TYPE_COLORS[type],
+    backgroundColor: assetColors[type],
     borderWidth: 1,
     borderColor: 'white',
   })).filter((dataset) => dataset.data.some((v) => v !== 0)); // Only show types with data
@@ -159,7 +153,13 @@ export default function AllocationHistoryChart({
             return `${context.dataset.label}: ${formatCurrency(value, currency)} (${percentage}%)`;
           },
           footer: function (tooltipItems: any[]) {
-            const total = tooltipItems.reduce((sum, item) => sum + (item.raw as number), 0);
+            // Calculate the total of ALL asset types for this snapshot (dataIndex)
+            if (tooltipItems.length === 0) return '';
+            const dataIndex = tooltipItems[0].dataIndex;
+            const total = tooltipItems[0].chart.data.datasets.reduce(
+              (sum: number, dataset: any) => sum + (dataset.data[dataIndex] || 0),
+              0
+            );
             return `Total: ${formatCurrency(total, currency)}`;
           },
         },

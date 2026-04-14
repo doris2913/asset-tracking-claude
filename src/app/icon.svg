@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background rounded square -->
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="#6366f1"/>
+
+  <!-- House/home shape representing life -->
+  <path d="M16 5 L26 13 L26 26 L6 26 L6 13 Z" fill="white" opacity="0.2"/>
+
+  <!-- Left column: asset chart bars -->
+  <rect x="8" y="18" width="3" height="7" rx="1" fill="#fbbf24"/>
+  <rect x="12" y="15" width="3" height="10" rx="1" fill="#34d399"/>
+
+  <!-- Right column: heart for wishlist -->
+  <path d="M21.5 14.5 C20 12.5 17 13 17 15.5 C17 13 14 12.5 12.5 14.5 C11 16.5 12 18.5 17 22 C22 18.5 23 16.5 21.5 14.5Z" fill="#f472b6" transform="translate(4, -2) scale(0.7)"/>
+
+  <!-- Checkmark representing management/completion -->
+  <path d="M19 18 L21 20.5 L25 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

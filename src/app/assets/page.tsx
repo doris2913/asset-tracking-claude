@@ -7,7 +7,7 @@ import AssetForm from '@/components/AssetForm';
 import StockSplitForm from '@/components/StockSplitForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
-import { useStockPrices, fetchExchangeRate, StockPriceWithMA } from '@/lib/yahooFinance';
+import { fetchMultipleStockPrices, fetchExchangeRate, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
 import { useI18n } from '@/i18n';
 import { Asset } from '@/types';
 import { formatCurrency } from '@/utils/calculations';
@@ -17,19 +17,17 @@ export default function AssetsPage() {
     currentAssets,
     totalTWD,
     totalUSD,
-    stockPrices,
+    settings,
     addAsset,
     updateAsset,
     deleteAsset,
     applyStockSplit,
-    updateStockPrices,
     updateStockPricesWithMA,
     updateExchangeRate,
     isLoaded,
   } = useAssetData();
 
   const { t, language } = useI18n();
-  const { fetchPrices, fetchPricesWithMA } = useStockPrices();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | undefined>(undefined);
@@ -37,6 +35,21 @@ export default function AssetsPage() {
   const [splittingAsset, setSplittingAsset] = useState<Asset | undefined>(undefined);
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
   const [priceUpdateStatus, setPriceUpdateStatus] = useState<string>('');
+  const [hideAssets, setHideAssets] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hideAssets') === 'true';
+    }
+    return false;
+  });
+
+  const toggleHideAssets = () => {
+    setHideAssets(prev => {
+      const newValue = !prev;
+      localStorage.setItem('hideAssets', String(newValue));
+      return newValue;
+    });
+  };
 
   const handleAddAsset = () => {
     setEditingAsset(undefined);
@@ -70,7 +83,15 @@ export default function AssetsPage() {
 
   const handleUpdateStockPrices = async () => {
     setIsUpdatingPrices(true);
-    setPriceUpdateStatus(language === 'zh-TW' ? '正在取得股價與移動平均...' : 'Fetching stock prices with moving averages...');
+
+    const dataSource = settings.stockDataSource || 'yahoo';
+    const sourceConfig = API_SOURCE_CONFIG[dataSource];
+
+    setPriceUpdateStatus(
+      language === 'zh-TW'
+        ? `正在透過 ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()} 取得股價...`
+        : `Fetching stock prices via ${dataSource === 'yahoo' ? 'Yahoo Finance' : dataSource.toUpperCase()}...`
+    );
 
     try {
       const stockAssets = currentAssets.assets.filter(
@@ -83,17 +104,53 @@ export default function AssetsPage() {
       }
 
       const symbols = stockAssets.map((a) => a.symbol!);
-      const prices = await fetchPricesWithMA(symbols);
+
+      // Progress callback for real-time updates
+      const onProgress: ProgressCallback = (current, total, symbol, status) => {
+        const statusText = status === 'cached'
+          ? (language === 'zh-TW' ? '快取' : 'cached')
+          : status === 'fetching'
+          ? (language === 'zh-TW' ? '取得中' : 'fetching')
+          : status === 'success'
+          ? (language === 'zh-TW' ? '成功' : 'success')
+          : (language === 'zh-TW' ? '失敗' : 'failed');
+
+        setPriceUpdateStatus(
+          language === 'zh-TW'
+            ? `${symbol} ${statusText}... (${current}/${total})`
+            : `${symbol} ${statusText}... (${current}/${total})`
+        );
+      };
+
+      // Use unified stock price manager
+      const prices = await fetchMultipleStockPrices(symbols, settings, onProgress);
 
       if (Object.keys(prices).length > 0) {
         updateStockPricesWithMA(prices);
+        const successCount = Object.keys(prices).length;
+        const failedCount = symbols.length - successCount;
+
+        let statusMessage = language === 'zh-TW'
+          ? `已更新 ${successCount} 檔股票`
+          : `Updated ${successCount} stock(s)`;
+
+        if (failedCount > 0) {
+          statusMessage += language === 'zh-TW'
+            ? `（${failedCount} 檔失敗）`
+            : ` (${failedCount} failed)`;
+        }
+
+        if (sourceConfig.supportsMA) {
+          statusMessage += language === 'zh-TW' ? '（含移動平均）' : ' with moving averages';
+        }
+
+        setPriceUpdateStatus(statusMessage);
+      } else {
         setPriceUpdateStatus(
           language === 'zh-TW'
-            ? `已成功更新 ${Object.keys(prices).length} 檔股票價格與移動平均！`
-            : `Updated ${Object.keys(prices).length} stock price(s) with moving averages!`
+            ? '無法取得股價。請檢查 API 設定。'
+            : 'Could not fetch any stock prices. Please check API settings.'
         );
-      } else {
-        setPriceUpdateStatus(language === 'zh-TW' ? '無法取得股價。API 可能暫時無法使用。' : 'Could not fetch any stock prices. API might be unavailable.');
       }
     } catch (error) {
       setPriceUpdateStatus(language === 'zh-TW' ? '更新股價失敗。' : 'Failed to update stock prices.');
@@ -109,13 +166,15 @@ export default function AssetsPage() {
     setPriceUpdateStatus(language === 'zh-TW' ? '正在取得匯率...' : 'Fetching exchange rate...');
 
     try {
-      const rate = await fetchExchangeRate();
-      if (rate) {
-        updateExchangeRate(rate);
+      const result = await fetchExchangeRate(settings);
+
+      if (result.success && result.rate) {
+        updateExchangeRate(result.rate);
+        const sourceLabel = result.source === 'yahoo' ? 'Yahoo Finance' : result.source.toUpperCase();
         setPriceUpdateStatus(
           language === 'zh-TW'
-            ? `匯率已更新為 ${rate.toFixed(2)} TWD/USD`
-            : `Exchange rate updated to ${rate.toFixed(2)} TWD/USD`
+            ? `匯率已更新為 ${result.rate.toFixed(2)} TWD/USD（來源：${sourceLabel}）`
+            : `Exchange rate updated to ${result.rate.toFixed(2)} TWD/USD (via ${sourceLabel})`
         );
       } else {
         setPriceUpdateStatus(language === 'zh-TW' ? '無法取得匯率。' : 'Could not fetch exchange rate.');
@@ -148,14 +207,14 @@ export default function AssetsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t.assets.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{t.assets.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
               {t.assets.subtitle}
             </p>
           </div>
-          <button onClick={handleAddAsset} className="btn btn-primary">
+          <button onClick={handleAddAsset} className="btn btn-primary w-full sm:w-auto">
             {t.assets.addAsset}
           </button>
         </div>
@@ -163,15 +222,24 @@ export default function AssetsPage() {
         {/* Summary */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="card">
-            <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalTWD}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalTWD}</p>
+              <button
+                onClick={toggleHideAssets}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                title={hideAssets ? (language === 'zh-TW' ? '顯示金額' : 'Show amounts') : (language === 'zh-TW' ? '隱藏金額' : 'Hide amounts')}
+              >
+                {hideAssets ? '👁️' : '🙈'}
+              </button>
+            </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalTWD, 'TWD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalTWD, 'TWD')}
             </p>
           </div>
           <div className="card">
             <p className="text-sm text-gray-600 dark:text-gray-400">{t.assets.totalUSD}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(totalUSD, 'USD')}
+              {hideAssets ? '＊＊＊＊＊＊' : formatCurrency(totalUSD, 'USD')}
             </p>
           </div>
         </div>
@@ -209,11 +277,11 @@ export default function AssetsPage() {
 
         {/* Asset List */}
         <div className="card">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t.assets.currentAssets}
             </h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               {t.assets.lastUpdated}: {new Date(currentAssets.lastModified).toLocaleString(dateLocale)}
             </span>
           </div>

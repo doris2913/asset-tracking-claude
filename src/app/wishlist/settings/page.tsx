@@ -1,0 +1,184 @@
+'use client';
+
+import { useState } from 'react';
+import { useWishListData } from '@/hooks/useWishListData';
+import { useAssetData } from '@/hooks/useAssetData';
+import Navigation from '@/components/Navigation';
+import { formatCurrency } from '@/utils/calculations';
+
+export default function WishListSettingsPage() {
+  const assetData = useAssetData();
+  const wishListData = useWishListData({ totalAssets: assetData.totalTWD });
+
+  const [budgetType, setBudgetType] = useState<'fixed' | 'percentage'>(
+    wishListData.settings.budgetType
+  );
+  const [monthlyBudget, setMonthlyBudget] = useState(wishListData.settings.monthlyBudget);
+  const [budgetPercentage, setBudgetPercentage] = useState(wishListData.settings.budgetPercentage);
+  const [autoArchiveAfterYears, setAutoArchiveAfterYears] = useState(
+    wishListData.settings.autoArchiveAfterYears
+  );
+
+  const handleSave = () => {
+    wishListData.updateSettings({
+      budgetType,
+      monthlyBudget,
+      budgetPercentage,
+      autoArchiveAfterYears,
+    });
+    alert('願望清單設定已儲存！');
+  };
+
+  const actualBudget = budgetType === 'percentage'
+    ? (assetData.totalTWD * budgetPercentage) / 100
+    : monthlyBudget;
+
+  if (!wishListData.isLoaded || !assetData.isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400">載入中...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation />
+      <main className="max-w-4xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">願望清單設定</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">設定預算、自動歸檔和其他偏好</p>
+      </div>
+
+      {/* Settings Sections */}
+      <div className="space-y-6">
+        {/* Budget Settings */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">預算設定</h2>
+
+          {/* Budget Type */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              預算類型
+            </label>
+            <div className="space-y-3">
+              <label className="flex items-start p-4 border-2 dark:border-gray-600 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
+                <input
+                  type="radio"
+                  value="fixed"
+                  checked={budgetType === 'fixed'}
+                  onChange={(e) => setBudgetType(e.target.value as 'fixed')}
+                  className="mt-1 mr-3"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 dark:text-white">固定金額</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    每月固定的預算金額，不隨資產變動
+                  </div>
+                  {budgetType === 'fixed' && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        每月預算 (TWD)
+                      </label>
+                      <input
+                        type="number"
+                        value={monthlyBudget}
+                        onChange={(e) => setMonthlyBudget(Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        min="0"
+                      />
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              <label className="flex items-start p-4 border-2 dark:border-gray-600 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
+                <input
+                  type="radio"
+                  value="percentage"
+                  checked={budgetType === 'percentage'}
+                  onChange={(e) => setBudgetType(e.target.value as 'percentage')}
+                  className="mt-1 mr-3"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 dark:text-white">總資產百分比</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    預算隨著總資產變動，更靈活的管理方式
+                  </div>
+                  {budgetType === 'percentage' && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        預算百分比 (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={budgetPercentage}
+                        onChange={(e) => setBudgetPercentage(Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                      />
+                      <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        目前總資產: {formatCurrency(assetData.totalTWD, 'TWD')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Calculated Budget Display */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <div className="text-sm text-blue-700 dark:text-blue-300 mb-1">實際每月預算</div>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+              {formatCurrency(actualBudget, 'TWD')}
+            </div>
+            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              {budgetType === 'percentage'
+                ? `${budgetPercentage}% × ${formatCurrency(assetData.totalTWD, 'TWD')}`
+                : '固定金額'}
+            </div>
+          </div>
+        </div>
+
+        {/* Archive Settings */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">自動歸檔設定</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              自動歸檔年限
+            </label>
+            <input
+              type="number"
+              value={autoArchiveAfterYears}
+              onChange={(e) => setAutoArchiveAfterYears(Number(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              min="1"
+              max="20"
+            />
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              「已拒絕」狀態的項目會在 {autoArchiveAfterYears} 年後自動刪除
+            </p>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex gap-3">
+          <button
+            onClick={handleSave}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            儲存設定
+          </button>
+        </div>
+      </div>
+      </main>
+    </div>
+  );
+}
