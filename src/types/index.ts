@@ -58,6 +58,7 @@ export interface AppData {
   snapshots: Snapshot[];
   settings: AppSettings;
   stockPrices: Record<string, StockPrice>;  // Stock prices with MAs
+  stockSplitEvents: StockSplitEvent[];      // Stock split history log
   version: string;           // Data schema version for migrations
 }
 
@@ -67,6 +68,17 @@ export interface AppSettings {
   defaultCurrency: Currency;
   exchangeRate: number;          // Default USD/TWD rate
   targetAllocation?: Record<AssetType, number>;  // Target percentage for each asset type (0-100)
+}
+
+// Stock split event record
+export interface StockSplitEvent {
+  id: string;
+  symbol: string;             // Stock symbol (e.g., "AAPL", "2330.TW")
+  assetName: string;          // Asset name at the time of split
+  date: string;               // ISO date string (YYYY-MM-DD) when split was applied
+  ratio: number;              // Split ratio (e.g., 4 means 4-for-1 split; 0.5 means 1-for-2 reverse split)
+  sharesBefore: number;       // Shares before split
+  sharesAfter: number;        // Shares after split
 }
 
 // Stock quote from Yahoo Finance
@@ -137,5 +149,6 @@ export const DEFAULT_APP_DATA: AppData = {
     exchangeRate: DEFAULT_EXCHANGE_RATE,
   },
   stockPrices: {},
+  stockSplitEvents: [],
   version: '1.0.0',
 };

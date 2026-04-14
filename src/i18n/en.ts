@@ -178,6 +178,18 @@ export const en = {
     info: 'These target allocations will be used to compare your current portfolio allocation and help you rebalance your assets.',
   },
 
+  // Stock Split
+  stockSplit: {
+    title: 'Stock Split',
+    split: 'Split',
+    currentShares: 'Current shares',
+    splitRatio: 'Split ratio (new : old)',
+    ratioHint: 'e.g., 4:1 means each share becomes 4 shares. For reverse split, use 1:2.',
+    preview: 'Preview',
+    snapshotNote: 'All historical snapshots will also be adjusted to match split-adjusted prices.',
+    apply: 'Apply Split',
+  },
+
   // Allocation Comparison
   allocationComparison: {
     current: 'Current',
