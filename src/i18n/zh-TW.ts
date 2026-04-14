@@ -245,6 +245,28 @@ export const zhTW: Translations = {
     note: '注意：這些建議基於百分比目標。在進行調整前，請考慮交易成本、稅務影響和市場狀況。',
   },
 
+  // Stock Split
+  stockSplit: {
+    title: '股票分拆',
+    description: '調整因股票分拆產生的股數變化。總價值維持不變。',
+    splitRatio: '分拆比例',
+    from: '原始',
+    to: '新股',
+    currentShares: '目前股數',
+    newShares: '分拆後股數',
+    apply: '套用分拆',
+    success: '股票分拆已成功套用！',
+    invalidRatio: '請輸入有效的分拆比例。',
+    noShares: '此資產沒有股數可進行分拆。',
+    example: '例如：1:4 表示每 1 股變成 4 股',
+    reverseExample: '例如：10:1 表示每 10 股合併為 1 股（反向分拆）',
+    history: '分拆紀錄',
+    noHistory: '尚無股票分拆紀錄。',
+    splitRecord: '{symbol}：{from}:{to} 分拆於 {date}',
+    sharesBefore: '分拆前',
+    sharesAfter: '分拆後',
+  },
+
   // Asset Growth Analysis
   growthAnalysis: {
     title: '資產成長分析',

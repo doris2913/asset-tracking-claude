@@ -269,6 +269,7 @@ function migrateOldDatabase(oldData: unknown): AppData | null {
         exchangeRate: data.exchangeRate.usdToTwd,
       },
       stockPrices: {},
+      stockSplitHistory: [],
       version: '1.0.0',
     };
   } catch (error) {

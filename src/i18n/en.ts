@@ -243,6 +243,28 @@ export const en = {
     note: 'Note: These are suggestions based on percentage targets. Consider transaction costs, tax implications, and market conditions before making changes.',
   },
 
+  // Stock Split
+  stockSplit: {
+    title: 'Stock Split',
+    description: 'Adjust shares for a stock split. Total value remains unchanged.',
+    splitRatio: 'Split Ratio',
+    from: 'From',
+    to: 'To',
+    currentShares: 'Current Shares',
+    newShares: 'New Shares',
+    apply: 'Apply Split',
+    success: 'Stock split applied successfully!',
+    invalidRatio: 'Please enter a valid split ratio.',
+    noShares: 'This asset has no shares to split.',
+    example: 'e.g., 1:4 means each share becomes 4 shares',
+    reverseExample: 'e.g., 10:1 means every 10 shares become 1 share (reverse split)',
+    history: 'Split History',
+    noHistory: 'No stock split history.',
+    splitRecord: '{symbol}: {from}:{to} split on {date}',
+    sharesBefore: 'Before',
+    sharesAfter: 'After',
+  },
+
   // Asset Growth Analysis
   growthAnalysis: {
     title: 'Asset Growth Analysis',
