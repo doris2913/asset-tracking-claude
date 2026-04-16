@@ -75,8 +75,8 @@ export default function AssetsPage() {
     setIsSplitModalOpen(true);
   };
 
-  const handleSubmitStockSplit = (assetId: string, ratio: number) => {
-    applyStockSplit(assetId, ratio);
+  const handleSubmitStockSplit = (assetId: string, ratio: number, splitDate: string) => {
+    applyStockSplit(assetId, ratio, splitDate);
     setIsSplitModalOpen(false);
     setSplittingAsset(undefined);
   };

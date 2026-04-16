@@ -183,9 +183,11 @@ export function useAssetData() {
     [setData]
   );
 
-  // Apply a stock split to an asset and all historical snapshots
+  // Apply a stock split: update current shares and record the event with split date.
+  // Snapshots and cached prices are NOT modified — the dashboard uses split events
+  // to compute effective shares at chart calculation time.
   const applyStockSplit = useCallback(
-    (assetId: string, ratio: number) => {
+    (assetId: string, ratio: number, splitDate: string) => {
       setData((prev) => {
         const asset = prev.currentAssets.assets.find((a) => a.id === assetId);
         if (!asset || !asset.shares || !asset.symbol) return prev;
@@ -193,7 +195,7 @@ export function useAssetData() {
         const sharesBefore = asset.shares;
         const sharesAfter = sharesBefore * ratio;
 
-        // Update current asset shares (value stays the same since price adjusts inversely)
+        // Only update current asset shares
         const updatedAssets = prev.currentAssets.assets.map((a) => {
           if (a.id === assetId) {
             return {
@@ -205,30 +207,12 @@ export function useAssetData() {
           return a;
         });
 
-        // Update all historical snapshots that contain this symbol
-        const updatedSnapshots = prev.snapshots.map((snapshot) => {
-          const updatedSnapshotAssets = snapshot.assets.map((a) => {
-            if (a.symbol === asset.symbol && a.shares) {
-              return {
-                ...a,
-                shares: a.shares * ratio,
-              };
-            }
-            return a;
-          });
-
-          return {
-            ...snapshot,
-            assets: updatedSnapshotAssets,
-          };
-        });
-
-        // Record the split event
+        // Record the split event (date = actual stock split date, not today)
         const splitEvent: StockSplitEvent = {
           id: generateId(),
           symbol: asset.symbol,
           assetName: asset.name,
-          date: new Date().toISOString().split('T')[0],
+          date: splitDate,
           ratio,
           sharesBefore,
           sharesAfter,
@@ -241,7 +225,6 @@ export function useAssetData() {
             assets: updatedAssets,
             lastModified: new Date().toISOString(),
           },
-          snapshots: updatedSnapshots,
           stockSplitEvents: [...(prev.stockSplitEvents || []), splitEvent],
         };
       });

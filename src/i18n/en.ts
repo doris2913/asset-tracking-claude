@@ -257,10 +257,12 @@ export const en = {
     title: 'Stock Split',
     split: 'Split',
     currentShares: 'Current shares',
+    splitDate: 'Split date',
+    splitDateHint: 'The actual date the stock split took effect. Used to correctly adjust historical chart calculations.',
     splitRatio: 'Split ratio (new : old)',
     ratioHint: 'e.g., 4:1 means each share becomes 4 shares. For reverse split, use 1:2.',
     preview: 'Preview',
-    snapshotNote: 'All historical snapshots will also be adjusted to match split-adjusted prices.',
+    snapshotNote: 'Historical snapshots will use this split date to correctly calculate chart values with split-adjusted prices.',
     apply: 'Apply Split',
   },
 
