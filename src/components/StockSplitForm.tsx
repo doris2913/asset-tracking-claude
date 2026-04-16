@@ -6,7 +6,7 @@ import { useI18n } from '@/i18n';
 
 interface StockSplitFormProps {
   asset: Asset;
-  onSubmit: (assetId: string, ratio: number) => void;
+  onSubmit: (assetId: string, ratio: number, splitDate: string) => void;
   onCancel: () => void;
 }
 
@@ -14,14 +14,17 @@ export default function StockSplitForm({ asset, onSubmit, onCancel }: StockSplit
   const { t } = useI18n();
   const [newShares, setNewShares] = useState<number>(1);
   const [oldShares, setOldShares] = useState<number>(1);
+  const [splitDate, setSplitDate] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
 
   const ratio = newShares / oldShares;
   const resultShares = asset.shares ? asset.shares * ratio : 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (ratio <= 0 || !isFinite(ratio)) return;
-    onSubmit(asset.id, ratio);
+    if (ratio <= 0 || !isFinite(ratio) || !splitDate) return;
+    onSubmit(asset.id, ratio, splitDate);
   };
 
   return (
@@ -34,6 +37,22 @@ export default function StockSplitForm({ asset, onSubmit, onCancel }: StockSplit
         <div className="font-medium text-gray-900 dark:text-gray-100">
           {t.stockSplit.currentShares}: {asset.shares?.toLocaleString() ?? 0}
         </div>
+      </div>
+
+      {/* Split date */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t.stockSplit.splitDate}
+        </label>
+        <input
+          type="date"
+          value={splitDate}
+          onChange={(e) => setSplitDate(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {t.stockSplit.splitDateHint}
+        </p>
       </div>
 
       {/* Split ratio input */}
@@ -91,7 +110,7 @@ export default function StockSplitForm({ asset, onSubmit, onCancel }: StockSplit
         </button>
         <button
           type="submit"
-          disabled={ratio <= 0 || !isFinite(ratio) || ratio === 1}
+          disabled={ratio <= 0 || !isFinite(ratio) || ratio === 1 || !splitDate}
           className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t.stockSplit.apply}

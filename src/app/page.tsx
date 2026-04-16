@@ -12,10 +12,11 @@ import SummaryCard from '@/components/SummaryCard';
 import { useAssetData } from '@/hooks/useAssetData';
 import { fetchMultipleStockPrices, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
 import { useI18n } from '@/i18n';
-import { Currency, StockPrice, Asset } from '@/types';
+import { Currency, StockPrice, Asset, StockSplitEvent } from '@/types';
 import {
   snapshotsToChartData,
   getAssetSummary,
+  getEffectiveShares,
   formatCurrency,
   calculateGrowthRate,
   getLatestSnapshotDate,
@@ -77,6 +78,7 @@ export default function DashboardPage() {
     currentAssets,
     snapshots,
     stockPrices,
+    stockSplitEvents,
     settings,
     totalTWD,
     totalUSD,
@@ -249,7 +251,9 @@ export default function DashboardPage() {
       };
     }
 
-    // Recalculate each snapshot's value using current stock prices and MAs
+    // Recalculate each snapshot's value using current stock prices and MAs.
+    // Uses getEffectiveShares to apply split ratios for splits that happened
+    // after the snapshot date, so pre-split shares match split-adjusted prices.
     const recalculateSnapshotValue = (
       snapshot: typeof sortedSnapshots[0],
       priceType: 'current' | 'ma3m' | 'ma1y'
@@ -275,7 +279,14 @@ export default function DashboardPage() {
               price = priceData.currentPrice;
           }
 
-          assetValue = asset.shares * price;
+          // Adjust shares for splits that happened after this snapshot
+          const effectiveShares = getEffectiveShares(
+            asset.symbol,
+            asset.shares,
+            snapshot.date,
+            stockSplitEvents
+          );
+          assetValue = effectiveShares * price;
         }
 
         // Convert to display currency
@@ -342,7 +353,7 @@ export default function DashboardPage() {
     }
 
     return { snapshotValues, currentValues, ma3M, ma1Y };
-  }, [snapshots, displayCurrency, stockPrices, currentAssets.assets, portfolioValues, totalTWD, totalUSD]);
+  }, [snapshots, displayCurrency, stockPrices, stockSplitEvents, currentAssets.assets, portfolioValues, totalTWD, totalUSD]);
 
   // Calculate asset breakdown (exclude liabilities)
   const assetBreakdown = useMemo(() => {

@@ -259,10 +259,12 @@ export const zhTW: Translations = {
     title: '股票分拆',
     split: '分拆',
     currentShares: '目前股數',
+    splitDate: '分拆日期',
+    splitDateHint: '股票實際分拆生效的日期。用於正確計算歷史圖表的移動平均線。',
     splitRatio: '分拆比例（新 : 舊）',
     ratioHint: '例如：4:1 表示每股變為 4 股。反向分拆請使用 1:2。',
     preview: '預覽',
-    snapshotNote: '所有歷史快照的股數也會一併調整，以配合分拆後的調整價格。',
+    snapshotNote: '系統會根據分拆日期，在計算圖表時自動為分拆前的快照調整股數，以配合分拆調整後的價格。',
     apply: '套用分拆',
   },
 

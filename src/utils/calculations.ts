@@ -1,4 +1,4 @@
-import { Asset, Snapshot, AssetSummary, ChartDataPoint, Currency, AssetType, ASSET_TYPE_CONFIG } from '@/types';
+import { Asset, Snapshot, AssetSummary, ChartDataPoint, Currency, AssetType, ASSET_TYPE_CONFIG, StockSplitEvent } from '@/types';
 
 // Generate unique ID
 export function generateId(): string {
@@ -233,4 +233,36 @@ export function parseStockSymbol(symbol: string): { isTW: boolean; cleanSymbol: 
   }
 
   return { isTW: false, cleanSymbol: symbol };
+}
+
+// Get effective shares for a snapshot asset, adjusted for splits that happened
+// AFTER the snapshot date. Yahoo Finance provides split-adjusted prices, so
+// pre-split snapshot shares must be multiplied by the cumulative split ratio
+// to match the adjusted prices.
+//
+// Example: snapshot from Jan has 100 shares, 4:1 split in Mar
+//   → effectiveShares = 100 × 4 = 400
+//   → 400 × split-adjusted price = correct value
+//
+// Snapshot from Apr (after split) already has 400 shares
+//   → effectiveShares = 400 × 1 = 400 (no adjustment needed)
+export function getEffectiveShares(
+  symbol: string,
+  shares: number,
+  snapshotDate: string,
+  splitEvents: StockSplitEvent[]
+): number {
+  let effective = shares;
+  const snapshotTime = new Date(snapshotDate.split('T')[0]).getTime();
+
+  for (const event of splitEvents) {
+    if (event.symbol !== symbol) continue;
+    const splitTime = new Date(event.date).getTime();
+    // Apply split ratio for splits that happened after this snapshot
+    if (splitTime > snapshotTime) {
+      effective *= event.ratio;
+    }
+  }
+
+  return effective;
 }
