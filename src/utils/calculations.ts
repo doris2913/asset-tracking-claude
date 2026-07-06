@@ -20,6 +20,31 @@ export function getEffectiveValue(asset: Asset): number {
   return asset.type === 'liability' ? -Math.abs(asset.value) : asset.value;
 }
 
+// Whether an asset type is priced by market quote/NAV via a symbol + shares/units
+// (stocks and funds, TW and US alike)
+export function isMarketPricedType(type: AssetType): boolean {
+  return (
+    type === 'stock_tw' ||
+    type === 'stock_us' ||
+    type === 'fund_tw' ||
+    type === 'fund_us'
+  );
+}
+
+// Whether an asset type can have its price auto-fetched today via the
+// existing Yahoo Finance/stockPriceManager pipeline. fund_tw is intentionally
+// excluded until a dedicated NAV data source is wired in (see twFundNav.ts).
+export function isAutoFetchEligible(type: AssetType): boolean {
+  return type === 'stock_tw' || type === 'stock_us' || type === 'fund_us';
+}
+
+// Whether an asset type is a "stock" or "fund" for label/behavior purposes
+export function getMarketAssetKind(type: AssetType): 'stock' | 'fund' | null {
+  if (type === 'stock_tw' || type === 'stock_us') return 'stock';
+  if (type === 'fund_tw' || type === 'fund_us') return 'fund';
+  return null;
+}
+
 // Calculate total value of assets in TWD (liabilities are subtracted)
 export function calculateTotalTWD(assets: Asset[], exchangeRate: number): number {
   return assets.reduce((total, asset) => {

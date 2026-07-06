@@ -11,6 +11,8 @@ export interface ChartThemeColors {
   stock_us: string;
   liability: string;
   us_tbills: string;
+  fund_tw: string;
+  fund_us: string;
 }
 
 // Theme definition for line chart colors
@@ -41,6 +43,8 @@ const defaultTheme: ChartTheme = {
     stock_us: '#6366f1',
     liability: '#ef4444',
     us_tbills: '#8b5cf6',
+    fund_tw: '#0ea5e9',
+    fund_us: '#a855f7',
   },
   lineColors: {
     snapshotValue: 'rgb(156, 163, 175)',
@@ -62,6 +66,8 @@ const oceanTheme: ChartTheme = {
     stock_us: '#1d4ed8',    // blue-700
     liability: '#f43f5e',   // rose-500
     us_tbills: '#6366f1',   // indigo-500
+    fund_tw: '#0e7490',     // cyan-700
+    fund_us: '#7c3aed',     // violet-600
   },
   lineColors: {
     snapshotValue: 'rgb(14, 165, 233)',      // sky-500
@@ -83,6 +89,8 @@ const forestTheme: ChartTheme = {
     stock_us: '#65a30d',    // lime-600
     liability: '#dc2626',   // red-600
     us_tbills: '#14b8a6',   // teal-500
+    fund_tw: '#0d9488',     // teal-600
+    fund_us: '#7c3aed',     // violet-600
   },
   lineColors: {
     snapshotValue: 'rgb(34, 197, 94)',       // green-500
@@ -104,6 +112,8 @@ const sunsetTheme: ChartTheme = {
     stock_us: '#ca8a04',    // yellow-600
     liability: '#dc2626',   // red-600
     us_tbills: '#f472b6',   // pink-400
+    fund_tw: '#fb923c',     // orange-400
+    fund_us: '#c026d3',     // fuchsia-600
   },
   lineColors: {
     snapshotValue: 'rgb(249, 115, 22)',      // orange-500
@@ -125,6 +135,8 @@ const monochromeTheme: ChartTheme = {
     stock_us: '#1f2937',    // gray-800
     liability: '#ef4444',   // red-500 (keep for visibility)
     us_tbills: '#9ca3af',   // gray-400
+    fund_tw: '#d1d5db',     // gray-300
+    fund_us: '#111827',     // gray-900
   },
   lineColors: {
     snapshotValue: 'rgb(107, 114, 128)',     // gray-500

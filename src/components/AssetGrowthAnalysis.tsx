@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Snapshot, Currency, Asset } from '@/types';
-import { formatCurrency, toTWD, toUSD } from '@/utils/calculations';
+import { formatCurrency, toTWD, toUSD, isMarketPricedType } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
 
 interface AssetGrowthAnalysisProps {
@@ -67,8 +67,8 @@ function analyzeGrowthBetweenSnapshots(
     } else {
       const startAssetValue = getValue(startAsset, startSnapshot.exchangeRate);
 
-      // Check if it's a stock with shares
-      if (endAsset.type === 'stock_tw' || endAsset.type === 'stock_us') {
+      // Check if it's a stock/fund with shares or units
+      if (isMarketPricedType(endAsset.type)) {
         const startShares = startAsset.shares || 0;
         const endShares = endAsset.shares || 0;
         const sharesDiff = endShares - startShares;

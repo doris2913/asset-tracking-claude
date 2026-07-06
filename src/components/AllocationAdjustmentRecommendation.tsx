@@ -15,6 +15,8 @@ const ASSET_TYPES: AssetType[] = [
   'cash_usd',
   'stock_tw',
   'stock_us',
+  'fund_tw',
+  'fund_us',
   'us_tbills',
   'liability',
 ];
@@ -59,6 +61,8 @@ export default function AllocationAdjustmentRecommendation({
       stock_us: 0,
       liability: 0,
       us_tbills: 0,
+      fund_tw: 0,
+      fund_us: 0,
     };
 
     for (const asset of assets) {

@@ -94,6 +94,10 @@ export const en = {
     stockSymbolPlaceholder: 'e.g., AAPL, 0050.TW, 2330.TW',
     stockSymbolHint: 'TW stocks: use .TW suffix (e.g., 2330.TW). US stocks: use symbol directly (e.g., AAPL)',
     numberOfShares: 'Number of Shares',
+    fundCode: 'Fund Code (for auto-price update)',
+    fundCodePlaceholder: 'e.g., FXAIX, VTSAX, or a TW fund code',
+    fundCodeHint: 'US/global funds: use ticker directly (auto NAV update supported). TW funds: NAV auto-update is best-effort; enter value manually if it fails.',
+    numberOfUnits: 'Number of Units',
     expectedReturn: 'Expected Annual Return (%)',
     expectedReturnPlaceholder: 'e.g., 7 for 7%',
     expectedReturnHint: 'Expected annual return rate. Leave empty for 0%.',
@@ -108,6 +112,8 @@ export const en = {
     stock_us: 'US Stocks',
     liability: 'Liability',
     us_tbills: 'US T-Bills',
+    fund_tw: 'TW Funds',
+    fund_us: 'Global Funds',
   },
 
   // Snapshots

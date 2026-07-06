@@ -1,17 +1,8 @@
 'use client';
 
-import { Asset, AssetType } from '@/types';
-import { formatCurrency, getEffectiveValue } from '@/utils/calculations';
+import { Asset, AssetType, ASSET_TYPE_CONFIG } from '@/types';
+import { formatCurrency, getEffectiveValue, getMarketAssetKind } from '@/utils/calculations';
 import { useI18n } from '@/i18n';
-
-const ASSET_TYPE_ICONS: Record<AssetType, string> = {
-  cash_twd: '💵',
-  cash_usd: '💲',
-  stock_tw: '📈',
-  stock_us: '📊',
-  liability: '💳',
-  us_tbills: '🏛️',
-};
 
 interface AssetListProps {
   assets: Asset[];
@@ -51,7 +42,7 @@ export default function AssetList({ assets, onEdit, onDelete, onStockSplit }: As
         return (
           <div key={type}>
             <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-800 dark:text-gray-200">
-              <span className="mr-2">{ASSET_TYPE_ICONS[assetType]}</span>
+              <span className="mr-2">{ASSET_TYPE_CONFIG[assetType].icon}</span>
               {t.assetTypes[assetType]}
               <span className="ml-2 text-sm font-normal text-gray-500">
                 ({typeAssets.length})
@@ -98,7 +89,7 @@ export default function AssetList({ assets, onEdit, onDelete, onStockSplit }: As
                       >
                         {t.common.edit}
                       </button>
-                      {onStockSplit && asset.shares && asset.symbol && (
+                      {onStockSplit && asset.shares && asset.symbol && getMarketAssetKind(asset.type) === 'stock' && (
                         <button
                           onClick={() => onStockSplit(asset)}
                           className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400"
