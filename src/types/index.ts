@@ -5,7 +5,9 @@ export type AssetType =
   | 'stock_tw'      // Taiwan stocks
   | 'stock_us'      // US stocks
   | 'liability'     // Liabilities (rent, loans, etc.)
-  | 'us_tbills';    // US Treasury Bills
+  | 'us_tbills'     // US Treasury Bills
+  | 'fund_tw'       // Taiwan-domiciled funds
+  | 'fund_us';      // Offshore/foreign funds
 
 // Currency types
 export type Currency = 'TWD' | 'USD';
@@ -144,7 +146,12 @@ export const ASSET_TYPE_CONFIG: Record<AssetType, { label: string; color: string
   stock_us: { label: 'US Stocks', color: '#6366f1', icon: '📊' },
   liability: { label: 'Liability', color: '#ef4444', icon: '💳' },
   us_tbills: { label: 'US T-Bills', color: '#8b5cf6', icon: '🏛️' },
+  fund_tw: { label: 'TW Funds', color: '#0ea5e9', icon: '🏦' },
+  fund_us: { label: 'Global Funds', color: '#a855f7', icon: '💹' },
 };
+
+// All asset types, derived from ASSET_TYPE_CONFIG (single source of truth)
+export const ALL_ASSET_TYPES: AssetType[] = Object.keys(ASSET_TYPE_CONFIG) as AssetType[];
 
 // Default exchange rate (can be updated)
 export const DEFAULT_EXCHANGE_RATE = 31.5; // USD to TWD

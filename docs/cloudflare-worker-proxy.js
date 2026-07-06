@@ -10,6 +10,9 @@
  * 6. 在設定頁面輸入此網址作為自訂 CORS Proxy
  *
  * 免費額度：每天 100,000 次請求
+ *
+ * 如果你已經部署過舊版的 Worker，請重新貼上此檔案的最新內容並重新部署，
+ * 才能讓白名單涵蓋新加入的台灣基金淨值資料來源（見下方 allowedDomains）。
  */
 
 export default {
@@ -30,6 +33,9 @@ export default {
       'www.alphavantage.co',
       'finnhub.io',
       'financialmodelingprep.com',
+      // 台灣基金淨值來源（盡力而為，實際可用網域待確認）
+      'openapi.tdcc.com.tw',
+      'www.sitca.org.tw',
     ];
 
     const targetHost = new URL(targetUrl).hostname;

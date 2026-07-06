@@ -8,9 +8,10 @@ import StockSplitForm from '@/components/StockSplitForm';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
 import { fetchMultipleStockPrices, fetchExchangeRate, API_SOURCE_CONFIG, ProgressCallback } from '@/lib/stockPriceManager';
+import { fetchMultipleTwFundNav } from '@/lib/twFundNav';
 import { useI18n } from '@/i18n';
-import { Asset } from '@/types';
-import { formatCurrency } from '@/utils/calculations';
+import { Asset, StockPrice } from '@/types';
+import { formatCurrency, isAutoFetchEligible } from '@/utils/calculations';
 
 export default function AssetsPage() {
   const {
@@ -94,16 +95,19 @@ export default function AssetsPage() {
     );
 
     try {
-      const stockAssets = currentAssets.assets.filter(
-        (a) => a.symbol && (a.type === 'stock_tw' || a.type === 'stock_us')
+      const autoFetchAssets = currentAssets.assets.filter(
+        (a) => a.symbol && isAutoFetchEligible(a.type)
+      );
+      const twFundAssets = currentAssets.assets.filter(
+        (a) => a.symbol && a.type === 'fund_tw'
       );
 
-      if (stockAssets.length === 0) {
-        setPriceUpdateStatus(language === 'zh-TW' ? '沒有需要更新的股票。' : 'No stocks with symbols to update.');
+      if (autoFetchAssets.length === 0 && twFundAssets.length === 0) {
+        setPriceUpdateStatus(language === 'zh-TW' ? '沒有需要更新的股票或基金。' : 'No stocks or funds with symbols to update.');
         return;
       }
 
-      const symbols = stockAssets.map((a) => a.symbol!);
+      const symbols = autoFetchAssets.map((a) => a.symbol!);
 
       // Progress callback for real-time updates
       const onProgress: ProgressCallback = (current, total, symbol, status) => {
@@ -122,13 +126,33 @@ export default function AssetsPage() {
         );
       };
 
-      // Use unified stock price manager
-      const prices = await fetchMultipleStockPrices(symbols, settings, onProgress);
+      // Use unified stock price manager for stocks + fund_us
+      const prices: Record<string, StockPrice> = symbols.length > 0
+        ? await fetchMultipleStockPrices(symbols, settings, onProgress)
+        : {};
+
+      // Best-effort NAV fetch for fund_tw, merged into the same price map
+      if (twFundAssets.length > 0) {
+        const twFundCodes = twFundAssets.map((a) => a.symbol!);
+        const navResults = await fetchMultipleTwFundNav(twFundCodes);
+        navResults.forEach((nav, fundCode) => {
+          prices[fundCode] = {
+            symbol: nav.fundCode,
+            currentPrice: nav.price,
+            movingAvg3M: nav.price,
+            movingAvg1Y: nav.price,
+            currency: nav.currency,
+            lastUpdated: nav.lastUpdated,
+          } as StockPrice;
+        });
+      }
+
+      const totalRequested = symbols.length + twFundAssets.length;
 
       if (Object.keys(prices).length > 0) {
         updateStockPricesWithMA(prices);
         const successCount = Object.keys(prices).length;
-        const failedCount = symbols.length - successCount;
+        const failedCount = totalRequested - successCount;
 
         let statusMessage = language === 'zh-TW'
           ? `已更新 ${successCount} 檔股票`

@@ -4,19 +4,8 @@ import { useState, useMemo } from 'react';
 import Navigation from '@/components/Navigation';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Currency, AssetType } from '@/types';
+import { Currency, AssetType, ASSET_TYPE_CONFIG, ALL_ASSET_TYPES } from '@/types';
 import { formatCurrency, toTWD, toUSD, getEffectiveValue } from '@/utils/calculations';
-
-const ASSET_TYPE_ICONS: Record<AssetType, string> = {
-  cash_twd: '💵',
-  cash_usd: '💲',
-  stock_tw: '📈',
-  stock_us: '📊',
-  liability: '💳',
-  us_tbills: '🏛️',
-};
-
-const ALL_ASSET_TYPES: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'liability', 'us_tbills'];
 
 export default function DetailsPage() {
   const { currentAssets, totalTWD, totalUSD, isLoaded } = useAssetData();
@@ -230,7 +219,7 @@ export default function DetailsPage() {
                 <option value="all">{labels.allTypes}</option>
                 {ALL_ASSET_TYPES.map(type => (
                   <option key={type} value={type}>
-                    {ASSET_TYPE_ICONS[type]} {t.assetTypes[type]}
+                    {ASSET_TYPE_CONFIG[type].icon} {t.assetTypes[type]}
                   </option>
                 ))}
               </select>
@@ -358,7 +347,7 @@ export default function DetailsPage() {
                           )}
                         </td>
                         <td className="py-3 px-4 text-gray-600 dark:text-gray-400">
-                          <span className="mr-1">{ASSET_TYPE_ICONS[asset.type]}</span>
+                          <span className="mr-1">{ASSET_TYPE_CONFIG[asset.type].icon}</span>
                           {t.assetTypes[asset.type]}
                         </td>
                         <td className="py-3 px-4 text-gray-600 dark:text-gray-400 font-mono text-sm">

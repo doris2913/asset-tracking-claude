@@ -1,18 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Asset, AssetType, Currency } from '@/types';
+import { Asset, AssetType, Currency, ALL_ASSET_TYPES, ASSET_TYPE_CONFIG } from '@/types';
 import { useI18n } from '@/i18n';
 import { fetchStockQuote } from '@/lib/yahooFinance';
-
-const ASSET_TYPE_ICONS: Record<AssetType, string> = {
-  cash_twd: '💵',
-  cash_usd: '💲',
-  stock_tw: '📈',
-  stock_us: '📊',
-  liability: '💳',
-  us_tbills: '🏛️',
-};
+import { isMarketPricedType, isAutoFetchEligible, getMarketAssetKind } from '@/utils/calculations';
 
 interface AssetFormProps {
   asset?: Asset;
@@ -35,18 +27,20 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
 
   // Auto-set currency based on asset type
   useEffect(() => {
-    if (type === 'cash_twd' || type === 'stock_tw') {
+    if (type === 'cash_twd' || type === 'stock_tw' || type === 'fund_tw') {
       setCurrency('TWD');
-    } else if (type === 'cash_usd' || type === 'stock_us' || type === 'us_tbills') {
+    } else if (type === 'cash_usd' || type === 'stock_us' || type === 'us_tbills' || type === 'fund_us') {
       setCurrency('USD');
     }
   }, [type]);
 
-  const isStockType = type === 'stock_tw' || type === 'stock_us';
+  const isSharePriceTrackedType = isMarketPricedType(type);
+  const marketAssetKind = getMarketAssetKind(type);
+  const autoFetchEnabled = isAutoFetchEligible(type);
 
-  // Auto-fetch stock price when symbol changes
+  // Auto-fetch stock/fund price when symbol changes
   const fetchPrice = useCallback(async (stockSymbol: string) => {
-    if (!stockSymbol || !isStockType) return;
+    if (!stockSymbol || !autoFetchEnabled) return;
 
     setIsFetchingPrice(true);
     setPriceStatus(language === 'zh-TW' ? '正在取得股價...' : 'Fetching price...');
@@ -70,7 +64,7 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
     } finally {
       setIsFetchingPrice(false);
     }
-  }, [isStockType, shares, language]);
+  }, [autoFetchEnabled, shares, language]);
 
   // Fetch price when symbol is entered and we have shares
   const handleFetchPrice = () => {
@@ -81,7 +75,7 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
 
   // Update value when shares change and we have a price status (meaning we fetched a price)
   useEffect(() => {
-    if (isStockType && symbol && shares && priceStatus.includes('Price:') || priceStatus.includes('股價:')) {
+    if (isSharePriceTrackedType && symbol && shares && priceStatus.includes('Price:') || priceStatus.includes('股價:')) {
       const priceMatch = priceStatus.match(/[\d.]+/);
       if (priceMatch) {
         const price = parseFloat(priceMatch[0]);
@@ -91,21 +85,21 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
         }
       }
     }
-  }, [shares, isStockType, symbol, priceStatus]);
+  }, [shares, isSharePriceTrackedType, symbol, priceStatus]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Default name to symbol if left blank for stock types
-    const assetName = name.trim() || (isStockType && symbol ? symbol : '');
+    // Default name to symbol if left blank for stock/fund types
+    const assetName = name.trim() || (isSharePriceTrackedType && symbol ? symbol : '');
 
     const assetData: Omit<Asset, 'id' | 'lastUpdated'> = {
       name: assetName,
       type,
       value: parseFloat(value) || 0,
       currency,
-      ...(isStockType && symbol ? { symbol } : {}),
-      ...(isStockType && shares ? { shares: parseFloat(shares) } : {}),
+      ...(isSharePriceTrackedType && symbol ? { symbol } : {}),
+      ...(isSharePriceTrackedType && shares ? { shares: parseFloat(shares) } : {}),
       ...(expectedReturn ? { expectedReturn: parseFloat(expectedReturn) } : {}),
       ...(notes ? { notes } : {}),
     };
@@ -113,22 +107,20 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
     onSubmit(assetData);
   };
 
-  const assetTypes: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'liability', 'us_tbills'];
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="label">
           {t.assetForm.assetName}
-          {isStockType && <span className="text-gray-400 text-xs ml-1">({t.common.optional})</span>}
+          {isSharePriceTrackedType && <span className="text-gray-400 text-xs ml-1">({t.common.optional})</span>}
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="input"
-          placeholder={isStockType ? (language === 'zh-TW' ? '留空則使用股票代號' : 'Leave blank to use symbol') : t.assetForm.assetNamePlaceholder}
-          required={!isStockType}
+          placeholder={isSharePriceTrackedType ? (language === 'zh-TW' ? '留空則使用代號' : 'Leave blank to use symbol') : t.assetForm.assetNamePlaceholder}
+          required={!isSharePriceTrackedType}
         />
       </div>
 
@@ -139,9 +131,9 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
           onChange={(e) => setType(e.target.value as AssetType)}
           className="select"
         >
-          {assetTypes.map((assetType) => (
+          {ALL_ASSET_TYPES.map((assetType) => (
             <option key={assetType} value={assetType}>
-              {ASSET_TYPE_ICONS[assetType]} {t.assetTypes[assetType]}
+              {ASSET_TYPE_CONFIG[assetType].icon} {t.assetTypes[assetType]}
             </option>
           ))}
         </select>
@@ -175,31 +167,35 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
         </div>
       </div>
 
-      {isStockType && (
+      {isSharePriceTrackedType && (
         <>
           <div>
-            <label className="label">{t.assetForm.stockSymbol}</label>
+            <label className="label">
+              {marketAssetKind === 'fund' ? t.assetForm.fundCode : t.assetForm.stockSymbol}
+            </label>
             <div className="flex space-x-2">
               <input
                 type="text"
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                 className="input flex-1"
-                placeholder={t.assetForm.stockSymbolPlaceholder}
+                placeholder={marketAssetKind === 'fund' ? t.assetForm.fundCodePlaceholder : t.assetForm.stockSymbolPlaceholder}
               />
-              <button
-                type="button"
-                onClick={handleFetchPrice}
-                disabled={!symbol || isFetchingPrice}
-                className="btn btn-secondary whitespace-nowrap"
-              >
-                {isFetchingPrice
-                  ? (language === 'zh-TW' ? '取得中...' : 'Fetching...')
-                  : (language === 'zh-TW' ? '取得股價' : 'Get Price')}
-              </button>
+              {autoFetchEnabled && (
+                <button
+                  type="button"
+                  onClick={handleFetchPrice}
+                  disabled={!symbol || isFetchingPrice}
+                  className="btn btn-secondary whitespace-nowrap"
+                >
+                  {isFetchingPrice
+                    ? (language === 'zh-TW' ? '取得中...' : 'Fetching...')
+                    : (language === 'zh-TW' ? '取得股價' : 'Get Price')}
+                </button>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {t.assetForm.stockSymbolHint}
+              {marketAssetKind === 'fund' ? t.assetForm.fundCodeHint : t.assetForm.stockSymbolHint}
             </p>
             {priceStatus && (
               <p className={`text-xs mt-1 ${priceStatus.includes('Price:') || priceStatus.includes('股價:') ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
@@ -209,7 +205,9 @@ export default function AssetForm({ asset, onSubmit, onCancel }: AssetFormProps)
           </div>
 
           <div>
-            <label className="label">{t.assetForm.numberOfShares}</label>
+            <label className="label">
+              {marketAssetKind === 'fund' ? t.assetForm.numberOfUnits : t.assetForm.numberOfShares}
+            </label>
             <input
               type="number"
               value={shares}

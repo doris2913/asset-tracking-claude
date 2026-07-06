@@ -96,6 +96,10 @@ export const zhTW: Translations = {
     stockSymbolPlaceholder: '例如：AAPL、0050.TW、2330.TW',
     stockSymbolHint: '台股：使用 .TW 後綴（例如 2330.TW）。美股：直接使用代號（例如 AAPL）',
     numberOfShares: '持有股數',
+    fundCode: '基金代號（用於自動更新淨值）',
+    fundCodePlaceholder: '例如：FXAIX、VTSAX，或台灣基金代號',
+    fundCodeHint: '海外基金：直接使用代號（支援自動更新淨值）。台灣基金：自動更新淨值為盡力而為，失敗請手動輸入。',
+    numberOfUnits: '持有單位數',
     expectedReturn: '預期年化報酬率 (%)',
     expectedReturnPlaceholder: '例如：7 代表 7%',
     expectedReturnHint: '預期年化報酬率。留空則以 0% 計算。',
@@ -110,6 +114,8 @@ export const zhTW: Translations = {
     stock_us: '美股',
     liability: '負債',
     us_tbills: '美國國庫券',
+    fund_tw: '台灣基金',
+    fund_us: '海外基金',
   },
 
   // Snapshots

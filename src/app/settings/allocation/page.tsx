@@ -11,6 +11,8 @@ const ASSET_TYPES: AssetType[] = [
   'cash_usd',
   'stock_tw',
   'stock_us',
+  'fund_tw',
+  'fund_us',
   'us_tbills',
   // Note: 'liability' is intentionally excluded from allocation settings
 ];

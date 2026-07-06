@@ -6,17 +6,8 @@ import SnapshotList from '@/components/SnapshotList';
 import Modal from '@/components/Modal';
 import { useAssetData } from '@/hooks/useAssetData';
 import { useI18n } from '@/i18n';
-import { Snapshot, Currency, AssetType } from '@/types';
+import { Snapshot, Currency, AssetType, ASSET_TYPE_CONFIG } from '@/types';
 import { formatCurrency, isSnapshotNeeded, getLatestSnapshotDate } from '@/utils/calculations';
-
-const ASSET_TYPE_ICONS: Record<AssetType, string> = {
-  cash_twd: '💵',
-  cash_usd: '💲',
-  stock_tw: '📈',
-  stock_us: '📊',
-  liability: '💳',
-  us_tbills: '🏛️',
-};
 
 export default function SnapshotsPage() {
   const {
@@ -40,7 +31,7 @@ export default function SnapshotsPage() {
   const dateLocale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
 
   // Asset types to show in the history table
-  const ASSET_TYPES: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'us_tbills', 'liability'];
+  const ASSET_TYPES: AssetType[] = ['cash_twd', 'cash_usd', 'stock_tw', 'stock_us', 'fund_tw', 'fund_us', 'us_tbills', 'liability'];
 
   // Helper to parse date safely
   const parseDate = (dateStr: string): Date => {
@@ -59,6 +50,8 @@ export default function SnapshotsPage() {
     stock_us: number;
     liability: number;
     us_tbills: number;
+    fund_tw: number;
+    fund_us: number;
     total_diff: number | null;
     cash_twd_diff: number | null;
     cash_usd_diff: number | null;
@@ -66,6 +59,8 @@ export default function SnapshotsPage() {
     stock_us_diff: number | null;
     liability_diff: number | null;
     us_tbills_diff: number | null;
+    fund_tw_diff: number | null;
+    fund_us_diff: number | null;
   };
 
   // Calculate category history data with differences from previous period
@@ -85,6 +80,8 @@ export default function SnapshotsPage() {
         stock_us: 0,
         liability: 0,
         us_tbills: 0,
+        fund_tw: 0,
+        fund_us: 0,
       };
 
       for (const asset of snapshot.assets) {
@@ -122,6 +119,8 @@ export default function SnapshotsPage() {
         stock_us_diff: prevRow ? row.stock_us - prevRow.stock_us : null,
         liability_diff: prevRow ? row.liability - prevRow.liability : null,
         us_tbills_diff: prevRow ? row.us_tbills - prevRow.us_tbills : null,
+        fund_tw_diff: prevRow ? row.fund_tw - prevRow.fund_tw : null,
+        fund_us_diff: prevRow ? row.fund_us - prevRow.fund_us : null,
       };
     });
   }, [snapshots, displayCurrency]);
@@ -257,7 +256,7 @@ export default function SnapshotsPage() {
                         key={type}
                         className="py-2 px-3 text-right font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap"
                       >
-                        <span className="mr-1">{ASSET_TYPE_ICONS[type]}</span>
+                        <span className="mr-1">{ASSET_TYPE_CONFIG[type].icon}</span>
                         {t.assetTypes[type]}
                       </th>
                     ))}
@@ -429,7 +428,7 @@ export default function SnapshotsPage() {
                     className="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 rounded p-2"
                   >
                     <div>
-                      <span className="mr-2">{ASSET_TYPE_ICONS[asset.type]}</span>
+                      <span className="mr-2">{ASSET_TYPE_CONFIG[asset.type].icon}</span>
                       <span className="text-sm">{asset.name}</span>
                       {asset.symbol && (
                         <span className="text-xs text-gray-400 ml-1">({asset.symbol})</span>
